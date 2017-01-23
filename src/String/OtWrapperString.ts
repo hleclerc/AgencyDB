@@ -1,5 +1,6 @@
 // import DeclTypesForRW from "../Core/DeclTypesForRW";
 // import PatchTypes     from "../Ot/PatchTypes";
+//// nsmake global alias ./GenOtWrapperString.ts ./(OtWrapperStringOperations.ts).ts
 import BinaryWriter              from "../System/BinaryWriter";
 import BinaryReader              from "../System/BinaryReader";
 import UsrId                     from "../System/UsrId";
@@ -7,7 +8,7 @@ import PatchTypes                from "../Core/PatchTypes";
 import OtWrapper                 from "../Core/OtWrapper";
 import methods                   from "../Core/methods";
 import Rp                        from "../Core/Rp";
-import OtWrapperStringOperations from "./(OtWrapperStringOperations.ts)";
+import OtWrapperStringOperations from "./GenOtWrapperString";
 import GenString                 from "./GenString";
 import Caret                     from "./Caret";
 

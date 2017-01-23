@@ -22,19 +22,18 @@ function new_patch( val: OtWrapperString, bw: BinaryWriter, br: BinaryReader, as
         const num = br.read_PI8();
         switch ( num ) {
         case 0: {
-            let pos = br.read_PT(); let sup = br.read_String();
+            let pos_new = br.read_PT(); let sup_new = br.read_String();
             let br_unk = new BinaryReader( cq_unk.to_Uint8Array() );
             while ( br_unk.size ) {
                 const num_unk = br_unk.read_PI8();
                 switch ( num_unk ) {
                     case 0: {
-                        let pos = br_unk.read_PT(); let sup = br_unk.read_String();
-                        console.log( "unk:", { pos,sup } );
+                        let pos_unk = br_unk.read_PT(); let sup_unk = br_unk.read_String();
+                        if(!is_infeq__bb(pos_unk,pos_new)){pos_unk+=sup_new.length;}else{pos_new+=sup_unk.length;}
                         break;
                     }
                     case 1: {
-                        let pos = br_unk.read_PT(); let len = br_unk.read_PT();
-                        console.log( "unk:", { pos,len } );
+                        let pos_unk = br_unk.read_PT(); let len_unk = br_unk.read_PT();
                         break;
                     }
                     default: break;
@@ -45,19 +44,17 @@ function new_patch( val: OtWrapperString, bw: BinaryWriter, br: BinaryReader, as
             break;
         }
         case 1: {
-            let pos = br.read_PT(); let len = br.read_PT();
+            let pos_new = br.read_PT(); let len_new = br.read_PT();
             let br_unk = new BinaryReader( cq_unk.to_Uint8Array() );
             while ( br_unk.size ) {
                 const num_unk = br_unk.read_PI8();
                 switch ( num_unk ) {
                     case 0: {
-                        let pos = br_unk.read_PT(); let sup = br_unk.read_String();
-                        console.log( "unk:", { pos,sup } );
+                        let pos_unk = br_unk.read_PT(); let sup_unk = br_unk.read_String();
                         break;
                     }
                     case 1: {
-                        let pos = br_unk.read_PT(); let len = br_unk.read_PT();
-                        console.log( "unk:", { pos,len } );
+                        let pos_unk = br_unk.read_PT(); let len_unk = br_unk.read_PT();
                         break;
                     }
                     default: break;

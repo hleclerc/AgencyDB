@@ -1,3 +1,4 @@
+/// <reference path="../../node_modules/@types/mocha/index.d.ts"/>
 //// nsmake global define NO_OPERATIONAL_TRANSFORM
 import GenOperations, { _if } from "../Core/GenOperations"
 import LvNumber               from "../LvNumber"

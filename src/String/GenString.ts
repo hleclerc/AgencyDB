@@ -41,9 +41,16 @@ class GenString extends Rp {
         return String;
     }
 
-    make_ot_wrapper__s() : Rp {
+    make_ot_wrapper__s(): Rp {
+        //// nsmake ifndef NO_OPERATIONAL_TRANSFORM
         return new OtWrapperString( this );
+        //// nsmake endif // NO_OPERATIONAL_TRANSFORM
+        //// nsmake uncomment_ifdef NO_OPERATIONAL_TRANSFORM
+        // return null;
+        //// nsmake endif // NO_OPERATIONAL_TRANSFORM
     }
+
+    //// nsmake endif // NO_OPERATIONAL_TRANSFORM
 
     // get_patch_type( bw : BinaryWriter ) {
     //     bw.write_PT( PatchTypes.num.OtWrapperString_GenString );
