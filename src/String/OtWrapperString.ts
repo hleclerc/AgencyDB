@@ -1,6 +1,6 @@
 // import DeclTypesForRW from "../Core/DeclTypesForRW";
 // import PatchTypes     from "../Ot/PatchTypes";
-//// nsmake global alias ./GenOtWrapperString.ts ./(OtWrapperStringOperations.ts).ts
+//// nsmake global alias ./OtWrapperStringOperations.ts ./(GenOtWrapperStringOperations.ts).ts
 import BinaryWriter              from "../System/BinaryWriter";
 import BinaryReader              from "../System/BinaryReader";
 import UsrId                     from "../System/UsrId";
@@ -8,7 +8,7 @@ import PatchTypes                from "../Core/PatchTypes";
 import OtWrapper                 from "../Core/OtWrapper";
 import methods                   from "../Core/methods";
 import Rp                        from "../Core/Rp";
-import OtWrapperStringOperations from "./GenOtWrapperString";
+import OtWrapperStringOperations from "./OtWrapperStringOperations";
 import GenString                 from "./GenString";
 import Caret                     from "./Caret";
 
@@ -55,6 +55,10 @@ class OtWrapperString extends OtWrapper {
 
     new_patch( res: BinaryWriter, msg: BinaryReader, as_usr: UsrId, cq_unk: BinaryWriter ) {
         OtWrapperStringOperations.new_patch( this, res, msg, as_usr, cq_unk );
+    }
+
+    undo_patch( data: BinaryReader, as_usr: UsrId ) {
+        OtWrapperStringOperations.undo_patch( this, data, as_usr );
     }
 
     // _self_remove( pos : number, len : number, usr_id = new UsrId() ) : boolean {

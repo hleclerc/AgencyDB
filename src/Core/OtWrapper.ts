@@ -147,7 +147,8 @@ abstract class OtWrapper extends Rp {
                 pm.new_modification( binary_data );
     }
 
-    abstract new_patch( res: BinaryWriter, msg: BinaryReader, as_usr: UsrId, cq_unk: BinaryWriter );
+    abstract new_patch ( res: BinaryWriter, msg: BinaryReader, as_usr: UsrId, cq_unk: BinaryWriter );
+    abstract undo_patch( msg: BinaryReader, as_usr: UsrId );
 
     on_change      = new Map<() => void, boolean>();
     patch_managers = new Array<PatchManager>();

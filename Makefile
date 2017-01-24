@@ -1,4 +1,4 @@
-all: clean
+all:
 	nsmake mocha test/test_String.ts
 
 clean:

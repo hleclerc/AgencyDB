@@ -6,8 +6,8 @@ import * as fs  from "fs";
 
 export { _if }  from "../Symbol/If";
 
-function bw_write( type: string, name: string ) {
-    return `bw.write_${ type }( ${ name } );`;
+function bw_write( type: string, name: string, suffix: string ) {
+    return `bw${ suffix }.write_${ type }( ${ name }${ suffix } );`;
 }
 
 function br_read( br: string, type: string ) {
@@ -23,13 +23,13 @@ function type_ts( type: string ) {
 }
 
 class Operation {
-    constructor( readonly name: string, readonly args: Array<{name:string,type:string}>, readonly num: number, readonly apply_op: { [lang: string]: ( string ) => string } ) {
+    constructor( readonly name: string, readonly args: Array<{name:string,type:string}>, readonly num: number, readonly apply_op: { [lang: string]: ( name: string, suffix: string ) => string }, readonly undo_op: { [lang: string]: ( name: string, suffix: string ) => string } ) {
     }
     func_args_ts(): string {
         return this.args.map( x => x.name + ': ' + type_ts( x.type ) ).join( ', ' );
     }
-    bw_write(): string {
-        return this.args.map( x => bw_write( x.type, x.name ) ).join( ' ' );
+    bw_write( suffix = "" ): string {
+        return this.args.map( x => bw_write( x.type, x.name, suffix ) ).join( ' ' );
     }
     br_read_obj( br = "br" ): string {
         return this.args.map( x => `${ x.name }: ${ br_read( br, x.type ) }` ).join( ', ' );
@@ -62,8 +62,8 @@ class GenOperation {
     }
 
     /** declare a new operation */
-    add_op( name: string, args: Array<string>, apply_op: { [lang: string]: ( string ) => string } ): void {
-        this.operations.push( new Operation( name, args.map( x => { const a = x.split(':'); return { name: a[ 0 ], type: a[ 1 ] }; } ), this.operations.length, apply_op ) );
+    add_op( name: string, args: Array<string>, apply_op: { [lang: string]: ( name: string, suffix: string ) => string }, undo_op: { [lang: string]: ( name: string, suffix: string ) => string } ): void {
+        this.operations.push( new Operation( name, args.map( x => { const a = x.split(':'); return { name: a[ 0 ], type: a[ 1 ] }; } ), this.operations.length, apply_op, undo_op ) );
     }
 
     /** add forward translation rule */
@@ -96,9 +96,9 @@ class GenOperation {
         wl();
 
         // new_patch
-        wl( `function new_patch( val: ${ this.class_name }, bw: BinaryWriter, br: BinaryReader, as_usr: UsrId, cq_unk: BinaryWriter ) {` );
-        wl( `    while ( br.size ) {` );
-        wl( `        const num = br.read_PI8();` );
+        wl( `function new_patch( val: ${ this.class_name }, bw_new: BinaryWriter, br_new: BinaryReader, as_usr: UsrId, cq_unk: BinaryWriter ) {` );
+        wl( `    while ( br_new.size ) {` );
+        wl( `        const num = br_new.read_PI8();` );
         wl( `        switch ( num ) {` );
         for( const op of this.operations ) {
             wl( `        case ${ op.num }: {` );
@@ -108,19 +108,36 @@ class GenOperation {
             wl( `            break;` );
             wl( `        }` );
         }
-        wl( `            default: return;` );
+        wl( `        }` );
+        wl( `    }` );
+        wl( `}` );
+        wl();
+
+        // undo_patch
+        wl( `function undo_patch( val: ${ this.class_name }, br: BinaryReader, as_usr: UsrId ) {` );
+        wl( `    while ( br.size ) {` );
+        wl( `        const num = br.read_PI8();` );
+        wl( `        switch ( num ) {` );
+        for( const op of this.operations ) {
+            wl( `        case ${ op.num }: {` );
+            nb_sp += 12;
+            this.write_undo_patch( lang, op );
+            nb_sp -= 12;
+            wl( `            break;` );
+            wl( `        }` );
+        }
         wl( `        }` );
         wl( `    }` );
         wl( `}` );
         wl();
 
         // exports
-        wl( `export default { read, bin_repr, new_patch };` );
+        wl( `export default { read, bin_repr, new_patch, undo_patch };` );
     }
 
     write_new_patch( lang: string, op_new: Operation ) {
         // read data
-        wl( op_new.br_read_var( "br", "_new" ) );
+        wl( op_new.br_read_var( "br_new", "_new" ) );
 
         // read unk data
         wl( `let br_unk = new BinaryReader( cq_unk.to_Uint8Array() );` );
@@ -153,10 +170,18 @@ class GenOperation {
         wl( `}` );
 
         // apply operation
-        wl( op_new.apply_op[ lang ]( "val" ) );
+        wl( op_new.apply_op[ lang ]( "val", "_new" ) );
 
         // write back the new data
-        wl( `bw.write_PI8( ${ op_new.num } ); ${ op_new.bw_write() }` );
+        wl( `bw_new.write_PI8( ${ op_new.num } ); ${ op_new.bw_write( "_new" ) }` );
+    }
+
+    write_undo_patch( lang: string, op: Operation ) {
+        // read data
+        wl( op.br_read_var( "br" ) );
+
+        // apply operation
+        wl( op.undo_op[ lang ]( "val", "" ) );
     }
 
     class_name  : string;

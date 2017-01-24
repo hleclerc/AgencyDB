@@ -90,7 +90,7 @@ describe( 'String', () => {
             vls[ 0 ].append( "a" );
             dbs[ 0 ].send_changes();
             vls[ 1 ].append( "b" );
-        }, "ab", "send succession" );
+        }, "ab", "succession of insertions" );
 
         test_ot<LvString>( LvString, 2, ( vls, dbs ) => {
             console.log( "1 --------------" );

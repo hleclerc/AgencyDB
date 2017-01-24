@@ -20,6 +20,10 @@ import Db           from "../Db";
 //     inode        : Inode;
 // }
 
+const INS_TYPE_UNK = 0;
+const INS_TYPE_NEW = 1;
+const INS_TYPE_STD = 2;
+
 /**  */
 export
 class Patch {
@@ -29,6 +33,7 @@ class Patch {
     usr_id    : UsrId;        /** who has made the changes */
     data      : Uint8Array;   /** content (operations) */
     merge     = false;        /** Merge; */
+    ins_type  = INS_TYPE_UNK; /**  */
 
     sup( that: Patch, cur_dev: DevId ): boolean {
         if ( this.causal_num != that.causal_num )
@@ -113,6 +118,8 @@ class DbItem extends PatchManager {
     app_changes( br: BinaryReader, src_dev: DevId, src_usr: UsrId, dst_devs = new Array<DevId>() ) {
         if ( ! br.size )
             return;
+        console.log( "\u001b[90m-- app changes:", src_dev, "->", this.db.dev_id, "\u001b[0m" );
+        
         // if ( this.variable.is_symbolic() ) {
         //     let wc      = new WaitingChange;
         //     wc.bp       = br.slice( br.size );
@@ -140,23 +147,21 @@ class DbItem extends PatchManager {
         assumed_to_be_known.map.forEach( ( num: number, dev: string ) => {
             if ( this.vector_clock.val( dev ) < num )
                 throw new Error( 'TODO assumed_to_be_known that actually are not known: store the data and send a request to get the corresponding stuff' );
-            }
-        );
+        } );
         // assumed_to_be_known.merges.forEach( ( item_id: ItemId ) => {
         //     if ( ! this.vector_clock.contains_merge( item_id ) )
         //         throw new Error( 'TODO assumed_to_be_known that actually are not known: store the data and send a request to get the corresponding stuff' );
         // } );
 
-        // unk patches or merges (i.e. stuff not known by the sender)
-        let unk_patches = new Array<Patch>();
-        let unk_merges = new Array<Patch>();
-        let index_first_insertion = 1 << 30;
+        // mark unk patches or merges (i.e. stuff not known by the sender)
+        let index_first_insertion = 1 << 30, nb_new = 0, nb_unk = 0, nb_std = 0;
         this.vector_clock.map.forEach( ( num: number, dev: string ) => {
             for( let i = assumed_to_be_known.val( dev ) + 1; i <= num; ++i ) {
                 let index = this.find_patch_index( dev, i );
                 if ( index_first_insertion > index )
                     index_first_insertion = index;
-                unk_patches.push( this.patches[ index ] );
+                this.patches[ index ].ins_type = INS_TYPE_UNK;
+                ++nb_unk;
             }
         } );
         // this.vector_clock.merges.forEach( ( item_id: ItemId ) => {
@@ -170,9 +175,7 @@ class DbItem extends PatchManager {
         // } );
 
         // read the patches, store a copy of the references in new_patches
-        let merger = methods[ "new_ot_merger__b" ].call_1( this.variable.rp, this ) as OtMerger;
-        let new_patches = new Array<Patch>();
-        let new_merges = new Array<Patch>();
+        const merger = methods[ "new_ot_merger__b" ].call_1( this.variable.rp, this ) as OtMerger;
         while( br.size ) {
             // prev && position of the patch
             // let index_ins_patch = 0;
@@ -187,6 +190,7 @@ class DbItem extends PatchManager {
             n.causal_num = br.read_PT();
             n.date       = br.read_Date();
             n.usr_id     = UsrId.read_from( br, src_dev, src_usr, this.db.dev_id, this.db.usr_id );
+            n.ins_type   = INS_TYPE_NEW;
 
             if ( n.patch_id.num ) {
                 // update ext_states (what is known && can be assumed to be sent to the other machines)
@@ -198,8 +202,9 @@ class DbItem extends PatchManager {
 
                 // we actually already have this patch ?
                 if ( this.vector_clock.contains_patch( n.patch_id ) ) {
-                    ListUtil.remove( unk_patches, this.patches[ this.find_patch_index_PatchId( n.patch_id ) ] ); // put the patch in std_patches
+                    this.patches[ this.find_patch_index_PatchId( n.patch_id ) ].ins_type = INS_TYPE_STD; // put the patch in std_patches
                     br.skip_Uint8Array(); // no need to read the patch data
+                    ++nb_std;
                     continue;
                 }
 
@@ -214,7 +219,6 @@ class DbItem extends PatchManager {
 
                 // register the patch
                 this.vector_clock.update_patch( n.patch_id );
-                new_patches.push( n );
             } else {
                 throw new Error( "TODO: merge" );
                 // n.merge       = new Merge;
@@ -241,38 +245,33 @@ class DbItem extends PatchManager {
             while ( index_ins_patch && this.patches[ index_ins_patch - 1 ].sup( n, this.db.dev_id ) )
                 --index_ins_patch;
             this.patches.splice( index_ins_patch, 0, n );
+            ++nb_new;
 
             // 
             if ( index_first_insertion > index_ins_patch )
                 index_first_insertion = index_ins_patch;
         }
 
+        console.log( "this.patches: ", this.patches.map( x => `\n  ${ x.data } it: ${ x.ins_type }` ).join( "" ) );
+
         // update patch content
-        if ( new_patches.length || new_merges.length ) {
+        if ( nb_new ) {
             // std patches at the beginning are not interesting -> we can skip them
-            let in_std = ( index : number ) => this.patches[ index ].merge ?
-                    new_merges .indexOf( this.patches[ index ] ) < 0 && unk_merges .indexOf( this.patches[ index ] ) < 0 :
-                    new_patches.indexOf( this.patches[ index ] ) < 0 && unk_patches.indexOf( this.patches[ index ] ) < 0;
-            while( index_first_insertion < this.patches.length && in_std( index_first_insertion ) )
+            while( index_first_insertion < this.patches.length && this.patches[ index_first_insertion ].ins_type == INS_TYPE_STD  )
                 ++index_first_insertion;
 
-            // undo std and unk patches and merges
+            // undo
             for( let index = this.patches.length - 1; index >= index_first_insertion; --index ) {
-                if ( this.patches[ index ].merge ) {
-                    if ( new_merges.indexOf( this.patches[ index ] ) < 0 )
-                        throw new Error( "TODO: undo merge" );
-                } else {
-                    if ( new_patches.indexOf( this.patches[ index ] ) < 0 )
-                        merger.undo_patch( this.patches[ index ].data, this.patches[ index ].usr_id );
-                }
+                if ( this.patches[ index ].ins_type == INS_TYPE_NEW )
+                    continue;
+                if ( this.patches[ index ].merge )
+                    throw new Error( "TODO: undo merge" );
+                else
+                    merger.undo_patch( this.patches[ index ].data, this.patches[ index ].usr_id );
             }
 
             // merge the data
-            let nb_new = new_patches.length + new_merges.length;
-            let nb_unk = unk_patches.length + unk_patches.length;
-            let nb_std = this.patches.length - index_first_insertion - nb_unk - nb_new;
             for( let index = index_first_insertion; index < this.patches.length; ++index ) {
-                // console.log( `Receving: ${ index }`, new_patches.length + new_merges.length );
                 // if ( ! f->prev )
                 //     merger->set_creator( f->usr_id );
 
@@ -294,27 +293,22 @@ class DbItem extends PatchManager {
                     // }
                 } else {
                     let pd = new BinaryWriter;
-                    if ( new_patches.indexOf( f ) >= 0 ) {
-                        merger.new_patch( pd, f.data, f.usr_id, nb_unk, nb_std );
-                        // console.log( "new", cur_dev.val, 'from', src_dev.val, f.patch_id.toString(), f.data, "" + this.variable, " usr:" + f.usr_id );
-                        --nb_new;
-                    } else if ( unk_patches.indexOf( f ) >= 0 ) {
-                        merger.unk_patch( pd, f.data, f.usr_id, nb_new, nb_std );
-                        // console.log( "unk", cur_dev.val, 'from', src_dev.val, f.patch_id.toString(), f.data, "" + this.variable );
-                        --nb_unk;
-                    } else {
-                        merger.std_patch( pd, f.data, f.usr_id, nb_unk, nb_new );
-                        // console.log( "std", cur_dev.val, 'from', src_dev.val, f.patch_id.toString(), f.data, "" + this.variable );
-                        --nb_std;
+                    switch ( f.ins_type ) {
+                    case INS_TYPE_NEW: merger.new_patch( pd, f.data, f.usr_id, nb_unk, nb_std ); --nb_new; break;
+                    case INS_TYPE_UNK: merger.unk_patch( pd, f.data, f.usr_id, nb_new, nb_std ); --nb_unk; break;
+                    case INS_TYPE_STD: merger.std_patch( pd, f.data, f.usr_id, nb_unk, nb_new ); --nb_std; break;
                     }
 
                     // stores the updated patch data
                     f.data = pd.to_Uint8Array();
+                    f.ins_type = INS_TYPE_UNK;
                 }
             }
 
             merger.finalize();
         }
+        console.log( "this.patches: ", this.patches.map( x => "\n  " + x.data.toString() ).join( "" ) );
+        
 
         // //
         // if ( unk_patches.length && when_unk ) {

@@ -146,7 +146,11 @@ class Operation extends Sym {
         case "mul"               : return bin( Operation.prec.MUL     , "*"   );
         case "div"               : return bin( Operation.prec.MUL     , "/"   );
         case "mod"               : return bin( Operation.prec.MUL     , "%"   );
+        case "is_equ"            : return bin( Operation.prec.INF     , "=="  );
         case "is_inf"            : return bin( Operation.prec.INF     , "<"   );
+        case "is_infeq"          : return bin( Operation.prec.INF     , "<="  );
+        case "is_sup"            : return bin( Operation.prec.INF     , ">"   );
+        case "is_supeq"          : return bin( Operation.prec.INF     , ">="  );
         case "signed_shift_left" : return bin( Operation.prec.SLFT_SHT, "<<"  );
         case "signed_shift_right": return bin( Operation.prec.SRGT_SHT, ">>"  );
         case "zfill_shift_right" : return bin( Operation.prec.RGT_SHT , ">>>" );
