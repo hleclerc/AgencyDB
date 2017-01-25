@@ -118,6 +118,7 @@ class OtMerger {
 
     /** pd = update of data (according to unk patches) */
     std_patch( res : BinaryWriter, data : Uint8Array, as_usr = new UsrId, nb_rem_unk = 0, nb_rem_std = 0 ) {
+        console.assert( false, "std patch" );
         // // goal:
         // // - update std data according to new stuff
         // // - make new' (new after std)

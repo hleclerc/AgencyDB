@@ -35,7 +35,7 @@ class Operation {
         return this.args.map( x => `${ x.name }: ${ br_read( br, x.type ) }` ).join( ', ' );
     }
     br_read_var( br = "br", suffix = "" ): string {
-        return this.args.map( x => `let ${ x.name }${ suffix } = ${ br_read( br, x.type ) };` ).join( ' ' );
+        return this.args.length ? "let " + this.args.map( x => `${ x.name }${ suffix } = ${ br_read( br, x.type ) }` ).join( ', ' ) + ";" : '';
     }
     make_symbolic_data( suffix = "" ) {
         let res = {} as any;

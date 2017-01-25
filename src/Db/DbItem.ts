@@ -33,7 +33,7 @@ class Patch {
     usr_id    : UsrId;        /** who has made the changes */
     data      : Uint8Array;   /** content (operations) */
     merge     = false;        /** Merge; */
-    ins_type  = INS_TYPE_UNK; /**  */
+    ins_type  = INS_TYPE_STD; /** used during each app_changes to determine if known by src by dev and so on */
 
     sup( that: Patch, cur_dev: DevId ): boolean {
         if ( this.causal_num != that.causal_num )
@@ -136,15 +136,20 @@ class DbItem extends PatchManager {
         // we work on patches... we need known states
         this.freeze_last_mod();
 
+        
+
         //
         if ( ! methods[ "cmp_patch_type__b" ].call_1( this.variable.rp, br ) )
             throw new Error( "TODO: != patch_type" );
 
         // read id of patches which serve as base for the new ones
-        let assumed_to_be_known = VectorClock.read_from( br, src_dev, this.db.dev_id );
+        let src_vector_clock = VectorClock.read_from( br, src_dev, this.db.dev_id );
+
+        console.log( "vc:", this.vector_clock.toString() );
+        console.log( "ac:", src_vector_clock.toString() );
 
         // there are patch or merges assumed_to_be_known but not present ??
-        assumed_to_be_known.map.forEach( ( num: number, dev: string ) => {
+        src_vector_clock.map.forEach( ( num: number, dev: string ) => {
             if ( this.vector_clock.val( dev ) < num )
                 throw new Error( 'TODO assumed_to_be_known that actually are not known: store the data and send a request to get the corresponding stuff' );
         } );
@@ -156,7 +161,7 @@ class DbItem extends PatchManager {
         // mark unk patches or merges (i.e. stuff not known by the sender)
         let index_first_insertion = 1 << 30, nb_new = 0, nb_unk = 0, nb_std = 0;
         this.vector_clock.map.forEach( ( num: number, dev: string ) => {
-            for( let i = assumed_to_be_known.val( dev ) + 1; i <= num; ++i ) {
+            for( let i = src_vector_clock.val( dev ) + 1; i <= num; ++i ) {
                 let index = this.find_patch_index( dev, i );
                 if ( index_first_insertion > index )
                     index_first_insertion = index;
@@ -252,7 +257,7 @@ class DbItem extends PatchManager {
                 index_first_insertion = index_ins_patch;
         }
 
-        console.log( "this.patches: ", this.patches.map( x => `\n  ${ x.data } it: ${ x.ins_type }` ).join( "" ) );
+        console.log( index_first_insertion, this.patches.length, "this.patches: ", this.patches.map( x => `\n  ${ x.data } it: ${ x.ins_type }` ).join( "" ) );
 
         // update patch content
         if ( nb_new ) {
@@ -301,7 +306,7 @@ class DbItem extends PatchManager {
 
                     // stores the updated patch data
                     f.data = pd.to_Uint8Array();
-                    f.ins_type = INS_TYPE_UNK;
+                    f.ins_type = INS_TYPE_STD;
                 }
             }
 
