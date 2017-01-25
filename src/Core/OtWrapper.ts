@@ -135,7 +135,7 @@ abstract class OtWrapper extends Rp {
     //     return val != null ? val : 0;
     // }
 
-    sig_change( binary_data: Uint8Array, src_patch_manager = null as PatchManager ) {
+    sig_change( wr: ( bw: BinaryWriter ) => void, src_patch_manager = null as PatchManager ) {
         // for( let p of this.on_change_par )
         //     p.par.sig_change( p.arg );
         // this.on_change.forEach( cb => cb(  ) );
@@ -144,7 +144,7 @@ abstract class OtWrapper extends Rp {
         } );
         for( let pm of this.patch_managers )
             if ( pm != src_patch_manager )
-                pm.new_modification( binary_data );
+                pm.new_modification( wr );
     }
 
     abstract new_patch ( res: BinaryWriter, msg: BinaryReader, as_usr: UsrId, cq_unk: BinaryWriter );

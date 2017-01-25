@@ -40,7 +40,7 @@ class OtWrapperString extends OtWrapper {
     _self_insert( pos: number, sup: string, usr_id = new UsrId() ): Rp {
         if ( sup.length ) { //  && OtWrapperString.op_insert.right( this, this.usr_right( usr_id ), pos, sup )
             this.val.data = this.val.data.slice( 0, pos ) + sup + this.val.data.slice( pos );
-            this.sig_change( OtWrapperStringOperations.bin_repr.insert( pos, sup ) );
+            this.sig_change( bw => OtWrapperStringOperations.bin_repr.Insert( bw, pos, sup ) );
         }
         return this;
     }
@@ -48,7 +48,7 @@ class OtWrapperString extends OtWrapper {
     _self_remove( pos: number, len: number, usr_id = new UsrId() ): Rp {
         if ( len ) { //  && OtWrapperString.op_insert.right( this, this.usr_right( usr_id ), pos, sup )
             this.val.data = this.val.data.slice( 0, pos ) + this.val.data.slice( pos + len );
-            this.sig_change( OtWrapperStringOperations.bin_repr.remove( pos, len ) );
+            this.sig_change( bw => OtWrapperStringOperations.bin_repr.Remove( bw, pos, len ) );
         }
         return this;
     }
@@ -58,7 +58,7 @@ class OtWrapperString extends OtWrapper {
     }
 
     undo_patch( data: BinaryReader, as_usr: UsrId ) {
-        OtWrapperStringOperations.undo_patch( this, data, as_usr );
+        OtWrapperStringOperations.undo_patch( this.val.data, data, as_usr );
     }
 
     // _self_remove( pos : number, len : number, usr_id = new UsrId() ) : boolean {
