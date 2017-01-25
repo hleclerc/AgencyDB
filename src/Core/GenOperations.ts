@@ -6,14 +6,6 @@ import * as fs  from "fs";
 
 export { _if }  from "../Symbol/If";
 
-// class Operation {
-//     constructor( readonly name: string, readonly args: Array<{name:string,type:string}>, readonly num: number, readonly apply_op: { [lang: string]: ( name: string, suffix: string ) => string }, readonly undo_op: { [lang: string]: ( name: string, suffix: string ) => string } ) {
-//     }
-//     br_read_var( br = "br", suffix = "" ): string {
-//         return this.args.length ? "let " + this.args.map( x => `${ x.name }${ suffix } = ${ br_read( br, x.type ) }` ).join( ', ' ) + ";" : '';
-//     }
-// }
-
 export type OpWriter = ( op: any ) => void;
 export class Op {}
 
@@ -107,20 +99,20 @@ class GenOperation<UT> {
 
         // undo_patch
         wl( `function undo_patch( val: ${ this.loc_type( lang, new this.underlying_class ) }, br: BinaryReader, as_usr: UsrId ) {` );
-        // wl( `    const res = skip( br );` );
-        // wl( `    for( let n = res.length; n--; ) {` );
-        // wl( `        br.cursor = res[ n ];` );
-        // wl( `        switch ( br.read_PI8() ) {` );
-        // for( const op of this.operations ) {
-        //     wl( `        case ${ op.num }: {` );
-        //     nb_sp += 12;
-        //     this.write_undo_patch( lang, op );
-        //     nb_sp -= 12;
-        //     wl( `            break;` );
-        //     wl( `        }` );
-        // }
-        // wl( `        }` );
-        // wl( `    }` );
+        wl( `    const res = skip( br );` );
+        wl( `    for( let n = res.length; n--; ) {` );
+        wl( `        br.cursor = res[ n ];` );
+        wl( `        switch ( br.read_PI8() ) {` );
+        for( const op of this.operations ) {
+            wl( `        case ${ op.num }: {` );
+            nb_sp += 12;
+            this.write_undo_patch( lang, op );
+            nb_sp -= 12;
+            wl( `            break;` );
+            wl( `        }` );
+        }
+        wl( `        }` );
+        wl( `    }` );
         wl( `}` );
         wl();
         // new_patch
@@ -163,6 +155,11 @@ class GenOperation<UT> {
     br_skip_obj( lang: string, op: OpInfo<UT> ): string {
         const inst = new op.op_type;
         return Object.keys( inst ).map( x => `br.skip_${ this.gen_type( inst[ x ] ) }();` ).join( ' ' );
+    }
+
+    br_read_var( lang: string, op: OpInfo<UT>, br = "br", suffix = "" ): string {
+        const inst = new op.op_type, keys = Object.keys( inst );
+        return keys.length ? "let " + keys.map( x => `${ x }${ suffix } = br.read_${ this.gen_type( inst[ x ] ) }()` ).join( ', ' ) + ";" : '';
     }
 
     loc_type( lang: string, inst ): string {
@@ -239,6 +236,7 @@ class GenOperation<UT> {
         let d = this.underlying_class.symbol( "val" );
         let o = this.make_symbolic_data( op );
         op.undo( d, o );
+        wl( this.br_read_var( lang, op ) );
         wl( Codegen.make_code( [ d ] ) );
     }
 

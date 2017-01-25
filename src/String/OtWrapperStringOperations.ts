@@ -29,6 +29,22 @@ function skip( br: BinaryReader ): Array<number> {
 }
 
 function undo_patch( val: string, br: BinaryReader, as_usr: UsrId ) {
+    const res = skip( br );
+    for( let n = res.length; n--; ) {
+        br.cursor = res[ n ];
+        switch ( br.read_PI8() ) {
+        case 0: {
+            let pos = br.read_PT(), str = br.read_String();
+            val=val.substr(0,pos)+val.substr(pos+str.length);
+            break;
+        }
+        case 1: {
+            let pos = br.read_PT(), len = br.read_PT();
+            val.insert__soo(pos,"proute");
+            break;
+        }
+        }
+    }
 }
 
 function new_patch( val: OtWrapperString, bw_new: BinaryWriter, br_new: BinaryReader, as_usr: UsrId, cq_unk: BinaryWriter ) {

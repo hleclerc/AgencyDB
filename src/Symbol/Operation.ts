@@ -118,13 +118,19 @@ class Operation extends Sym {
             }
 
             switch ( this.method.base_name ) {
-            case "add": return bin( '+=' );
-            case "set": return bin( '='  );
-            default:
-                return `${ name }.${ this.method.name }(${ [
-                    ...this.children.slice( 1 ).map( ch => cg.inline_code( ch, Operation.prec.COMMA ) ),
-                    ...this.args
-                ].join( ',' ) })`;
+                // binary
+                case "add": return bin( '+=' );
+                case "set": return bin( '='  );
+                // ternary
+                case "remove"            : {
+                    const val = cg.inline_code( this.children[ 0 ], Operation.prec.MEMBER );
+                    return `${ val }=${ val }.substr(0,${ cg.inline_code( this.children[ 1 ], Operation.prec.GROUP ) })+${ val }.substr(${ cg.inline_code( this.children[ 1 ], Operation.prec.ADD ) }+${ cg.inline_code( this.children[ 2 ], Operation.prec.ADD ) })`;
+                }
+                default:
+                    return `${ name }.${ this.method.name }(${ [
+                        ...this.children.slice( 1 ).map( ch => cg.inline_code( ch, Operation.prec.COMMA ) ),
+                        ...this.args
+                    ].join( ',' ) })`;
             }
         }
 
@@ -135,32 +141,32 @@ class Operation extends Sym {
 
         // content
         switch ( this.method.base_name ) {
-        // unary
-        case "to_BooleanVariable": return par( Operation.prec.CALL, options.conv_to_boolean ? cg.inline_code( this.children[ 0 ], prec, options ) : `Boolean(${ cg.inline_code( this.children[ 0 ], 1e6 ) })` );
-        case "copy"              : return cg.inline_code( this.children[ 0 ], prec );
-        case "get_size"          : return par( Operation.prec.MEMBER, `${ cg.inline_code( this.children[ 0 ], Operation.prec.MEMBER ) }.${ this.children[ 0 ].item.variable_type__b() == LvBuffer ? "byteLength" : "length" }` );
-        case "not"               : return una( Operation.prec.NOT, "!"   );
-        // binary
-        case "add"               : return bin( Operation.prec.ADD     , "+"   );
-        case "sub"               : return bin( Operation.prec.ADD     , "-"   );
-        case "mul"               : return bin( Operation.prec.MUL     , "*"   );
-        case "div"               : return bin( Operation.prec.MUL     , "/"   );
-        case "mod"               : return bin( Operation.prec.MUL     , "%"   );
-        case "is_equ"            : return bin( Operation.prec.INF     , "=="  );
-        case "is_inf"            : return bin( Operation.prec.INF     , "<"   );
-        case "is_infeq"          : return bin( Operation.prec.INF     , "<="  );
-        case "is_sup"            : return bin( Operation.prec.INF     , ">"   );
-        case "is_supeq"          : return bin( Operation.prec.INF     , ">="  );
-        case "signed_shift_left" : return bin( Operation.prec.SLFT_SHT, "<<"  );
-        case "signed_shift_right": return bin( Operation.prec.SRGT_SHT, ">>"  );
-        case "zfill_shift_right" : return bin( Operation.prec.RGT_SHT , ">>>" );
-        case "select"            : return par( Operation.prec.CALL, cg.inline_code( this.children[ 0 ], Operation.prec.CALL ) + "[" + cg.inline_code( this.children[ 1 ], Operation.prec.COMMA ) + "]" );
-        // default
-        default:
-            return par( Operation.prec.CALL, `${ this.method.name }(${ [
-                ...this.children.map( ch => cg.inline_code( ch, Operation.prec.COMMA ) ),
-                ...this.args
-            ].join( ',' ) })` );
+            // unary
+            case "to_BooleanVariable": return par( Operation.prec.CALL, options.conv_to_boolean ? cg.inline_code( this.children[ 0 ], prec, options ) : `Boolean(${ cg.inline_code( this.children[ 0 ], 1e6 ) })` );
+            case "copy"              : return cg.inline_code( this.children[ 0 ], prec );
+            case "get_size"          : return par( Operation.prec.MEMBER, `${ cg.inline_code( this.children[ 0 ], Operation.prec.MEMBER ) }.${ this.children[ 0 ].item.variable_type__b() == LvBuffer ? "byteLength" : "length" }` );
+            case "not"               : return una( Operation.prec.NOT, "!"   );
+            // binary
+            case "add"               : return bin( Operation.prec.ADD     , "+"   );
+            case "sub"               : return bin( Operation.prec.ADD     , "-"   );
+            case "mul"               : return bin( Operation.prec.MUL     , "*"   );
+            case "div"               : return bin( Operation.prec.MUL     , "/"   );
+            case "mod"               : return bin( Operation.prec.MUL     , "%"   );
+            case "is_equ"            : return bin( Operation.prec.INF     , "=="  );
+            case "is_inf"            : return bin( Operation.prec.INF     , "<"   );
+            case "is_infeq"          : return bin( Operation.prec.INF     , "<="  );
+            case "is_sup"            : return bin( Operation.prec.INF     , ">"   );
+            case "is_supeq"          : return bin( Operation.prec.INF     , ">="  );
+            case "signed_shift_left" : return bin( Operation.prec.SLFT_SHT, "<<"  );
+            case "signed_shift_right": return bin( Operation.prec.SRGT_SHT, ">>"  );
+            case "zfill_shift_right" : return bin( Operation.prec.RGT_SHT , ">>>" );
+            case "select"            : return par( Operation.prec.CALL, cg.inline_code( this.children[ 0 ], Operation.prec.CALL ) + "[" + cg.inline_code( this.children[ 1 ], Operation.prec.COMMA ) + "]" );
+            // default
+            default:
+                return par( Operation.prec.CALL, `${ this.method.base_name }(${ [
+                    ...this.children.map( ch => cg.inline_code( ch, Operation.prec.COMMA ) ),
+                    ...this.args
+                ].join( ',' ) })` );
         }
     }
 
@@ -225,7 +231,7 @@ Method.plugins.push( function( test_pf, for_a_test, method, type_0, type_1, type
             }
         }
         break;
-    case 2:
+    case 3:
         if ( type_0.prototype instanceof Sym || type_1.prototype instanceof Sym || type_2.prototype instanceof Sym ) {
             switch ( method.pattern ) {
                 case 'bbb': test_pf( new Surdef( 1, null, ( a: Rp, b: Rp, c: Rp, ...args ) => new Operation( method, [   ], slb( a ), slb( b ), slb( c ), ...args ) ) ); break;

@@ -75,27 +75,29 @@ class LvString extends Variable<LvString> {
 
     /** insert `sup` at position `pos` */
     insert( pos: LvNumber | number, sup: LvString | string ): LvString {
-        if ( typeof pos == 'number' )
+        this.rp = typeof pos == 'number' ? (
             typeof sup == 'string' ?
                 methods["insert__soo"].call_3s( this, new BN_FP64( pos ), new GenString( sup ) ) :
-                methods["insert__sob"].call_3s( this, new BN_FP64( pos ), sup.rp               );
-        else
+                methods["insert__sob"].call_3s( this, new BN_FP64( pos ), sup.rp               )
+        ) : (
             typeof sup == 'string' ?
                 methods["insert__soo"].call_3s( this, pos.rp            , new GenString( sup ) ) :
-                methods["insert__sob"].call_3s( this, pos.rp            , sup.rp               );
+                methods["insert__sob"].call_3s( this, pos.rp            , sup.rp               )
+        );
         return this;
     }
 
     /** insert `len` characters from position `pos` */
     remove( pos: LvNumber | number, len: LvNumber | number ): LvString {
-        if ( typeof pos == 'number' )
+        this.rp = typeof pos == 'number' ? (
             typeof len == 'number' ?
                 methods["remove__soo"].call_3s( this, new BN_FP64( pos ), new BN_FP64( len ) ) :
-                methods["remove__sob"].call_3s( this, new BN_FP64( pos ), len.rp             );
-        else
+                methods["remove__sob"].call_3s( this, new BN_FP64( pos ), len.rp             )
+        ) : (
             typeof len == 'number' ?
                 methods["remove__soo"].call_3s( this, pos.rp            , new BN_FP64( len ) ) :
-                methods["remove__sob"].call_3s( this, pos.rp            , len.rp             );
+                methods["remove__sob"].call_3s( this, pos.rp            , len.rp             )
+        );
         return this;
     }
 

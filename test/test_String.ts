@@ -77,6 +77,12 @@ describe( 'String', () => {
         assert.equal( intercept[ 0 ], a, "interception of the right variable" );
     });
 
+    // it( 'symbolic operations', () => {
+    //     let a = LvString.symbol( "a" );
+    //     a.remove( 1, 2 );
+    //     console.log( a.toString() );
+    // });
+
     it( 'operationnal tranform', () => {
         test_ot<LvString>( LvString, 2, ( vls, dbs ) => {
             vls[ 0 ].append( "a" );
