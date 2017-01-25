@@ -9,7 +9,7 @@ function sequ( a, b, msg?: string ) {
 
 export default
 function test_ot<type>( type: typeof VarAnc, nb_dbs: number, operations: ( vars: Array<type>, dbs: Array<Db> ) => void, expected: string, explanation: string ) {
-    const dev_ids = [ "gMWDnGjZfxZ~", "O5HeHcHU1Io~", "h8u858_RnDF~", "ujtameVI3fN~", "gmWRNBUMN7o~" ];
+    const dev_ids = [ "0MWDnGjZfxZ~", "15HeHcHU1Io~", "28u858_RnDF~", "3jtameVI3fN~", "4mWRNBUMN7o~" ];
     let dbs = new Array<Db>();
     for( let i = 0; i < nb_dbs; ++i ) {
         let db = new Db;
