@@ -18,7 +18,7 @@ describe( 'Codegen', () => {
         s.remove( 1, 2 );
         t.insert( 1, "u" );
         
-        sequ( Codegen.make_code( [ s ] ), "s=s.substr(0,1)+s.substr(1+2);" );
+        sequ( Codegen.make_code( [ s ] ), "s=s.substr(0,1)+s.substr(3);" );
         sequ( Codegen.make_code( [ t ] ), 't=t.substr(0,1)+"u"+t.substr(1);' );
     });
 

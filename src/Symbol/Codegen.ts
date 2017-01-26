@@ -6,7 +6,7 @@ import { BN_PT }                   from "../Number/Bn"
 import SymbolicKnownValue, { skv } from "./SymbolicKnownValue"
 import BlockCodegen                from "./BlockCodegen"
 import GenSymbol                   from "./GenSymbol"
-import Operation                   from "./Operation"
+import Operation, { make_op }      from "./Operation"
 import While, { WhileInp }         from "./While"
 import Sym, { Link }               from "./Sym"
 import If, { IfInp }               from "./If"
@@ -113,30 +113,15 @@ function base_instruction_selection( targets: Array<Sym>, lang: string ) {
         if ( op instanceof Operation ) {
             switch ( op.base_name ) {
                 case "remove_s": // a.substring( 0, children[ 1 ] ) + a.substring( children[ 1 + 2 ] )
-                    return [ { item: new Operation( methods[ "set__sb" ], [ 0 ], op.children[ 0 ], {
-                        item: new Operation( methods[ "add__bb" ], [], {
-                            item: new Operation( methods[ "heads__bb" ], [], op.children[ 0 ], op.children[ 1 ] ), nout: 0
-                        }, {
-                            item: new Operation( methods[ "tails__bb" ], [], op.children[ 0 ], {
-                                item: new Operation( methods[ "add__bb" ], [],
-                                    op.children[ 1 ],
-                                    op.children[ 2 ]
-                                ), nout: 0
-                            } ), nout: 0
-                        } ), nout: 0
-                    } ), nout: 0 } ];
-                case "insert_s": // a.substring( 0, children[ 1 ] ) + children[ 2 ] + a.substring( children[ 1 ] )
-                    return [ { item: new Operation( methods[ "set__sb" ], [ 0 ], op.children[ 0 ], {
-                        item: new Operation( methods[ "add__bb" ], [], {
-                            item: new Operation( methods[ "add__bb" ], [], {
-                                item: new Operation( methods[ "heads__bb" ], [], op.children[ 0 ], op.children[ 1 ] ), nout: 0
-                            },
-                                op.children[ 2 ]
-                            ), nout: 0
-                        }, {
-                            item: new Operation( methods[ "tails__bb" ], [], op.children[ 0 ], op.children[ 1 ] ), nout: 0
-                        } ), nout: 0
-                    } ), nout: 0 } ];
+                    return [ make_op( "set__sb", op.children[ 0 ], make_op( "add__bb",
+                        make_op( "heads__bb", op.children[ 0 ], op.children[ 1 ] ),
+                        make_op( "tails__bb", op.children[ 0 ], make_op( "add__bb", op.children[ 1 ], op.children[ 2 ] ) )
+                    ) ) ];
+                case "insert_s": // ( a.substring( 0, children[ 1 ] ) + children[ 2 ] ) + a.substring( children[ 1 ] )
+                    return [ make_op( "set__sb", op.children[ 0 ], make_op( "add__bb", 
+                        make_op( "add__bb", make_op( "heads__bb", op.children[ 0 ], op.children[ 1 ] ), op.children[ 2 ] ),
+                        make_op( "tails__bb", op.children[ 0 ], op.children[ 1 ] )
+                    ) ) ];
             }
         }
         return null;

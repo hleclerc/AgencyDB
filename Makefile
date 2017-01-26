@@ -1,5 +1,5 @@
 all:
-	nsmake mocha --verbose test/test_Codegen.ts
+	nsmake mocha test/test_Codegen.ts
 
 	# nsmake mocha test/test_String.ts
 clean:

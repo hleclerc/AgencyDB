@@ -145,6 +145,17 @@ class Method {
         return this.call_4( a.rp, b, c, d, ...args );
     }
 
+    /** version for any number of rp args */
+    call_gen( ...args ) {
+        switch ( this.nb_rp_args ) {
+            case 1: return ( this.call_1 as any )( ...args );
+            case 2: return ( this.call_2 as any )( ...args );
+            case 3: return ( this.call_3 as any )( ...args );
+            case 4: return ( this.call_4 as any )( ...args );
+            default: throw new Error( "TODO" );
+        }
+    }
+
     surdef_for( ...args ) : Surdef {
         switch ( this.nb_rp_args ) {
             case 1: return this.find_best_func_1( args[ 0 ], 1 );
