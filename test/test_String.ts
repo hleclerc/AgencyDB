@@ -25,6 +25,8 @@ describe( 'String', () => {
         sequ( s.length            , 4             );
         sequ( s.append( "ouille" ), "testouille"  );
         sequ( s.insert( 9, "s" )  , "testouillse" );
+        sequ( s.substr( 2, 4 )    , "stou"        );
+        sequ( s.substring( 2, 4 ) , "st"          );
         sequ( s.remove( 2, 8 )    , "tee"         );
     });
 

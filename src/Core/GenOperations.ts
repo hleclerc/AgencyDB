@@ -12,9 +12,9 @@ export class Op {}
 class OpInfo<UT> {
     op_type: any;
     num    : number;
-    apply ?:( d: UT, o: Op ) => any
-    undo  ?:( d: UT, o: Op ) => any
-    // store?: ( b: OpWriter, o: any ) => void;
+    apply ?: ( d: UT, o: Op ) => any;
+    undo  ?: ( d: UT, o: Op ) => any;
+    store ?: ( d: UT, o: Op ) => Array<{type:any,data:any}>;
 };
 
 /** helper */
@@ -36,6 +36,10 @@ class GenOperation<UT> {
 
     undo( op_type, cb: ( d: UT, o: Op ) => any ) {
         this.reg_op( op_type ).undo = cb;
+    }
+
+    store( op_type, cb: ( d: UT, o: Op ) => Array<{type:any,data:any}> ) {
+        this.reg_op( op_type ).store = cb;
     }
 
     reg_op( op_type ): OpInfo<UT> {
@@ -97,21 +101,25 @@ class GenOperation<UT> {
         wl();
 
         // undo_patch
-        wl( `function undo_patch( val: ${ this.loc_type( lang, new this.underlying_class ) }, br: BinaryReader, as_usr: UsrId ) {` );
+        const ul = this.loc_type( lang, new this.underlying_class );
+        wl( `function undo_patch( val: ${ ul }, br: BinaryReader, as_usr: UsrId ): ${ ul } {` );
         wl( `    const res = skip( br );` );
         wl( `    for( let n = res.length; n--; ) {` );
         wl( `        br.cursor = res[ n ];` );
         wl( `        switch ( br.read_PI8() ) {` );
         for( const op of this.operations ) {
-            wl( `        case ${ op.num }: {` );
-            nb_sp += 12;
-            this.write_undo_patch( lang, op );
-            nb_sp -= 12;
-            wl( `            break;` );
-            wl( `        }` );
+            if ( op.undo ) {
+                wl( `        case ${ op.num }: {` );
+                nb_sp += 12;
+                this.write_undo_patch( lang, op );
+                nb_sp -= 12;
+                wl( `            break;` );
+                wl( `        }` );
+            }
         }
         wl( `        }` );
         wl( `    }` );
+        wl( `    return val;` );
         wl( `}` );
         wl();
         // new_patch

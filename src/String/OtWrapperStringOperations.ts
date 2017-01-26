@@ -1,17 +1,19 @@
-import OtWrapperString from "./OtWrapperString"
 import BinaryWriter    from "../System/BinaryWriter"
 import BinaryReader    from "../System/BinaryReader"
 import UsrId           from "../System/UsrId"
+import OtWrapperString from "./OtWrapperString"
 
 var bin_repr = {
     Insert: function( bw: BinaryWriter, pos: number, str: string ): void { bw.write_PI8( 0 ); bw.write_PT( pos ); bw.write_String( str ); },
     Remove: function( bw: BinaryWriter, pos: number, len: number ): void { bw.write_PI8( 1 ); bw.write_PT( pos ); bw.write_PT( len ); },
+    RemUnd: function( bw: BinaryWriter, pos: number, str: string ): void { bw.write_PI8( 2 ); bw.write_PT( pos ); bw.write_String( str ); },
 }
 
 function read( br: BinaryReader, cb: ( type: string, args: any ) => void ) {
     switch ( br.read_PI8() ) {
         case 0: cb( "Insert", { pos: br.read_PT(), str: br.read_String() } ); break;
         case 1: cb( "Remove", { pos: br.read_PT(), len: br.read_PT() } ); break;
+        case 2: cb( "RemUnd", { pos: br.read_PT(), str: br.read_String() } ); break;
         default: cb( null, {} ); br.clear(); break;
     }
 }
@@ -23,29 +25,30 @@ function skip( br: BinaryReader ): Array<number> {
         switch ( br.read_PI8() ) {
             case 0: br.skip_PT(); br.skip_String(); break;
             case 1: br.skip_PT(); br.skip_PT(); break;
+            case 2: br.skip_PT(); br.skip_String(); break;
         }
     }
     return res;
 }
 
-function undo_patch( val: string, br: BinaryReader, as_usr: UsrId ) {
+function undo_patch( val: string, br: BinaryReader, as_usr: UsrId ): string {
     const res = skip( br );
     for( let n = res.length; n--; ) {
         br.cursor = res[ n ];
         switch ( br.read_PI8() ) {
         case 0: {
             let pos = br.read_PT(), str = br.read_String();
-pou
-            
+            val=val.substr(0,pos)+val.substr(pos+str.length);
             break;
         }
-        case 1: {
-            let pos = br.read_PT(), len = br.read_PT();
-            val.insert__soo(pos,"proute");
+        case 2: {
+            let pos = br.read_PT(), str = br.read_String();
+            val=val.substr(0,pos)+str+val.substr(pos);
             break;
         }
         }
     }
+    return val;
 }
 
 function new_patch( val: OtWrapperString, bw_new: BinaryWriter, br_new: BinaryReader, as_usr: UsrId, cq_unk: BinaryWriter ) {

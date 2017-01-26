@@ -122,11 +122,6 @@ class Operation extends Sym {
                 // binary
                 case "add": return bin( '+=' );
                 case "set": return bin( '='  );
-                // ternary
-                case "remove"            : {
-                    const val = cg.inline_code( this.children[ 0 ], Operation.prec.MEMBER );
-                    return `${ val }=${ val }.substr(0,${ cg.inline_code( this.children[ 1 ], Operation.prec.GROUP ) })+${ val }.substr(${ cg.inline_code( this.children[ 1 ], Operation.prec.ADD ) }+${ cg.inline_code( this.children[ 2 ], Operation.prec.ADD ) })`;
-                }
                 default:
                     return `${ name }.${ this.method.name }(${ [
                         ...this.children.slice( 1 ).map( ch => cg.inline_code( ch, Operation.prec.COMMA ) ),

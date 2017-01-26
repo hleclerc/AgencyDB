@@ -1,12 +1,12 @@
-import Variable        from "./Core/Variable"
-import methods         from "./Core/methods"
-import Select          from "./Core/Select"
-import Rp              from "./Core/Rp"
+import Variable  from "./Core/Variable"
+import methods   from "./Core/methods"
+import Select    from "./Core/Select"
+import Rp        from "./Core/Rp"
   
-import GenString       from "./String/GenString"
-import GenSymbol       from "./Symbol/GenSymbol"
-import { BN_FP64 }     from "./Number/Bn"
-import LvNumber        from "./LvNumber"
+import GenString from "./String/GenString"
+import GenSymbol from "./Symbol/GenSymbol"
+import { BN_PT } from "./Number/Bn"
+import LvNumber  from "./LvNumber"
 
 // import Caret     from "./String/Caret";
 // import DevId     from "../System/DevId"
@@ -51,13 +51,40 @@ class LvString extends Variable<LvString> {
         return new LvNumber( methods[ "get_size__b" ].call_1( this.rp ) );
     }
 
+    /** */
     charAt( index: number | LvNumber ): LvString {
-        return new LvString( typeof index == 'number' ? methods[ "select__bo" ].call_2( this.rp, new BN_FP64( index ) ) : methods[ "select__bb" ].call_2( this.rp, ( index as LvNumber ).rp ) );
+        return new LvString( typeof index == 'number' ? methods[ "select__bo" ].call_2( this.rp, new BN_PT( index ) ) : methods[ "select__bb" ].call_2( this.rp, ( index as LvNumber ).rp ) );
     }
 
-    /** return a proxy that gives charAt if read, but it also enable writes */
+    /** */
+    substr( from: number | LvNumber, length: number | LvNumber ): LvString {
+        return new LvString( typeof from == 'number' ? (
+            typeof length == 'number' ?
+                methods["slice__boo"].call_3s( this, new BN_PT( from ), new BN_PT( from + length )                                ) :
+                methods["slice__bob"].call_3s( this, new BN_PT( from ), methods["add__ob"].call_2( new BN_PT( from ), length.rp ) )
+        ) : (
+            typeof length == 'number' ?
+                methods["slice__boo"].call_3s( this, from.rp          , methods["add__ob"].call_2( from.rp, new BN_PT( length ) ) ) :
+                methods["slice__bob"].call_3s( this, from.rp          , methods["add__ob"].call_2( from.rp, length.rp )           )
+        ) );
+    }
+
+    /** */
+    substring( beg: number | LvNumber, end: number | LvNumber ): LvString {
+        return new LvString( typeof beg == 'number' ? (
+            typeof end == 'number' ?
+                methods["slice__boo"].call_3s( this, new BN_PT( beg ), new BN_PT( end ) ) :
+                methods["slice__bob"].call_3s( this, new BN_PT( beg ), end.rp           )
+        ) : (
+            typeof end == 'number' ?
+                methods["slice__boo"].call_3s( this, beg.rp          , new BN_PT( end ) ) :
+                methods["slice__bob"].call_3s( this, beg.rp          , end.rp           )
+        ) );
+    }
+
+    /** returns a proxy that gives charAt if read, and enables writes */
     select( index: number | LvNumber ): LvString {
-        return new LvString( new Select( this, typeof index == 'number' ? new BN_FP64( index ) : methods[ "copy__b" ].call_1( ( index as LvNumber ).rp ) ) );
+        return new LvString( new Select( this, typeof index == 'number' ? new BN_PT( index ) : methods[ "copy__b" ].call_1( ( index as LvNumber ).rp ) ) );
     }
 
     append( val: LvString | string ): LvString {
@@ -77,8 +104,8 @@ class LvString extends Variable<LvString> {
     insert( pos: LvNumber | number, sup: LvString | string ): LvString {
         this.rp = typeof pos == 'number' ? (
             typeof sup == 'string' ?
-                methods["insert__soo"].call_3s( this, new BN_FP64( pos ), new GenString( sup ) ) :
-                methods["insert__sob"].call_3s( this, new BN_FP64( pos ), sup.rp               )
+                methods["insert__soo"].call_3s( this, new BN_PT( pos ), new GenString( sup ) ) :
+                methods["insert__sob"].call_3s( this, new BN_PT( pos ), sup.rp               )
         ) : (
             typeof sup == 'string' ?
                 methods["insert__soo"].call_3s( this, pos.rp            , new GenString( sup ) ) :
@@ -91,11 +118,11 @@ class LvString extends Variable<LvString> {
     remove( pos: LvNumber | number, len: LvNumber | number ): LvString {
         this.rp = typeof pos == 'number' ? (
             typeof len == 'number' ?
-                methods["remove__soo"].call_3s( this, new BN_FP64( pos ), new BN_FP64( len ) ) :
-                methods["remove__sob"].call_3s( this, new BN_FP64( pos ), len.rp             )
+                methods["remove__soo"].call_3s( this, new BN_PT( pos ), new BN_PT( len ) ) :
+                methods["remove__sob"].call_3s( this, new BN_PT( pos ), len.rp             )
         ) : (
             typeof len == 'number' ?
-                methods["remove__soo"].call_3s( this, pos.rp            , new BN_FP64( len ) ) :
+                methods["remove__soo"].call_3s( this, pos.rp            , new BN_PT( len ) ) :
                 methods["remove__sob"].call_3s( this, pos.rp            , len.rp             )
         );
         return this;

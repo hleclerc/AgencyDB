@@ -58,7 +58,7 @@ class OtWrapperString extends OtWrapper {
     }
 
     undo_patch( data: BinaryReader, as_usr: UsrId ) {
-        OtWrapperStringOperations.undo_patch( this.val.data, data, as_usr );
+        this.val.data = OtWrapperStringOperations.undo_patch( this.val.data, data, as_usr );
     }
 
     // _self_remove( pos : number, len : number, usr_id = new UsrId() ) : boolean {

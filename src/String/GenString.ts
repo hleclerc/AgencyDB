@@ -82,5 +82,6 @@ methods[ "remove__sbb" ].add_surdef( 10, [ GenString, "to_Number__b", "to_Number
  
 methods[ "select__bb"  ].add_surdef( 10, [ GenString, "to_Number__b" ], ( a: GenString, b: Rp ) => { return new GenString( a.data[ methods[ "to_Number__b" ].call_1( b ) ] ); } );
 
+methods[ "slice__bbb"  ].add_surdef( 10, [ GenString, "to_Number__b", "to_Number__b" ], ( a: GenString, b: Rp, c: Rp ) => { return new GenString( a.data.substring( methods[ "to_Number__b" ].call_1( b ), methods[ "to_Number__b" ].call_1( c ) ) ); } );
 
 

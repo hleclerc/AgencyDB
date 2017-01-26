@@ -5,6 +5,8 @@ import GenOperations, { _if,
 import LvNumber         from "../LvNumber"
 import LvString         from "../LvString"
 
+//
+let go = new GenOperations<LvString>( 'OtWrapperString', LvString );
 
 // operation types
 class Insert { pos = new LvNumber(); str = new LvString(); };
@@ -13,13 +15,15 @@ class RemUnd { pos = new LvNumber(); str = new LvString(); };
 // type Op = Insert | Remove | RemUnd;
 
 // declaration of operation types for AgencyDB
-let go = new GenOperations<LvString>( 'OtWrapperString', LvString );
 go.apply( Insert, ( d: LvString, o: Insert ) => d.insert( o.pos, o.str ) );
 go.apply( Remove, ( d: LvString, o: Remove ) => d.remove( o.pos, o.len ) );
+go.apply( RemUnd, ( d: LvString, o: RemUnd ) => d.remove( o.pos, o.str.length ) );
 
 go.undo ( Insert, ( d: LvString, o: Insert ) => d.remove( o.pos, o.str.length ) );
-go.undo ( Remove, ( d: LvString, o: Remove ) => d.insert( o.pos, "proute" ) );
+go.undo ( Remove, null );
+go.undo ( RemUnd, ( d: LvString, o: RemUnd ) => d.insert( o.pos, o.str ) );
 
+go.store( Remove, ( d: LvString, o: Remove ) => [ { type: RemUnd, data: { pos: o.pos, str: d.substr( o.pos, o.len ) } as RemUnd } ] );
 
 // go.add_op( 'insert', [ "pos:PT", "sup:String" ], {
 //     apply: {
