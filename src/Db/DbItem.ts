@@ -116,7 +116,7 @@ class DbItem extends PatchManager {
     app_changes( br: BinaryReader, src_dev: DevId, src_usr: UsrId, dst_devs = new Array<DevId>() ) {
         if ( ! br.size )
             return;
-        console.log( "\u001b[90m-- app changes:", src_dev, "->", this.db.dev_id, "\u001b[0m" );
+        // console.log( "\u001b[90m-- app changes:", src_dev, "->", this.db.dev_id, "\u001b[0m" );
         
         // if ( this.variable.is_symbolic() ) {
         //     let wc      = new WaitingChange;
@@ -142,9 +142,6 @@ class DbItem extends PatchManager {
 
         // read id of patches which serve as base for the new ones
         let src_vector_clock = VectorClock.read_from( br, src_dev, this.db.dev_id );
-
-        console.log( "vc:", this.vector_clock.toString() );
-        console.log( "ac:", src_vector_clock.toString() );
 
         // there are patch or merges assumed_to_be_known but not present ??
         src_vector_clock.map.forEach( ( num: number, dev: string ) => {
@@ -255,7 +252,7 @@ class DbItem extends PatchManager {
                 index_first_insertion = index_ins_patch;
         }
 
-        console.log( index_first_insertion, this.patches.length, "this.patches: ", this.patches.map( x => `\n  ${ x.data } it: ${ x.ins_type }` ).join( "" ) );
+        // console.log( index_first_insertion, this.patches.length, "this.patches: ", this.patches.map( x => `\n  ${ x.data } it: ${ x.ins_type }` ).join( "" ) );
 
         // update patch content
         if ( nb_new ) {
@@ -310,7 +307,7 @@ class DbItem extends PatchManager {
 
             merger.finalize();
         }
-        console.log( "this.patches: ", this.patches.map( x => "\n  " + x.data.toString() ).join( "" ) );
+        // console.log( "this.patches: ", this.patches.map( x => "\n  " + x.data.toString() ).join( "" ) );
         
 
         // //

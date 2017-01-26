@@ -54,7 +54,7 @@ class OtWrapperString extends OtWrapper {
     }
 
     new_patch( res: BinaryWriter, msg: BinaryReader, as_usr: UsrId, cq_unk: BinaryWriter ) {
-        OtWrapperStringOperations.new_patch( this, res, msg, as_usr, cq_unk );
+        this.val.data = OtWrapperStringOperations.new_patch( this.val.data, res, msg, as_usr, cq_unk );
     }
 
     undo_patch( data: BinaryReader, as_usr: UsrId ) {
@@ -92,6 +92,12 @@ methods[ "insert__sbb" ].add_surdef( 2, [ OtWrapperString, "to_Number__b", "to_S
     const npos = methods[ "to_Number__b" ].call_1( pos );
     const nsup = methods[ "to_String__b" ].call_1( sup );
     return str._self_insert( npos, nsup );
+} );
+
+methods[ "remove__sbb" ].add_surdef( 2, [ OtWrapperString, "to_Number__b", "to_Number__b" ], function( str: OtWrapperString, pos: Rp, len: Rp ): Rp {
+    const npos = methods[ "to_Number__b" ].call_1( pos );
+    const nlen = methods[ "to_Number__b" ].call_1( len );
+    return str._self_remove( npos, nlen );
 } );
 
 // // patch types

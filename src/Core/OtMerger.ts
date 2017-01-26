@@ -43,14 +43,14 @@ class OtMerger {
 
     /** res = update of msg (according to unk patches) */
     new_patch( res: BinaryWriter, msg: Uint8Array, as_usr = new UsrId, nb_rem_unk = 0, nb_rem_std = 0 ) {
-        console.log( "new", msg, ( this.ot_wrapper as any ).val );
+        // console.log( "new", msg, ( this.ot_wrapper as any ).val );
 
         let tmp_res = new BinaryWriter; // res may contain data
         this.ot_wrapper.new_patch( tmp_res, new BinaryReader( msg ), as_usr, this.cq_unk );
         this.cq_new.write_some( tmp_res.to_Uint8Array() );
         res.write_some( tmp_res.to_Uint8Array() );
 
-        console.log( "=>", ( this.ot_wrapper as any ).val );
+        // console.log( "=>", ( this.ot_wrapper as any ).val );
 
         // this.ot_wrapper.patch_data_visitor( msg, ( op_new, ...args_new ) => {
         //     op_new.update_patch_data_l0( this.ot_wrapper, args_new );
@@ -81,14 +81,14 @@ class OtMerger {
 
     /** res = update of data (according to new patches) */
     unk_patch( res: BinaryWriter, msg: Uint8Array, as_usr = new UsrId, nb_rem_new = 0, nb_rem_std = 0 ) {
-        console.log( "unk", msg, ( this.ot_wrapper as any ).val );
+        // console.log( "unk", msg, ( this.ot_wrapper as any ).val );
 
         let tmp_res = new BinaryWriter; // res may contain data
         this.ot_wrapper.new_patch( tmp_res, new BinaryReader( msg ), as_usr, this.cq_new );
         this.cq_unk.write_some( tmp_res.to_Uint8Array() );
         res.write_some( tmp_res.to_Uint8Array() );
 
-        console.log( "=>", ( this.ot_wrapper as any ).val );
+        // console.log( "=>", ( this.ot_wrapper as any ).val );
         // let tmp_res = new BinaryWriter; // res may contain data
         // this.ot_wrapper.patch_data_visitor( msg, ( op_unk, ...args_unk ) => {
         //     op_unk.update_patch_data_l0( this.ot_wrapper, args_unk );

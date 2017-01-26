@@ -16,9 +16,16 @@ declare var TextEncoder: any;
 
 //
 export default class BinaryWriter {
-    //
     constructor( reservation = 32 ) {
         this.data = new ArrayBuffer( reservation );
+    }
+
+    /** */
+    transfer_to( dst: BinaryWriter ) {
+        dst.data = this.data;
+        dst.size = this.size;
+        dst.mark = this.mark;
+        dst.i2rd = this.i2rd;
     }
 
     /** for the display */

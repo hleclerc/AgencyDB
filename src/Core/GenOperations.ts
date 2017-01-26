@@ -51,8 +51,8 @@ class GenOperation<UT> {
         return res;
     }
 
-    fwd_trans( o_op_type, n_op_type, cb: ( o, n ) => { o: Array<Op>, n: Array<Op> } ) {
-        this.trans_rules.set( `${ o_op_type } ${ n_op_type }`, cb );
+    fwd_trans( o_op_type, n_op_type, cb: ( o, n ) => void ) {
+        this.trans_rules.set( `${ ( new o_op_type ).constructor.name } ${ ( new n_op_type ).constructor.name }`, cb );
     }
 
     // /** declare a new operation */
@@ -126,7 +126,7 @@ class GenOperation<UT> {
         wl( `}` );
         wl();
         // new_patch
-        wl( `function new_patch( val: ${ this.class_name }, bw_new: BinaryWriter, br_new: BinaryReader, as_usr: UsrId, cq_unk: BinaryWriter ) {` );
+        wl( `function new_patch( val: ${ ul }, bw_new: BinaryWriter, br_new: BinaryReader, as_usr: UsrId, cq_unk: BinaryWriter ): ${ ul } {` );
         wl( `    while ( br_new.size ) {` );
         wl( `        switch ( br_new.read_PI8() ) {` );
         for( const op of this.operations ) {
@@ -139,6 +139,7 @@ class GenOperation<UT> {
         }
         wl( `        }` );
         wl( `    }` );
+        wl( `    return val;` );
         wl( `}` );
         wl();
 
@@ -207,6 +208,7 @@ class GenOperation<UT> {
 
         // read unk data
         wl( `let br_unk = new BinaryReader( cq_unk.to_Uint8Array() );` );
+        wl( `let bw_unk = new BinaryWriter;` );
         wl( `while ( br_unk.size ) {` );
         wl( `    const num_unk = br_unk.read_PI8();` );
         wl( `    switch ( num_unk ) {` );
@@ -214,8 +216,7 @@ class GenOperation<UT> {
             wl( `        case ${ op_unk.num }: {` );
             nb_sp += 12;
             wl( this.br_read_var( lang, op_unk, "br_unk", "_unk" ) );
-            // wl( `console.log( "unk:", { ${ op_unk.args.map( x => x.name ).join(',') } } );` );
-
+            
             let cb = this.trans_rules.get( `${ ( new op_unk.op_type ).constructor.name } ${ ( new op_new.op_type ).constructor.name }` );
             if ( cb ) {
                 let data_unk = this.make_symbolic_data( op_unk, "_unk" );
@@ -226,20 +227,41 @@ class GenOperation<UT> {
                     ...Object.keys( data_new ).map( k => data_new[ k ] ),
                 ] ) );
             }
-
+            wl( `bw_unk.write_PI8( ${ op_unk.num } ); ${ this.bw_write_op( lang, op_unk, "bw_unk", "_unk" ) }` );
             nb_sp -= 12;
             wl( `            break;` );
             wl( `        }` );
         }
-        wl( `        default: break;` );
         wl( `    }` );
         wl( `}` );
 
-        // apply operation
-        //wl( op_new.apply[ lang ]( "val", "_new" ) );
-
         // write back the new data
-        wl( `bw_new.write_PI8( ${ op_new.num } ); ${ this.bw_write_op( lang, op_new, "bw_new", "_new" ) }` );
+        if ( op_new.store ) {
+            let d = this.underlying_class.symbol( "val" );
+            let o = this.make_symbolic_data( op_new, "_new" );
+            for( const new_op of op_new.store( d, o ) ) {
+                const op = this.reg_op( new_op.type ), inst = new op.op_type;
+                const li = Object.keys( new_op.data ).map( x => inst[ x ].constructor.symbol( x + "_tmp" ).set( new_op.data[ x ] ) );
+                wl( `{` ); 
+                nb_sp += 4;
+                wl( `let ${ Object.keys( inst ).map( x => x + "_tmp" ).join( ', ' ) };` );
+                wl( Codegen.make_code( li, lang ) );
+                wl( `bw_new.write_PI8( ${ op.num } );` + Object.keys( inst ).map( x => ` bw_new.write_${ this.gen_type( inst[ x ] ) }( ${ x }_tmp );` ).join( '' ) );
+                nb_sp -= 4;
+                wl( `}` ); 
+            }
+        } else {
+            wl( `bw_new.write_PI8( ${ op_new.num } ); ${ this.bw_write_op( lang, op_new, "bw_new", "_new" ) }` );
+        }
+
+        // register new unk data
+        wl( `bw_unk.transfer_to( cq_unk );` );
+
+        // apply operation
+        let d = this.underlying_class.symbol( "val" );
+        let o = this.make_symbolic_data( op_new, "_new" );
+        op_new.apply( d, o );
+        wl( Codegen.make_code( [ d ] ) );
     }
 
     write_undo_patch( lang: string, op: OpInfo<UT> ) {
@@ -253,5 +275,5 @@ class GenOperation<UT> {
     operations      = new Array<OpInfo<UT>>();
     class_name      : string;
     underlying_class: any;
-    trans_rules     = new Map<string,(o,n)=>{o:Array<any>,n:Array<any>}>();
+    trans_rules     = new Map<string,(o,n)=>void>();
 }

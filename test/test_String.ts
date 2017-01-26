@@ -79,13 +79,7 @@ describe( 'String', () => {
         assert.equal( intercept[ 0 ], a, "interception of the right variable" );
     });
 
-    // it( 'symbolic operations', () => {
-    //     let a = LvString.symbol( "a" );
-    //     a.remove( 1, 2 );
-    //     console.log( a.toString() );
-    // });
-
-    it( 'operationnal tranform', () => {
+    it( 'operationnal tranform, sending', () => {
         test_ot<LvString>( LvString, 2, ( vls, dbs ) => {
             vls[ 0 ].append( "a" );
         }, "a", "send from 0" );
@@ -93,7 +87,9 @@ describe( 'String', () => {
         test_ot<LvString>( LvString, 2, ( vls, dbs ) => {
             vls[ 1 ].append( "a" );
         }, "a", "send from 1" );
+    });
 
+    it( 'operationnal tranform, succession remove / insertions', () => {
         test_ot<LvString>( LvString, 2, ( vls, dbs ) => {
             vls[ 0 ].append( "a" );
             dbs[ 0 ].send_changes();
@@ -101,13 +97,33 @@ describe( 'String', () => {
         }, "ab", "succession of insertions" );
 
         test_ot<LvString>( LvString, 2, ( vls, dbs ) => {
-            console.log( "1 --------------" );
+            vls[ 0 ].append( "abcd" );
+            dbs[ 0 ].send_changes();
+            vls[ 1 ].remove( 1, 2 );
+        }, "ad", "succession of insertion + removal" );
+    });
+
+    it( 'operationnal tranform, parallel remove / insertions', () => {
+        test_ot<LvString>( LvString, 2, ( vls, dbs ) => {
             vls[ 0 ].insert( 0, "abcd" );
             dbs.forEach( x => x.send_changes() );
-            console.log( "2 --------------" );
             vls[ 0 ].insert( 1, "X" );
             vls[ 1 ].insert( 3, "Y" );
         }, "aXbcYd", "concurrent insertions" );
+
+        test_ot<LvString>( LvString, 2, ( vls, dbs ) => {
+            vls[ 0 ].insert( 0, "abcd" );
+            dbs.forEach( x => x.send_changes() );
+            vls[ 1 ].insert( 3, "Y" );
+            vls[ 0 ].insert( 1, "X" );
+        }, "aXbcYd", "concurrent insertions" );
+
+        test_ot<LvString>( LvString, 2, ( vls, dbs ) => {
+            vls[ 0 ].insert( 0, "012345" );
+            dbs.forEach( x => x.send_changes() );
+            vls[ 0 ].insert( 3, "ab" );
+            vls[ 1 ].remove( 1, 1 );
+        }, "02ab345", "concurrent insertions" );
     });
 });
  
