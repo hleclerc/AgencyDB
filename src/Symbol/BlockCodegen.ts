@@ -6,7 +6,7 @@ import Sym, { Link }                from "./Sym"
 
 /** */
 function get_leaves( leaves: Array<Sym>, targets: Array<Sym> ) {
-    Sym.dfs_u( targets, function( op: Sym ) {
+    Sym.dfs_unique( targets, function( op: Sym ) {
         if ( op.children.length == 0 )
             leaves.push( op );
     } );

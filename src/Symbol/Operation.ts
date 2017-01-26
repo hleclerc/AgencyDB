@@ -29,16 +29,17 @@ class Operation extends Sym {
 
     to_String__b(): string {
         const lst = [ ...this.children.map( x => methods[ "to_String__b" ].call_1( x.item ) ), ...this.args.map( x => x.toString() ) ];
-        return `${ this.base_name() }(${ lst.join( ',' ) })`;
+        return `${ this.base_name }(${ lst.join( ',' ) })`;
     }
 
-    base_name(): string {
+    /** this.method.base_name, with a '_s' if self method */
+    get base_name(): string {
         const ind_und = this.method.name.indexOf( '__' );
         return this.method.name.substr( 0, ind_und ) + ( this.method.name[ ind_und + 2 ] == 's' ? '_s' : '' );
     }
 
     repr_graphviz(): string {
-        return this.base_name();
+        return this.base_name;
     }
 
     self_ops(): Array<number> {
@@ -161,6 +162,8 @@ class Operation extends Sym {
             case "signed_shift_right": return bin( Operation.prec.SRGT_SHT, ">>"  );
             case "zfill_shift_right" : return bin( Operation.prec.RGT_SHT , ">>>" );
             case "select"            : return par( Operation.prec.CALL, cg.inline_code( this.children[ 0 ], Operation.prec.CALL ) + "[" + cg.inline_code( this.children[ 1 ], Operation.prec.COMMA ) + "]" );
+            case "heads"             : return par( Operation.prec.MEMBER, `${ cg.inline_code( this.children[ 0 ], Operation.prec.MEMBER ) }.substr(0,${ cg.inline_code( this.children[ 1 ], Operation.prec.COMMA ) })` );
+            case "tails"             : return par( Operation.prec.MEMBER, `${ cg.inline_code( this.children[ 0 ], Operation.prec.MEMBER ) }.substr(${ cg.inline_code( this.children[ 1 ], Operation.prec.COMMA ) })` );
             // default
             default:
                 return par( Operation.prec.CALL, `${ this.method.base_name }(${ [

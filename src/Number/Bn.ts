@@ -95,6 +95,7 @@ function Bn( T ) {
 
 export var BN_Bool = Bn( "Bool" );
 export var BN_FP64 = Bn( "FP64" );
+export var BN_PT   = BN_FP64;
 
 // DeclTypesForRW.readers[ DeclTypesForRW.num.Bn_PI32 ] = function( br: BinaryReader, dev_id : DevId, usr_id : UsrId ) : Number {
 //     return new Number( new BN_FP64( br.read_PT() ) );

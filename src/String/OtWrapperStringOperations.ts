@@ -35,7 +35,8 @@ function undo_patch( val: string, br: BinaryReader, as_usr: UsrId ) {
         switch ( br.read_PI8() ) {
         case 0: {
             let pos = br.read_PT(), str = br.read_String();
-            val=val.substr(0,pos)+val.substr(pos+str.length);
+pou
+            
             break;
         }
         case 1: {

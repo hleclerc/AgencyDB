@@ -1,4 +1,3 @@
-//// nsmake define NO_OPERATIONAL_TRANSFORM
 import Codegen  from "../Symbol/Codegen";
 import LvNumber from "../LvNumber";
 import LvString from "../LvString";

@@ -221,6 +221,8 @@ dstd( "sup_immediate"          , 2, false );
 dstd( "equ_immediate"          , 2, false );
    
 dstd( "select"                 , 2        ); // select for read
+dstd( "heads"                  , 2        ); // item, end => items at the beginning (up to end)
+dstd( "tails"                  , 2        ); // item, beg => items up to beg
    
 dstd( "get_size"               , 1        ); // return a Variable (probably a Number)
    

@@ -5,7 +5,7 @@ import { cd }        from "./Codegen";
 import BlockCodegen  from "./BlockCodegen";
 
 export
-class Link {
+interface Link {
     item: Sym;
     nout: number;
 }
@@ -67,10 +67,16 @@ class Sym extends Rp {
     }
 
     /** Depth First Search unique (items are visited only once if they are of type Sym) */
-    static dfs_u( v: Array<Sym>, cb: ( x: Sym, ssb: number ) => void, go_into_subblocks = false ) {
+    static dfs_unique( v: Array<Sym>, cb: ( x: Sym, ssb: number ) => void, go_into_subblocks = false ): void {
         ++Sym.cur_op_id;
         for( const x of v )
-            _dfs_u_rec( x, cb, go_into_subblocks, 0 );
+            _dfs_unique_rec( x, cb, go_into_subblocks, 0 );
+    } 
+
+    /** replace items. if cb return null, items are unchanged. */
+    static dfs_repl_unique( v: Array<Sym>, cb: ( x: Sym ) => Array<Link>, go_into_subblocks = false ): Array<Sym> {
+        ++Sym.cur_op_id;
+        return [].concat( ...v.map( x => _dfs_repl_unique_rec( x, cb, go_into_subblocks ).map( l => l.item ) ) );
     } 
 
 
@@ -82,17 +88,44 @@ class Sym extends Rp {
     static cur_sched_id = 0;
 }
 
-function _dfs_u_rec( v: Sym, cb: ( x: Sym, ssb: number ) => void, go_into_subblocks, ssb = 0 ) {
+function _dfs_unique_rec( v: Sym, cb: ( x: Sym, ssb: number ) => void, go_into_subblocks, ssb = 0 ) {
     if ( v.op_id == Sym.cur_op_id )
         return;
     v.op_id = Sym.cur_op_id;
 
     // rec
     for( const ch of v.children )
-        _dfs_u_rec( ch.item, cb, go_into_subblocks, ssb );
+        _dfs_unique_rec( ch.item, cb, go_into_subblocks, ssb );
     if ( go_into_subblocks )
-        v.for_each_sub_block( sb => _dfs_u_rec( sb, cb, go_into_subblocks, ssb + 1 ) );
+        v.for_each_sub_block( sb => _dfs_unique_rec( sb, cb, go_into_subblocks, ssb + 1 ) );
 
     // call
     cb( v, ssb );
+}
+
+/** Return a Link for each output */
+function _dfs_repl_unique_rec( v: Sym, cb: ( x: Sym ) => Array<Link>, go_into_subblocks ): Array<Link> {
+    if ( v.op_id == Sym.cur_op_id )
+        return v.op_mp as Array<Link>;
+    v.op_id = Sym.cur_op_id;
+
+    // call
+    let res = cb( v );
+    if ( ! res ) {
+        res = [];
+        for( let nout = 0; nout < v.nb_outputs(); ++nout )
+            res.push( { item: v, nout } );
+    }
+
+    // rec
+    if ( res instanceof Sym ) {
+        for( let i = 0; i < v.children.length; ++i ) {
+            const arr = _dfs_repl_unique_rec( v.children[ i ].item, cb, go_into_subblocks );
+            v.children[ i ] = arr[ v.children[ i ].nout ];
+        }
+        if ( go_into_subblocks )
+            v.for_each_sub_block( sb => _dfs_repl_unique_rec( sb, cb, go_into_subblocks ) );
+    }
+
+    return res;
 }
