@@ -12,7 +12,7 @@ let go = new GenOperations<LvString>( 'OtWrapperString', LvString );
 class Insert { pos = new LvNumber(); str = new LvString(); };
 class Remove { pos = new LvNumber(); len = new LvNumber(); };
 class RemUnd { pos = new LvNumber(); str = new LvString(); };
-// type Op = Insert | Remove | RemUnd;
+type StrOp = Insert | Remove | RemUnd;
 
 // declaration of operation types for AgencyDB
 go.apply( Insert, ( d: LvString, o: Insert ) => d.insert( o.pos, o.str ) );
@@ -25,61 +25,23 @@ go.undo ( RemUnd, ( d: LvString, o: RemUnd ) => d.insert( o.pos, o.str ) );
 
 go.store( Remove, ( d: LvString, o: Remove ) => [ { type: RemUnd, data: { pos: o.pos, str: d.substr( o.pos, o.len ) } as RemUnd } ] );
 
-// go.add_op( 'insert', [ "pos:PT", "sup:String" ], {
-//     apply: {
-//         ts: ( name, suffix ) => `${ name }.val.data = ${ name }.val.data.slice( 0, pos${ suffix } ) + sup${ suffix } + ${ name }.val.data.slice( pos${ suffix } );`
-//     }, 
-//     undo: {
-//         ts: ( name, suffix ) => `${ name }.val.data = ${ name }.val.data.slice( 0, pos${ suffix } ) + ${ name }.val.data.slice( pos${ suffix } + sup${ suffix }.length );`
-//     } 
-// } );
-
-
-// go.add_op( 'insert', [ "pos:PT", "sup:String" ], {
-//     apply: {
-//         ts: ( name, suffix ) => `${ name }.val.data = ${ name }.val.data.slice( 0, pos${ suffix } ) + sup${ suffix } + ${ name }.val.data.slice( pos${ suffix } );`
-//     }, 
-//     undo: {
-//         ts: ( name, suffix ) => `${ name }.val.data = ${ name }.val.data.slice( 0, pos${ suffix } ) + ${ name }.val.data.slice( pos${ suffix } + sup${ suffix }.length );`
-//     } 
-// } );
-
-// go.add_op( 'remove', [ "pos:PT", "len:PT" ], {
-//     apply: {
-//         ts: ( name, suffix ) => `${ name }.val.data = ${ name }.val.data.slice( 0, pos${ suffix } ) + ${ name }.val.data.slice( pos${ suffix } + len${ suffix } );`
-//     }, 
-//     undo: {
-//         ts: null
-//     },
-//     store: ( b: OpWriter, o: Remove ) => { b( { type: "remund", pos: o.pos, str:  } as RemUnd ); }
-// } );
-
-// go.add_op( 'remund', [ "pos:PT", "len:PT" ], {
-//     apply: {
-//         ts: ( name, suffix ) => `${ name }.val.data = ${ name }.val.data.slice( 0, pos${ suffix } ) + ${ name }.val.data.slice( pos${ suffix } + len${ suffix } );`
-//     }, 
-//     undo: {
-//         ts: ( name, suffix ) => `${ name }.val.data = "proute";`
-//     },
-// } );
-
-// // combinations
-// go.add_ftr( 'insert', 'insert', ( o: Insert, n: Insert ): { o: Array<Op>, n: Array<Op> } => {
-//     _if( o.pos.is_sup( n.pos ), () => {
-//         // orig 01234
-//         // real 0123unk4    INS(args_o[ 0 ]=4,args_o[ 1 ]=unk)
-//         // imag 0new1234    INS(args_n[ 0 ]=1,args_n[ 1 ]=new)
-//         // obj  0new123unk4 (real -> obj = new: INS 1,new; imag -> obj = unk: INS 7,unk)
-//         o.pos.self_add( n.str.length );
-//     }, () => {
-//         // orig 01234
-//         // real 0123unk4    INS(args_o[ 0 ]=4,args_o[ 1 ]=unk)
-//         // imag 0new1234    INS(args_n[ 0 ]=1,args_n[ 1 ]=new)
-//         // obj  0new123unk4 (real -> obj = new: INS 1,new; imag -> obj = unk: INS 7,unk)
-//         n.pos.self_add( o.str.length );
-//     } );
-//     return { o: [ o ], n: [ n ] };
-// } );
+// combinations
+go.fwd_trans( Insert, Insert, ( o: Insert, n: Insert ): { o: Array<StrOp>, n: Array<StrOp> } => {
+    _if( o.pos.is_sup( n.pos ), () => {
+        // orig 01234
+        // real 0123unk4    INS(args_o[ 0 ]=4,args_o[ 1 ]=unk)
+        // imag 0new1234    INS(args_n[ 0 ]=1,args_n[ 1 ]=new)
+        // obj  0new123unk4 (real -> obj = new: INS 1,new; imag -> obj = unk: INS 7,unk)
+        o.pos.self_add( n.str.length );
+    }, () => {
+        // orig 01234
+        // real 0123unk4    INS(args_o[ 0 ]=4,args_o[ 1 ]=unk)
+        // imag 0new1234    INS(args_n[ 0 ]=1,args_n[ 1 ]=new)
+        // obj  0new123unk4 (real -> obj = new: INS 1,new; imag -> obj = unk: INS 7,unk)
+        n.pos.self_add( o.str.length );
+    } );
+    return { o: [ o ], n: [ n ] };
+} );
 
 process.stdout.write( `import OtWrapperString from "./OtWrapperString"\n` );
 go.write( "ts" );

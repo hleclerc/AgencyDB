@@ -1,7 +1,7 @@
+import OtWrapperString from "./OtWrapperString"
 import BinaryWriter    from "../System/BinaryWriter"
 import BinaryReader    from "../System/BinaryReader"
 import UsrId           from "../System/UsrId"
-import OtWrapperString from "./OtWrapperString"
 
 var bin_repr = {
     Insert: function( bw: BinaryWriter, pos: number, str: string ): void { bw.write_PI8( 0 ); bw.write_PT( pos ); bw.write_String( str ); },
@@ -52,6 +52,82 @@ function undo_patch( val: string, br: BinaryReader, as_usr: UsrId ): string {
 }
 
 function new_patch( val: OtWrapperString, bw_new: BinaryWriter, br_new: BinaryReader, as_usr: UsrId, cq_unk: BinaryWriter ) {
+    while ( br_new.size ) {
+        switch ( br_new.read_PI8() ) {
+        case 0: {
+            let pos_new = br_new.read_PT(), str_new = br_new.read_String();
+            let br_unk = new BinaryReader( cq_unk.to_Uint8Array() );
+            while ( br_unk.size ) {
+                const num_unk = br_unk.read_PI8();
+                switch ( num_unk ) {
+                    case 0: {
+                        let pos_unk = br_unk.read_PT(), str_unk = br_unk.read_String();
+                        break;
+                    }
+                    case 1: {
+                        let pos_unk = br_unk.read_PT(), len_unk = br_unk.read_PT();
+                        break;
+                    }
+                    case 2: {
+                        let pos_unk = br_unk.read_PT(), str_unk = br_unk.read_String();
+                        break;
+                    }
+                    default: break;
+                }
+            }
+            bw_new.write_PI8( 0 ); bw_new.write_PT( pos_new ); bw_new.write_String( str_new );
+            break;
+        }
+        case 1: {
+            let pos_new = br_new.read_PT(), len_new = br_new.read_PT();
+            let br_unk = new BinaryReader( cq_unk.to_Uint8Array() );
+            while ( br_unk.size ) {
+                const num_unk = br_unk.read_PI8();
+                switch ( num_unk ) {
+                    case 0: {
+                        let pos_unk = br_unk.read_PT(), str_unk = br_unk.read_String();
+                        break;
+                    }
+                    case 1: {
+                        let pos_unk = br_unk.read_PT(), len_unk = br_unk.read_PT();
+                        break;
+                    }
+                    case 2: {
+                        let pos_unk = br_unk.read_PT(), str_unk = br_unk.read_String();
+                        break;
+                    }
+                    default: break;
+                }
+            }
+            bw_new.write_PI8( 1 ); bw_new.write_PT( pos_new ); bw_new.write_PT( len_new );
+            break;
+        }
+        case 2: {
+            let pos_new = br_new.read_PT(), str_new = br_new.read_String();
+            let br_unk = new BinaryReader( cq_unk.to_Uint8Array() );
+            while ( br_unk.size ) {
+                const num_unk = br_unk.read_PI8();
+                switch ( num_unk ) {
+                    case 0: {
+                        let pos_unk = br_unk.read_PT(), str_unk = br_unk.read_String();
+                        break;
+                    }
+                    case 1: {
+                        let pos_unk = br_unk.read_PT(), len_unk = br_unk.read_PT();
+                        break;
+                    }
+                    case 2: {
+                        let pos_unk = br_unk.read_PT(), str_unk = br_unk.read_String();
+                        break;
+                    }
+                    default: break;
+                }
+            }
+            bw_new.write_PI8( 2 ); bw_new.write_PT( pos_new ); bw_new.write_String( str_new );
+            break;
+        }
+        }
+    }
 }
 
 export default { read, bin_repr, new_patch, undo_patch };
