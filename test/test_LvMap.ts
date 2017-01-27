@@ -14,13 +14,10 @@ describe( 'LvMap', () => {
         let s = new_LvMap( LvString, LvString );
 
         // set/get
-        //s.set( "a", "A" );
+        s.set( "b", "B" );
         s.get( "a" ).set( "A" );
-        sequ( s, "{a:A}" );
-        console.log( s.get( "a" ).toString() );
-        // sequ( s.get( "a" ), "A" );
-        
-        //sequ( s           , "test" );
+        sequ( s, "{a:A,b:B}" );
+        sequ( s.get( "a" ), "A" );
     });
 });
  

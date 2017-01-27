@@ -22,7 +22,6 @@ class Select extends Rp {
 }
 Rp.make_templ( Select );
 
-// set__so( select, value )
 /**
  * Prop: appel de set_seo( obj, ind, value )
  * 

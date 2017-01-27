@@ -11,11 +11,13 @@ class LvNumber extends Variable<LvNumber> {
     static NativeType = Number;
 
     constructor( val = 0 as Rp | LvNumber | number | boolean ) {
-        if      ( val instanceof Rp            ) super( val );
-        else if ( val instanceof LvNumber        ) super( methods[ "copy__b" ].call_1( val.rp ) );
-        else if ( typeof( val ) == "number"    ) super( new BN_FP64( val ) );
-        else if ( typeof( val ) == "boolean"   ) super( new BN_FP64( val ? 1 : 0 ) );
-        else throw new Error( "TODO Number from" + typeof( val ) );
+        if      ( val instanceof Rp       ) super( val );
+        else if ( val instanceof LvNumber ) super( methods[ "copy__b" ].call_1( val.rp ) );
+        else                                super( LvNumber.make_Rp( val ) );
+    }
+
+    static make_Rp( val: number | boolean ) {
+        return typeof( val ) == "number" ? new BN_FP64( val ) : new BN_FP64( val ? 1 : 0 );
     }
 
     static symbol( name: string ): LvNumber {

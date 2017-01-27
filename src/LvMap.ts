@@ -73,15 +73,19 @@ class LvMap<K extends VarAnc,V extends VarAnc> extends Variable<LvMap<K,V>> {
 
     /**  */
     set( key, val ): LvMap<K,V> {
-        this.rp = key instanceof VarAnc ? (
-            val instanceof VarAnc ?
-                methods["set_val__sbb"].call_3s( this, key.rp                                                 , val.rp ) :
-                methods["set_val__sbo"].call_3s( this, key.rp                                                 , methods["val_type__b"].call_1( this.rp ).make_Rp( val ) )
-        ) : (
-            val instanceof VarAnc ?
-                methods["set_val__sob"].call_3s( this, methods["key_type__b"].call_1( this.rp ).make_Rp( key ), val.rp                                                  ) :
-                methods["set_val__soo"].call_3s( this, methods["key_type__b"].call_1( this.rp ).make_Rp( key ), methods["val_type__b"].call_1( this.rp ).make_Rp( val ) )
-        );
+        let sup = this.get( key );
+        sup.rp = val instanceof VarAnc ?
+            methods["set__sb"].call_2s( sup, val.rp ) :
+            methods["set__so"].call_2s( sup, methods["val_type__b"].call_1( this.rp ).make_Rp( val ) )
+        // this.rp = key instanceof VarAnc ? (
+        //     val instanceof VarAnc ?
+        //         methods["set_val__sbb"].call_3s( this, key.rp                                                 , val.rp ) :
+        //         methods["set_val__sbo"].call_3s( this, key.rp                                                 , methods["val_type__b"].call_1( this.rp ).make_Rp( val ) )
+        // ) : (
+        //     val instanceof VarAnc ?
+        //         methods["set_val__sob"].call_3s( this, methods["key_type__b"].call_1( this.rp ).make_Rp( key ), val.rp                                                  ) :
+        //         methods["set_val__soo"].call_3s( this, methods["key_type__b"].call_1( this.rp ).make_Rp( key ), methods["val_type__b"].call_1( this.rp ).make_Rp( val ) )
+        // );
         return this;
     }
 
