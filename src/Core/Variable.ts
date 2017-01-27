@@ -213,8 +213,8 @@ decl( "new_ot_merger__b"       , false    ); // arg: orig patch_manager. returns
 // decl( "mod_select"             , "rc"  ); // select for modification
 // decl( "rem_item"               , "rc"  ); // remove item (e.g. using a key)
 // decl( "obj_type"               , "c"   ); // variable type (ex: GenString -> String)
-// decl( "key_type"               , "c"   );
-// decl( "val_type"               , "c"   );
+dstd( "key_type"               , 1, false );
+dstd( "val_type"               , 1, false );
    
 //    
 dstd( "inf_immediate"          , 2, false );
@@ -226,7 +226,7 @@ dstd( "heads"                  , 2        ); // item, end => items at the beginn
 dstd( "tails"                  , 2        ); // item, beg => items up to beg
 dstd( "slice"                  , 3        ); // lst, beg, end (get a copy)
    
-dstd( "get_size"               , 1        ); // return a Variable (probably a Number)
+dstd( "get_size"               , 1        ); // return a Variable (probably a number)
    
 dstd( "to_BooleanVariable"     , 1        ); // conversion to Boolean variable (can be symbolic, ...)
    
@@ -243,7 +243,7 @@ dstd( "copy"                   , 1        );
 
 dslf( "remove"                 , 3        );
 dslf( "insert"                 , 3        );
-   
+
 // changes
 dslf( "on_change"              , 1        ); // return an id (type PatchId), that can be used to remove the callback
 dstd( "sig_change"             , 1        ); //

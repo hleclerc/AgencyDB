@@ -17,9 +17,13 @@ class LvString extends Variable<LvString> {
     static NativeType = String;
 
     constructor( val = "" as Rp | LvString | string ) {
-        if      ( val instanceof Rp     ) super( val );
+        if      ( val instanceof Rp       ) super( val );
         else if ( val instanceof LvString ) super( methods[ "copy__b" ].call_1( this.rp ) );
-        else                              super( new GenString( val ) );
+        else                                super( LvString.make_Rp( val ) );
+    }
+
+    static make_Rp( val: string ) {
+        return new GenString( val );
     }
 
     static symbol( name: string ): LvString {

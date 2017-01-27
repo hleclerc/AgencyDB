@@ -6,8 +6,9 @@ import * as fs  from "fs";
 
 export { _if }  from "../Symbol/If";
 
-export type OpWriter = ( op: any ) => void;
 export class Op {}
+
+//export class OtWrapperWithRightFlags { right_flags: new LvMap<LvUsrId,LvNumber> }
 
 class OpInfo<UT> {
     inst   : any; /** instance of symbolic repr */
@@ -28,6 +29,9 @@ function wl( str = "" ) {
 // struct op_add_usr_right { static const char *name() { return "add_usr_right"; } static bool valid( UsrId, unsigned v ) { return v; } };
 // struct op_rem_usr_right { static const char *name() { return "rem_usr_right"; } static bool valid( UsrId, unsigned v ) { return v; } };
 class AddUsrRight { usr = new LvUsrId(); flags = new LvNumber(); };
+class RemUsrRight { usr = new LvUsrId(); flags = new LvNumber(); };
+
+class OtWrapperString { val = new LvString; }
 
 export default 
 class GenOperation<UT> {
@@ -38,15 +42,10 @@ class GenOperation<UT> {
         this.cl_inst  = new class_;
     }
 
-    add_right_flags( ...right_flags: Array<string> ) {
-        if ( right_flags.length == 0 )
-            throw "right_flags is expected to be non void";
-        // if first time, add flags and operations for right mgmt
-        if ( this.right_flags.length == 0 ) {
-            this.right_flags.push( "add_rights", "rem_rights" );
-
-        }
-        this.right_flags.push( ...right_flags );
+    /** this function install  */
+    define_rights_by_flags( right_names: Array<string>, attr_name = "right_flags" ) {
+        // this.apply( AddUsrRight, ( d, o: AddUsrRight ) => ( d as OtWrapperString ).val.insert( o.pos, o.str        ) );
+        // this.apply( RemUsrRight, ( d, o: RemUsrRight ) => ( d as OtWrapperString ).val.remove( o.pos, o.len        ) );
     }
 
     apply( op_type, cb: ( d: UT, o: Op ) => any ) {

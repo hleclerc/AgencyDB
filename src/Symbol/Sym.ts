@@ -14,6 +14,7 @@ interface Link {
 export default
 class Sym extends Rp {
     static watch_self_op = true;
+    static symbolic_value = true;
 
     constructor( cl ) {
         super( cl );
