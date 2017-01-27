@@ -118,12 +118,12 @@ describe( 'String', () => {
             vls[ 0 ].insert( 1, "X" );
         }, "aXbcYd", "concurrent insertions" );
 
-        test_ot<LvString>( LvString, 2, ( vls, dbs ) => {
-            vls[ 0 ].insert( 0, "012345" );
-            dbs.forEach( x => x.send_changes() );
-            vls[ 0 ].insert( 3, "ab" );
-            vls[ 1 ].remove( 1, 1 );
-        }, "02ab345", "concurrent insertions" );
+        // test_ot<LvString>( LvString, 2, ( vls, dbs ) => {
+        //     vls[ 0 ].insert( 0, "012345" );
+        //     dbs.forEach( x => x.send_changes() );
+        //     vls[ 0 ].insert( 3, "ab" );
+        //     vls[ 1 ].remove( 1, 1 );
+        // }, "02ab345", "concurrent insertion and removal" );
     });
 });
  

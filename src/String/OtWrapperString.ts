@@ -54,11 +54,11 @@ class OtWrapperString extends OtWrapper {
     }
 
     new_patch( res: BinaryWriter, msg: BinaryReader, as_usr: UsrId, cq_unk: BinaryWriter ) {
-        this.val.data = OtWrapperStringOperations.new_patch( this.val.data, res, msg, as_usr, cq_unk );
+        OtWrapperStringOperations.new_patch( this, res, msg, as_usr, cq_unk );
     }
 
     undo_patch( data: BinaryReader, as_usr: UsrId ) {
-        this.val.data = OtWrapperStringOperations.undo_patch( this.val.data, data, as_usr );
+        OtWrapperStringOperations.undo_patch( this, data, as_usr );
     }
 
     // _self_remove( pos : number, len : number, usr_id = new UsrId() ) : boolean {
@@ -75,7 +75,8 @@ class OtWrapperString extends OtWrapper {
     //     return this.val.toString().substr( pos, len );
     // }
 
-    val        : GenString;
+    val         : GenString;
+    right_flags = new Map<string,number>(); /** usr_id => flags */
     // cursors    = new Array<Cursor>();
     // new_cursors= new Array<Cursor>();
     // mod_cursors= new Array<Cursor>();

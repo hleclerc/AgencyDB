@@ -197,7 +197,7 @@ class Method {
         for( let s of this.surdefs ) {
             if ( s.test instanceof Array ) {
                 if ( s.test.length != 1 )
-                    throw new Error( "Wrong test array size" );
+                    throw new Error( `Wrong test array size (in ${ this.name })` );
                 if ( Method.test_arg_surdef( s.test[ 0 ], type_0 ) )
                     test_pf( s );
             } else if ( Method.test_arg_surdef( s.test, type_0 ) )
@@ -287,7 +287,7 @@ class Method {
         for( let s of this.surdefs ) {
             if ( s.test instanceof Array ) {
                 if ( s.test.length != 2 )
-                    throw new Error( "Wrong test array size" );
+                    throw new Error( `Wrong test array size (in ${ this.name })` );
                 if ( Method.test_arg_surdef( s.test[ 0 ], type_0 ) && Method.test_arg_surdef( s.test[ 1 ], type_1 ) )
                     test_pf( s );
             } else if ( s.test( type_0, type_1 ) )
@@ -401,7 +401,7 @@ class Method {
         for( let s of this.surdefs ) {
             if ( s.test instanceof Array ) {
                 if ( s.test.length != 3 )
-                    throw new Error( "Wrong test array size" );
+                    throw new Error( `Wrong test array size (in ${ this.name })` );
                 if ( Method.test_arg_surdef( s.test[ 0 ], type_0 ) && Method.test_arg_surdef( s.test[ 1 ], type_1 ) && Method.test_arg_surdef( s.test[ 2 ], type_2 ) )
                     test_pf( s );
             } else if ( s.test( type_0, type_1, type_2 ) )
@@ -547,7 +547,7 @@ class Method {
         for( let s of this.surdefs ) {
             if ( s.test instanceof Array ) {
                 if ( s.test.length != 4 )
-                    throw new Error( "Wrong test array size" );
+                    throw new Error( `Wrong test array size (in ${ this.name })` );
                 if ( Method.test_arg_surdef( s.test[ 0 ], type_0 ) && Method.test_arg_surdef( s.test[ 1 ], type_1 ) && Method.test_arg_surdef( s.test[ 2 ], type_2 ) && Method.test_arg_surdef( s.test[ 3 ], type_3 ) )
                     test_pf( s );
             } else if ( s.test( type_0, type_1, type_2, type_3 ) )

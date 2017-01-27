@@ -19,6 +19,10 @@ class DevId {
         this.val = val;
     }
 
+    copy(): DevId {
+        return new DevId( this.val );
+    }
+
     to_glo( cur_dev: DevId ): DevId {
         return this.loc ? cur_dev : this;
     }

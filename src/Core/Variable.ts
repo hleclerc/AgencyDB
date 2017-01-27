@@ -185,6 +185,7 @@ dstd( "to_Boolean"             , 1, false ); // returns a native Boolean
 dstd( "to_Array"               , 1, false ); // returns a native Array
 dstd( "to_Inode"               , 1, false ); // returns an Inode object
 dstd( "to_Buffer"              , 1, false ); // returns an Buffer object
+dstd( "to_native_type"         , 1, false ); // 
 
 // proxy
 dstd( "prox_ptr"               , 1, false ); // returns a Variable, which can be modified

@@ -1,6 +1,7 @@
 import Codegen  from "../Symbol/Codegen";
 import LvNumber from "../LvNumber";
 import LvString from "../LvString";
+import LvUsrId  from "../LvUsrId";
 import * as fs  from "fs";
 
 export { _if }  from "../Symbol/If";
@@ -8,9 +9,8 @@ export { _if }  from "../Symbol/If";
 export type OpWriter = ( op: any ) => void;
 export class Op {}
 
-
 class OpInfo<UT> {
-    op_type: any;
+    inst   : any; /** instance of symbolic repr */
     num    : number;
     apply ?: ( d: UT, o: Op ) => any;
     undo  ?: ( d: UT, o: Op ) => any;
@@ -23,11 +23,30 @@ function wl( str = "" ) {
     process.stdout.write( " ".repeat( nb_sp ) + str + "\n" );
 }
 
+// struct op_add_grp_right { static const char *name() { return "add_grp_right"; } static bool valid( GrpId, unsigned v ) { return v; } };
+// struct op_rem_grp_right { static const char *name() { return "rem_grp_right"; } static bool valid( GrpId, unsigned v ) { return v; } };
+// struct op_add_usr_right { static const char *name() { return "add_usr_right"; } static bool valid( UsrId, unsigned v ) { return v; } };
+// struct op_rem_usr_right { static const char *name() { return "rem_usr_right"; } static bool valid( UsrId, unsigned v ) { return v; } };
+class AddUsrRight { usr = new LvUsrId(); flags = new LvNumber(); };
+
 export default 
 class GenOperation<UT> {
-    constructor( class_name: string, underlying_class ) {
-        this.underlying_class = underlying_class;
-        this.class_name       = class_name;
+    static AddUsrRight = AddUsrRight;
+
+    constructor( class_: any, sym_corr = {} as { [ name: string ]: string } ) {
+        this.sym_corr = sym_corr;
+        this.cl_inst  = new class_;
+    }
+
+    add_right_flags( ...right_flags: Array<string> ) {
+        if ( right_flags.length == 0 )
+            throw "right_flags is expected to be non void";
+        // if first time, add flags and operations for right mgmt
+        if ( this.right_flags.length == 0 ) {
+            this.right_flags.push( "add_rights", "rem_rights" );
+
+        }
+        this.right_flags.push( ...right_flags );
     }
 
     apply( op_type, cb: ( d: UT, o: Op ) => any ) {
@@ -43,10 +62,10 @@ class GenOperation<UT> {
     }
 
     reg_op( op_type ): OpInfo<UT> {
-        const ind = this.operations.find( x => x.op_type == op_type );
+        const ind = this.operations.find( x => x.inst.constructor == op_type );
         if ( ind )
             return ind;
-        const res = { op_type, num: this.operations.length } as OpInfo<UT>;
+        const res = { inst: new op_type, num: this.operations.length } as OpInfo<UT>;
         this.operations.push( res );
         return res;
     }
@@ -75,7 +94,7 @@ class GenOperation<UT> {
         // bin_repr
         wl( `var bin_repr = {` );
         for( const op of this.operations )
-            wl( `    ${ op.op_type.prototype.constructor.name }: function( bw: BinaryWriter, ${ this.func_args_op( lang, op ) } ): void { bw.write_PI8( ${ op.num } ); ${ this.bw_write_op( lang, op ) } },` );
+            wl( `    ${ op.inst.constructor.name }: function( bw: BinaryWriter, ${ this.func_args_op( lang, op ) } ): void { bw.write_PI8( ${ op.num } ); ${ this.bw_write_op( lang, op ) } },` );
         wl( `}` );
         wl();
 
@@ -83,7 +102,7 @@ class GenOperation<UT> {
         wl( `function read( br: BinaryReader, cb: ( type: string, args: any ) => void ) {` );
         wl( `    switch ( br.read_PI8() ) {` );
         for( const op of this.operations )
-            wl( `        case ${ op.num }: cb( "${ ( new op.op_type ).constructor.name }", { ${ this.br_read_obj( lang, op ) } } ); break;` );
+            wl( `        case ${ op.num }: cb( "${ op.inst.constructor.name }", { ${ this.br_read_obj( lang, op ) } } ); break;` );
         wl( `        default: cb( null, {} ); br.clear(); break;` );
         wl( `    }` );
         wl( `}` );
@@ -104,8 +123,8 @@ class GenOperation<UT> {
         wl();
 
         // undo_patch
-        const ul = this.loc_type( lang, new this.underlying_class );
-        wl( `function undo_patch( val: ${ ul }, br: BinaryReader, as_usr: UsrId ): ${ ul } {` );
+        //const ul = this.loc_type( lang, new this.underlying_class );
+        wl( `function undo_patch( val: ${ this.cl_inst.constructor.name }, br: BinaryReader, as_usr: UsrId ) {` );
         wl( `    const res = skip( br );` );
         wl( `    for( let n = res.length; n--; ) {` );
         wl( `        br.cursor = res[ n ];` );
@@ -126,7 +145,7 @@ class GenOperation<UT> {
         wl( `}` );
         wl();
         // new_patch
-        wl( `function new_patch( val: ${ ul }, bw_new: BinaryWriter, br_new: BinaryReader, as_usr: UsrId, cq_unk: BinaryWriter ): ${ ul } {` );
+        wl( `function new_patch( val: ${ this.cl_inst.constructor.name }, bw_new: BinaryWriter, br_new: BinaryReader, as_usr: UsrId, cq_unk: BinaryWriter ) {` );
         wl( `    while ( br_new.size ) {` );
         wl( `        switch ( br_new.read_PI8() ) {` );
         for( const op of this.operations ) {
@@ -149,28 +168,24 @@ class GenOperation<UT> {
     }
 
     func_args_op( lang: string, op: OpInfo<UT> ): string {
-        const inst = new op.op_type;
-        return Object.keys( inst ).map( x => `${ x }: ${ this.loc_type( lang, inst[ x ] ) }` ).join( ', ' );
+        return Object.keys( op.inst ).map( x => `${ x }: ${ this.loc_type( lang, op.inst[ x ] ) }` ).join( ', ' );
     }
 
     bw_write_op( lang: string, op: OpInfo<UT>, bw = "bw", suffix = "" ): string {
-        const inst = new op.op_type;
-        return Object.keys( inst ).map( x => `${ bw }.write_${ this.gen_type( inst[ x ] ) }( ${ x }${ suffix } );` ).join( ' ' );
+        return Object.keys( op.inst ).map( x => `${ bw }.write_${ this.gen_type( op.inst[ x ] ) }( ${ x }${ suffix } );` ).join( ' ' );
     }
 
     br_read_obj( lang: string, op: OpInfo<UT> ): string {
-        const inst = new op.op_type;
-        return Object.keys( inst ).map( x => `${ x }: br.read_${ this.gen_type( inst[ x ] ) }()` ).join( ', ' );
+        return Object.keys( op.inst ).map( x => `${ x }: br.read_${ this.gen_type( op.inst[ x ] ) }()` ).join( ', ' );
     }
 
     br_skip_obj( lang: string, op: OpInfo<UT> ): string {
-        const inst = new op.op_type;
-        return Object.keys( inst ).map( x => `br.skip_${ this.gen_type( inst[ x ] ) }();` ).join( ' ' );
+        return Object.keys( op.inst ).map( x => `br.skip_${ this.gen_type( op.inst[ x ] ) }();` ).join( ' ' );
     }
 
     br_read_var( lang: string, op: OpInfo<UT>, br = "br", suffix = "" ): string {
-        const inst = new op.op_type, keys = Object.keys( inst );
-        return keys.length ? "let " + keys.map( x => `${ x }${ suffix } = ${ br }.read_${ this.gen_type( inst[ x ] ) }()` ).join( ', ' ) + ";" : '';
+        const keys = Object.keys( op.inst );
+        return keys.length ? "let " + keys.map( x => `${ x }${ suffix } = ${ br }.read_${ this.gen_type( op.inst[ x ] ) }()` ).join( ', ' ) + ";" : '';
     }
 
     loc_type( lang: string, inst ): string {
@@ -189,13 +204,12 @@ class GenOperation<UT> {
         throw "Unknown gen type for " + inst.constructor.name;
     }
 
-    make_symbolic_data( op: OpInfo<UT>, suffix = "" ) {
+    make_symbolic_data( inst: any, suffix = "", prefix = "", correction = {} as { [ key: string ]: string } ) {
         const res = {} as any;
-        const inst = new op.op_type;
         for( const key of Object.keys( inst ) ) {
             switch ( inst[ key ].constructor.name ) {
-                case 'LvNumber': res[ key ] = LvNumber.symbol( key + suffix ); break;
-                case 'LvString': res[ key ] = LvString.symbol( key + suffix ); break;
+                case 'LvNumber': res[ key ] = LvNumber.symbol( prefix + ( correction[ key ] || key ) + suffix ); break;
+                case 'LvString': res[ key ] = LvString.symbol( prefix + ( correction[ key ] || key ) + suffix ); break;
                 default: throw "TODO: make_symbolic_data for " + inst[ key ].constructor.name;
             }
         }
@@ -217,15 +231,15 @@ class GenOperation<UT> {
             nb_sp += 12;
             wl( this.br_read_var( lang, op_unk, "br_unk", "_unk" ) );
             
-            let cb = this.trans_rules.get( `${ ( new op_unk.op_type ).constructor.name } ${ ( new op_new.op_type ).constructor.name }` );
+            let cb = this.trans_rules.get( `${ op_unk.inst.constructor.name } ${ op_new.inst.constructor.name }` );
             if ( cb ) {
-                let data_unk = this.make_symbolic_data( op_unk, "_unk" );
-                let data_new = this.make_symbolic_data( op_new, "_new" );
+                let data_unk = this.make_symbolic_data( op_unk.inst, "_unk" );
+                let data_new = this.make_symbolic_data( op_new.inst, "_new" );
                 cb( data_unk, data_new );
                 wl( Codegen.make_code( [
                     ...Object.keys( data_unk ).map( k => data_unk[ k ] ),
                     ...Object.keys( data_new ).map( k => data_new[ k ] ),
-                ] ) );
+                ], lang ) );
             }
             wl( `bw_unk.write_PI8( ${ op_unk.num } ); ${ this.bw_write_op( lang, op_unk, "bw_unk", "_unk" ) }` );
             nb_sp -= 12;
@@ -237,16 +251,16 @@ class GenOperation<UT> {
 
         // write back the new data
         if ( op_new.store ) {
-            let d = this.underlying_class.symbol( "val" );
-            let o = this.make_symbolic_data( op_new, "_new" );
+            let d = this.make_symbolic_data( this.cl_inst, "", "val.", this.sym_corr );
+            let o = this.make_symbolic_data( op_new.inst, "_new" );
             for( const new_op of op_new.store( d, o ) ) {
-                const op = this.reg_op( new_op.type ), inst = new op.op_type;
-                const li = Object.keys( new_op.data ).map( x => inst[ x ].constructor.symbol( x + "_tmp" ).set( new_op.data[ x ] ) );
+                const op = this.reg_op( new_op.type );
+                const li = Object.keys( new_op.data ).map( x => op.inst[ x ].constructor.symbol( x + "_tmp" ).set( new_op.data[ x ] ) );
                 wl( `{` ); 
                 nb_sp += 4;
-                wl( `let ${ Object.keys( inst ).map( x => x + "_tmp" ).join( ', ' ) };` );
+                wl( `let ${ Object.keys( op.inst ).map( x => x + "_tmp" ).join( ', ' ) };` );
                 wl( Codegen.make_code( li, lang ) );
-                wl( `bw_new.write_PI8( ${ op.num } );` + Object.keys( inst ).map( x => ` bw_new.write_${ this.gen_type( inst[ x ] ) }( ${ x }_tmp );` ).join( '' ) );
+                wl( `bw_new.write_PI8( ${ op.num } );` + Object.keys( op.inst ).map( x => ` bw_new.write_${ this.gen_type( op.inst[ x ] ) }( ${ x }_tmp );` ).join( '' ) );
                 nb_sp -= 4;
                 wl( `}` ); 
             }
@@ -258,22 +272,23 @@ class GenOperation<UT> {
         wl( `bw_unk.transfer_to( cq_unk );` );
 
         // apply operation
-        let d = this.underlying_class.symbol( "val" );
-        let o = this.make_symbolic_data( op_new, "_new" );
+        let d = this.make_symbolic_data( this.cl_inst, "", "val.", this.sym_corr );
+        let o = this.make_symbolic_data( op_new.inst, "_new" );
         op_new.apply( d, o );
-        wl( Codegen.make_code( [ d ] ) );
+        wl( Codegen.make_code( Object.keys( d ).map( n => d[ n ] ), lang ) );
     }
 
     write_undo_patch( lang: string, op: OpInfo<UT> ) {
-        let d = this.underlying_class.symbol( "val" );
-        let o = this.make_symbolic_data( op );
+        let d = this.make_symbolic_data( this.cl_inst, "", "val.", this.sym_corr );
+        let o = this.make_symbolic_data( op.inst );
         op.undo( d, o );
         wl( this.br_read_var( lang, op ) );
-        wl( Codegen.make_code( [ d ] ) );
+        wl( Codegen.make_code( Object.keys( d ).map( n => d[ n ] ), lang ) );
     }
 
-    operations      = new Array<OpInfo<UT>>();
-    class_name      : string;
-    underlying_class: any;
-    trans_rules     = new Map<string,(o,n)=>void>();
+    cl_inst     : any; /** instance of symbolic repr of class */
+    sym_corr    : { [ name: string ]: string }; /** names in symbolic repr to name in dst code */
+    operations  = new Array<OpInfo<UT>>();
+    trans_rules = new Map<string,(o,n)=>void>();
+    right_flags = new Array<string>();
 }

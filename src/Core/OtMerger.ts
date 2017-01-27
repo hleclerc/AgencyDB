@@ -165,9 +165,9 @@ class OtMerger {
 
     /** pd = update of data (according to unk patches). data should be an array */
     undo_patch( data: Uint8Array, as_usr = new UsrId ) {
-        console.log( "undo", data, ( this.ot_wrapper as any ).val );
+        // console.log( "undo", data, ( this.ot_wrapper as any ).val );
         this.ot_wrapper.undo_patch( new BinaryReader( data ), as_usr );
-        console.log( "=>", ( this.ot_wrapper as any ).val );
+        // console.log( "=>", ( this.ot_wrapper as any ).val );
         
         // this.ot_wrapper.reverse_patch_data_visitor( data, ( type, ...args ) => {
         //     type.undo( this.ot_wrapper, { usr: as_usr, type: 0 }, ...args );

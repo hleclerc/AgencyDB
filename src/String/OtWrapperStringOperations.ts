@@ -31,19 +31,19 @@ function skip( br: BinaryReader ): Array<number> {
     return res;
 }
 
-function undo_patch( val: string, br: BinaryReader, as_usr: UsrId ): string {
+function undo_patch( val: OtWrapperString, br: BinaryReader, as_usr: UsrId ) {
     const res = skip( br );
     for( let n = res.length; n--; ) {
         br.cursor = res[ n ];
         switch ( br.read_PI8() ) {
         case 0: {
             let pos = br.read_PT(), str = br.read_String();
-            val=val.substr(0,pos)+val.substr((pos+str.length));
+            val.val.data=val.val.data.substr(0,pos)+val.val.data.substr((pos+str.length));
             break;
         }
         case 2: {
             let pos = br.read_PT(), str = br.read_String();
-            val=val.substr(0,pos)+str+val.substr(pos);
+            val.val.data=val.val.data.substr(0,pos)+str+val.val.data.substr(pos);
             break;
         }
         }
@@ -51,7 +51,7 @@ function undo_patch( val: string, br: BinaryReader, as_usr: UsrId ): string {
     return val;
 }
 
-function new_patch( val: string, bw_new: BinaryWriter, br_new: BinaryReader, as_usr: UsrId, cq_unk: BinaryWriter ): string {
+function new_patch( val: OtWrapperString, bw_new: BinaryWriter, br_new: BinaryReader, as_usr: UsrId, cq_unk: BinaryWriter ) {
     while ( br_new.size ) {
         switch ( br_new.read_PI8() ) {
         case 0: {
@@ -81,7 +81,7 @@ function new_patch( val: string, bw_new: BinaryWriter, br_new: BinaryReader, as_
             }
             bw_new.write_PI8( 0 ); bw_new.write_PT( pos_new ); bw_new.write_String( str_new );
             bw_unk.transfer_to( cq_unk );
-            val=val.substr(0,pos_new)+str_new+val.substr(pos_new);
+            val.val.data=val.val.data.substr(0,pos_new)+str_new+val.val.data.substr(pos_new);
             break;
         }
         case 1: {
@@ -110,11 +110,11 @@ function new_patch( val: string, bw_new: BinaryWriter, br_new: BinaryReader, as_
             }
             {
                 let pos_tmp, str_tmp;
-                pos_tmp=pos_new;str_tmp=val.substring(pos_new,pos_new+len_new);
+                pos_tmp=pos_new;str_tmp=val.val.data.substring(pos_new,pos_new+len_new);
                 bw_new.write_PI8( 2 ); bw_new.write_PT( pos_tmp ); bw_new.write_String( str_tmp );
             }
             bw_unk.transfer_to( cq_unk );
-            val=val.substr(0,pos_new)+val.substr((pos_new+len_new));
+            val.val.data=val.val.data.substr(0,pos_new)+val.val.data.substr((pos_new+len_new));
             break;
         }
         case 2: {
@@ -143,7 +143,7 @@ function new_patch( val: string, bw_new: BinaryWriter, br_new: BinaryReader, as_
             }
             bw_new.write_PI8( 2 ); bw_new.write_PT( pos_new ); bw_new.write_String( str_new );
             bw_unk.transfer_to( cq_unk );
-            val=val.substr(0,pos_new)+val.substr((pos_new+str_new.length));
+            val.val.data=val.val.data.substr(0,pos_new)+val.val.data.substr((pos_new+str_new.length));
             break;
         }
         }

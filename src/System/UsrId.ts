@@ -14,6 +14,10 @@ class UsrId {
         return `${this.num}@${this.dev}`
     }
 
+    copy(): UsrId {
+        return new UsrId( this.dev.copy(), this.num );
+    }
+
     static fromString( str: string ) : UsrId {
         let i = str.indexOf( "@" );
         return new UsrId( new DevId( str.substr( i + 1 ) ), parseInt( str.substr( 0, i ) ) );
