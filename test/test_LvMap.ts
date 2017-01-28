@@ -19,6 +19,18 @@ describe( 'LvMap', () => {
         sequ( s, "{a:A,b:B}" );
         sequ( s.get( "a" ), "A" );
     });
+
+    it( 'symbolic', () => {
+        let s = LvMap.symbol( LvString, LvString, "m" );
+
+        // set/get
+        //console.log( `${ s.get( "k" ) }` );
+        
+        // s.set( "b", "B" );
+        // s.get( "a" ).set( "A" );
+        sequ( s.get( "k" ), "select(m,k)" );
+        // sequ( s.get( "a" ), "A" );
+    });
 });
  
 

@@ -4,6 +4,7 @@ import Select               from "./Core/Select"
 import Rp                   from "./Core/Rp"
            
 import GenSymbol            from "./Symbol/GenSymbol"
+import GenSymbolLvMap       from "./Map/GenSymbolLvMap"
 import GenMap               from "./Map/GenMap"
 import { BN_PT }            from "./Number/Bn"
 import LvNumber             from "./LvNumber"
@@ -22,18 +23,13 @@ class LvMap<K extends VarAnc,V extends VarAnc> extends Variable<LvMap<K,V>> {
     constructor( v: Rp );
 
     constructor( k: Rp | { new(): K; }, v?: { new(): K; } ) { //  | LvMap | Map | string | Array<number>
-        if      ( k instanceof Rp       ) super( k );
-        else                              super( new GenMap( k, v ) );
-        // 
-        // else if ( val instanceof LvMap ) super( methods[ "copy__b" ].call_1( this.rp ) );
-        // else if ( val instanceof Map   ) super( new GenMap( val ) );
-        // else if ( val == undefined        ) super( new GenMap( Map.from( [] ) ) );
-        // else                                super( new GenMap( Map.from( val as any ) ) );
+        if      ( k instanceof Rp ) super( k );
+        else                        super( new GenMap( k, v ) );
     }
 
-    // static symbol<K extends VarAnc,V extends VarAnc>( name: string ): LvMap<K,V> {
-    //     return new LvMap<K,V>( new GenSymbol( LvMap, name ) );
-    // }
+    static symbol<K extends VarAnc,V extends VarAnc>( k: { new(): K; }, v: { new(): V; }, name: string ): LvMap<K,V> {
+        return new LvMap<K,V>( new GenSymbolLvMap( k, v, name ) );;
+    }
 
     copy(): LvMap<K,V> {
         return new LvMap<K,V>( methods[ "copy__b" ].call_1( this.rp ) );
@@ -64,7 +60,7 @@ class LvMap<K extends VarAnc,V extends VarAnc> extends Variable<LvMap<K,V>> {
 
     /** return a proxy on the value */
     get( key ): V {
-        const val_type = methods["val_type__b"].call_1( this.rp )
+        const val_type = methods["val_type__b"].call_1( this.rp );
         return new val_type( new Select( this, key instanceof VarAnc ? 
             methods["copy__b"].call_1( key.rp ) : 
             methods["key_type__b"].call_1( this.rp ).make_Rp( key )

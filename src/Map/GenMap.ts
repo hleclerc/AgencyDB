@@ -1,5 +1,5 @@
 import CmpInterface from "../System/CmpInterface"
-import SortedArray  from "../System/SortedArray";
+import SortedArray  from "../System/SortedArray"
 import PatchId      from "../System/PatchId"
 import DevId        from "../System/DevId"
 import { VarAnc }   from "../Core/Variable"

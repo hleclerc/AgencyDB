@@ -5,8 +5,8 @@ import Sym       from "./Sym"
 
 export default 
 class GenSymbol extends Sym {
-    constructor( type: typeof Variable, name: string ) {
-        super( GenSymbol );
+    constructor( type: typeof Variable, name: string, p = GenSymbol as any ) {
+        super( p );
         this.type = type;
         this.name = name;
     }
