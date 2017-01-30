@@ -1,13 +1,12 @@
-import CmpInterface from "../System/CmpInterface"
-import SortedArray  from "../System/SortedArray"
-import PatchId      from "../System/PatchId"
-import DevId        from "../System/DevId"
-import { VarAnc }   from "../Core/Variable"
-import methods      from "../Core/methods"
-import Select       from "../Core/Select"
-import { BN_PT }    from "../Number/Bn"
-import Rp           from "../Core/Rp"
-import SelectGenMap from "./SelectGenMap"
+import CmpInterface    from "../System/CmpInterface"
+import SortedArray     from "../System/SortedArray"
+import PatchId         from "../System/PatchId"
+import DevId           from "../System/DevId"
+import { VarAnc }      from "../Core/Variable"
+import methods         from "../Core/methods"
+import RpList          from "../Core/RpList"
+import { BN_PT }       from "../Number/Bn"
+import Rp              from "../Core/Rp"
 
 //
 class Node implements CmpInterface {
@@ -92,6 +91,10 @@ class GenMap extends Rp {
         return node;
     }
 
+    can_add_key(): boolean {
+        return true;
+    }
+
     key_type   : { new( rp?: Rp ): VarAnc; };
     val_type   : { new( rp?: Rp ): VarAnc; };
     loc_id_num = 0;
@@ -100,45 +103,35 @@ class GenMap extends Rp {
 } 
 Rp.make_templ( GenMap );
 
-// methods[ "add__bb"    ].add_surdef( 10, [ Map, Map ], ( a: Map, b: Map ) => new Map( a.data + b.data ) );
-// methods[ "set__sb"    ].add_surdef( 10, [ Map, Map ], ( a: Map, b: Map ) => { a.data = b.data; return a; } );
-
-// methods[ "set__sbb"   ].add_surdef( 10, [ Map, "to_Number__b", "to_Number__b" ], ( a: Map, b: Rp, c: Rp ) => { a.data[ methods[ "to_Number__b" ].call_1( b ) ] = methods[ "to_Number__b" ].call_1( c ); return a; } );
-
-// methods[ "select__bb" ].add_surdef( 10, [ Map, "to_Number__b" ], ( a: Map, b: Rp ) => new BN_FP64( a.data[ methods[ "to_Number__b" ].call_1( b ) ] ) );
-
-// methods["mod_select__bo"].add_surdef( 2, [ GenMap, ( type ) => ! type.symbolic_value ], function( map: GenMap, key: Rp, variable: VarAnc ) {
-//     return new map.val_type( new SelectGenMap( variable, key ) );
-// } );
-
-methods["select__bb"].add_surdef( 2, [ GenMap, ( type ) => ! type.symbolic_value ], function( map: GenMap, key: Rp ) {
-    let node = map.kmap.get( key );
-    return node ? node.val.rp : null;
+methods["select__bb"].add_surdef( 3, [ GenMap, RpList ], function( map: GenMap, keys: RpList ) {
+    const node = map.kmap.get( keys.cur );
+    return node ? methods["select__bb"].call_2( node.val.rp, keys.nxt ) : null; // TODO: wrapped null
+} );
+methods["select__bb"].add_surdef( 2, [ GenMap, () => true ], function( map: GenMap, key: Rp ) {
+    const node = map.kmap.get( key );
+    return node ? node.val.rp : null; // TODO: wrapped null
 } );
 
-methods["set__sbb"].add_surdef( 2, [ GenMap, ( type ) => ! type.symbolic_value, ( type ) => ! type.symbolic_value ], function( map: GenMap, key: Rp, val: Rp ) {
-    let need_set = true, node = map.kmap.get( key, function() {
-        //if ( GenMap.can_add_key.ok( map.rp.usr_right() ) ){
-            need_set = false;
-            return map._create_node( new map.key_type( methods["copy__b"].call_1( key ) ), new map.val_type( methods["copy__b"].call_1( val ) ), false );
-        // }
-        // return null;
+methods["set__sbo"].add_surdef( 3, [ GenMap, RpList, ( type ) => ! type.symbolic_value ], function( map: GenMap, keys: RpList, val: Rp ) {
+    let node = map.kmap.get( keys.cur, function() {
+        if ( map.can_add_key() )
+            return map._create_node( new map.key_type( methods["copy__b"].call_1( keys.cur ) ), new map.val_type(), false );
+        return null;
     } );
-    if ( need_set && node )
-        node.val = methods["set__sb"].call_2s( node.val, val );
+    if ( node )
+        node.val.rp = methods["set__sbo"].call_3s( node.val, keys.nxt, val );
     return map;
 } );
-
-methods["set__sbo"].add_surdef( 2, [ GenMap, ( type ) => ! type.symbolic_value, ( type ) => ! type.symbolic_value ], function( map: GenMap, key: Rp, val: Rp ) {
+methods["set__sbo"].add_surdef( 2, [ GenMap, () => true, ( type ) => ! type.symbolic_value ], function( map: GenMap, key: Rp, val: Rp ) {
     let need_set = true, node = map.kmap.get( key, function() {
-        //if ( GenMap.can_add_key.ok( map.rp.usr_right() ) ){
+        if ( map.can_add_key() ) {
             need_set = false;
             return map._create_node( new map.key_type( methods["copy__b"].call_1( key ) ), new map.val_type( val ), false );
-        // }
-        // return null;
+        }
+        return null;
     } );
     if ( need_set && node )
-        node.val = methods["set__so"].call_2s( node.val, val );
+        node.val.rp = methods["set__so"].call_2s( node.val, val );
     return map;
 } );
 

@@ -5,7 +5,7 @@ import Method             from "../Core/Method"
 import Surdef             from "../Core/Surdef"
 import Rp                 from "../Core/Rp"
 import LvNumber           from "../LvNumber"
-import { skv, skv_link }  from "./SymbolicKnownValue"
+import { skv_link_o }     from "./SymbolicKnownValue"
 import Interceptor        from "./Interceptor"
 import Operation, { slo } from "./Operation"
 import BlockCodegen       from "./BlockCodegen"
@@ -167,7 +167,7 @@ function _while( cond_cb: () => any, block_cb?: () => void ) {
         } );
 
         // save condition + modified variables 
-        out_co = [ ...mod_co.entries() ].map( ( [ v, oan ] ) => skv_link( oan.n ) ).concat( cond );
+        out_co = [ ...mod_co.entries() ].map( ( [ v, oan ] ) => skv_link_o( oan.n ) ).concat( cond );
 
         // entry variables for the block
         let mod_bk = new Map<VarAnc,{ o: Rp, b: Rp, n: Rp }>();
@@ -183,7 +183,7 @@ function _while( cond_cb: () => any, block_cb?: () => void ) {
         } );
 
         // save modified variables 
-        out_bk = [ ...mod_bk.entries() ].map( ( [ v, oan ] ) => skv_link( oan.n ) );
+        out_bk = [ ...mod_bk.entries() ].map( ( [ v, oan ] ) => skv_link_o( oan.n ) );
 
         // nb of modifications has not changed ?
         if ( old_le == mod_bk.size )
@@ -204,7 +204,7 @@ function _while( cond_cb: () => any, block_cb?: () => void ) {
         inp_wh.forEach( ( v, num ) => { Method.int_call_s( v ); } );
 
     // modify variables to take while outputs
-    let rp_wh = new While( inp_wh.map( x => skv_link( x.rp ) ), inp_co, new WhileOutCond( out_co ), inp_bk, new WhileOut( out_bk ) );
+    let rp_wh = new While( inp_wh.map( x => skv_link_o( x.rp ) ), inp_co, new WhileOutCond( out_co ), inp_bk, new WhileOut( out_bk ) );
     inp_wh.forEach( ( v, num ) => { v.rp = get_nout( rp_wh, num ); } );
 }
 

@@ -5,7 +5,7 @@ import Method            from "../Core/Method"
 import Surdef            from "../Core/Surdef"
 import Rp                from "../Core/Rp"
 import LvNumber          from "../LvNumber"
-import { skv, skv_link } from "./SymbolicKnownValue"
+import { skv_link_o }    from "./SymbolicKnownValue"
 import BlockCodegen      from "./BlockCodegen"
 import { cd }            from "./Codegen"
 import Interceptor       from "./Interceptor"
@@ -159,15 +159,15 @@ function _if( cond: any, ok: () => any, ko?: () => any ) {
         //
         let out_ok = new Array<Link>(), out_ko = new Array<Link>();
         for( let [ v, oan ] of mod_ok ) {
-            out_ok.push( skv_link( oan.n ) );
+            out_ok.push( skv_link_o( oan.n ) );
             const oan_ko = mod_ko.get( v );
-            out_ko.push( oan_ko ? skv_link( oan_ko.n ) : { item: inp_ko, nout: inp_if.indexOf( v ) } );
+            out_ko.push( oan_ko ? skv_link_o( oan_ko.n ) : { item: inp_ko, nout: inp_if.indexOf( v ) } );
         }
         for( let [ v, oan ] of mod_ko ) {
             if ( mod_ok.get( v ) )
                 continue;
             out_ok.push( { item: inp_ok, nout: inp_if.indexOf( v ) } );
-            out_ko.push( skv_link( oan.n ) );
+            out_ko.push( skv_link_o( oan.n ) );
         }
 
         // excepted for condition variable, an If inst is basically a value modifier
@@ -175,7 +175,7 @@ function _if( cond: any, ok: () => any, ko?: () => any ) {
             inp_if.forEach( ( v, num ) => { Method.int_call_s( v ); } );
 
         // modify variables to take if outputs
-        let rp_if = new If( [ ...inp_if, b_cond ].map( x => skv_link( x.rp ) ), inp_ok, new IfOut( out_ok ), inp_ko, new IfOut( out_ko ) );
+        let rp_if = new If( [ ...inp_if, b_cond ].map( x => skv_link_o( x.rp ) ), inp_ok, new IfOut( out_ok ), inp_ko, new IfOut( out_ko ) );
         inp_if.forEach( ( v, num ) => { v.rp = get_nout( rp_if, num ); } );
         return;
     }

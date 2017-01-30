@@ -1,9 +1,12 @@
-import { VarAnc } from './Variable';
-import methods    from './methods';
-import Surdef     from './Surdef';
-import Method     from './Method';
-import Rp         from './Rp';
+import { VarAnc } from './Variable'
+import methods    from './methods'
+import Surdef     from './Surdef'
+import Method     from './Method'
+import RpList     from './RpList'
+import Rp         from './Rp'
 
+/**
+ */
 export default
 class Select extends Rp {
     constructor( obj: VarAnc, ind: Rp ) {
@@ -18,14 +21,11 @@ class Select extends Rp {
     }
 
     obj: VarAnc;
-    ind: Rp;
+    ind: Rp; /** RpList means that we have multiple selection */
 }
 Rp.make_templ( Select );
 
 /**
- * Prop: appel de set_seo( obj, ind, value )
- * 
- * ATTENTION: CALL_Xs => avec le select, pour l'instant, on ne sait pas qu'on modifie la variable
  */
 Method.plugins.push( function( test_pf, for_a_test, method, type_0, type_1, type_2, type_3 ) {
     if ( method.pattern[ 0 ] == 's' && type_0 == Select ) {
@@ -39,3 +39,11 @@ Method.plugins.push( function( test_pf, for_a_test, method, type_0, type_1, type
         }
     }
 } )
+
+methods["select_ref__bo"].add_surdef( 2, [ () => true, () => true ], function( val: Rp, ind: Rp, obj: VarAnc ) {
+    return new Select( obj, ind );
+} );
+
+methods["select_ref__bo"].add_surdef( 3, [ Select, () => true ], function( val: Select, ind: Rp, obj: VarAnc ) {
+    return new Select( val.obj, RpList.append( val.ind, ind ) );
+} );

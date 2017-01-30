@@ -1,5 +1,5 @@
 all:
-	nsmake mocha test/test_LvMap.ts
+	nsmake mocha -DNO_OPERATIONAL_TRANSFORM test/test_LvMap.ts
 
 	# nsmake mocha test/test_String.ts
 clean:

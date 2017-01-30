@@ -1,12 +1,10 @@
-import Variable    from "./Core/Variable"
-import methods     from "./Core/methods"
-import Select      from "./Core/Select"
-import Rp          from "./Core/Rp"
-  
-import GenSymbol   from "./Symbol/GenSymbol"
-import GenBuffer   from "./Buffer/GenBuffer"
-import { BN_FP64 } from "./Number/Bn"
-import LvNumber    from "./LvNumber"
+import Variable       from "./Core/Variable"
+import methods        from "./Core/methods"
+import Rp             from "./Core/Rp"
+import GenSymbol      from "./Symbol/GenSymbol"
+import GenBuffer      from "./Buffer/GenBuffer"
+import { BN_FP64 }    from "./Number/Bn"
+import LvNumber       from "./LvNumber"
 
 //
 export default
@@ -65,7 +63,11 @@ class LvBuffer extends Variable<LvBuffer> {
 
     /** return a proxy that gives charAt if read, but it also enable writes */
     select( index: number | LvNumber ): LvNumber {
-        return new LvNumber( new Select( this, typeof index == 'number' ? new BN_FP64( index ) : methods[ "copy__b" ].call_1( ( index as LvNumber ).rp ) ) );
+        return new LvNumber( 
+            index instanceof LvNumber ? 
+                methods["select_ref__bb"].call_2( this.rp, index.rp, this ) :
+                methods["select_ref__bo"].call_2( this.rp, new BN_FP64( index ), this )
+        );
     }
 
     // append( val: LvBuffer | LvBuffer ): LvBuffer {

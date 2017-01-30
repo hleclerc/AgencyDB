@@ -1,12 +1,11 @@
-import Variable  from "./Core/Variable"
-import methods   from "./Core/methods"
-import Select    from "./Core/Select"
-import Rp        from "./Core/Rp"
+import Variable       from "./Core/Variable"
+import methods        from "./Core/methods"
+import Rp             from "./Core/Rp"
   
-import GenString from "./String/GenString"
-import GenSymbol from "./Symbol/GenSymbol"
-import { BN_PT } from "./Number/Bn"
-import LvNumber  from "./LvNumber"
+import GenString      from "./String/GenString"
+import GenSymbol      from "./Symbol/GenSymbol"
+import { BN_PT }      from "./Number/Bn"
+import LvNumber       from "./LvNumber"
 
 // import Caret     from "./String/Caret";
 // import DevId     from "../System/DevId"
@@ -88,7 +87,11 @@ class LvString extends Variable<LvString> {
 
     /** returns a proxy that gives charAt if read, and enables writes */
     select( index: number | LvNumber ): LvString {
-        return new LvString( new Select( this, typeof index == 'number' ? new BN_PT( index ) : methods[ "copy__b" ].call_1( ( index as LvNumber ).rp ) ) );
+        return new LvString( 
+            index instanceof LvNumber ? 
+                methods["select_ref__bb"].call_2( this.rp, index.rp, this ) :
+                methods["select_ref__bo"].call_2( this.rp, new BN_PT( index ), this )
+        );
     }
 
     append( val: LvString | string ): LvString {

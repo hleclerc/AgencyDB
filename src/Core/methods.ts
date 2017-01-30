@@ -1,6 +1,7 @@
 import Method from "./Method";
 
 var methods = {} as { [name: string]: Method };
+export default methods;
 
 function comb_bo( nb_rp_args: number ): Array<String> {
     switch ( nb_rp_args ) {
@@ -12,8 +13,8 @@ function comb_bo( nb_rp_args: number ): Array<String> {
     throw new Error("TODO");
 }
 
-export function decl( name: string, ok_sym = true ) : void {
-    methods[ name ] = new Method( name, ok_sym );
+export function decl( name: string, ok_sym = true, select = false ) : void {
+    methods[ name ] = new Method( name, ok_sym, select );
 }
 
 export function dstd( name: string, nb_rp_args: number, ok_sym = true ) {
@@ -28,8 +29,6 @@ export function dslf( name: string, nb_rp_args: number, ok_sym = true ) {
     // xxx_sb, xxx_so, ... + xxx_sb_extr, self_xxx_so_extr, ...
     for( let v of comb_bo( nb_rp_args - 1 ) ) {
         decl( name + "__s"  + v, ok_sym );
-        decl( name + "__sb" + v, ok_sym ); // with a select list
+        decl( name + "__sb" + v, ok_sym, true ); // with a select list
     }
 }
-
-export default methods; 

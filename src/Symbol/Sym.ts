@@ -1,5 +1,5 @@
-import Graphviz      from "../Core/Graphviz";
 import methods       from "../Core/methods";
+import Graphviz      from "../Core/Graphviz";
 import Rp            from "../Core/Rp";
 import { cd }        from "./Codegen";
 import BlockCodegen  from "./BlockCodegen";
@@ -18,6 +18,10 @@ class Sym extends Rp {
 
     constructor( cl ) {
         super( cl );
+    }
+
+    add_child( ch: Link ) {
+        this.children.push( ch );
     }
 
     replace_child( old_ch: Link, new_ch: Link ) {
@@ -78,8 +82,7 @@ class Sym extends Rp {
     static dfs_repl_unique( v: Array<Sym>, cb: ( x: Sym ) => Array<Link>, go_into_subblocks = false ): Array<Sym> {
         ++Sym.cur_op_id;
         return [].concat( ...v.map( x => _dfs_repl_unique_rec( x, cb, go_into_subblocks ).map( l => l.item ) ) );
-    } 
-
+    }
 
     children            = new Array<Link>();
     op_mp               = {} as any;
@@ -130,3 +133,5 @@ function _dfs_repl_unique_rec( v: Sym, cb: ( x: Sym ) => Array<Link>, go_into_su
 
     return res;
 }
+
+require( "./SelectSymbolic" );

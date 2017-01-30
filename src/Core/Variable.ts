@@ -173,6 +173,10 @@ class Variable<T> extends VarAnc {
     }
 } 
 
+/** */
+export function od( cb ) { if ( base_methods_are_defined ) cb(); else waiting_bmar_cbs.push( cb ); }
+let base_methods_are_defined = false, waiting_bmar_cbs = [];
+
 // representation
 dstd( "to_String"              , 1, false ); // returns a native String
 dstd( "write_graphviz"         , 1, false ); // param: ( gr: Graphviz )
@@ -221,6 +225,7 @@ dstd( "inf_immediate"          , 2, false );
 dstd( "sup_immediate"          , 2, false );
 dstd( "equ_immediate"          , 2, false );
    
+dstd( "select_ref"             , 2        ); // make a Select (or a SelectSym, ...)
 dstd( "select"                 , 2        ); // select for read
 dstd( "heads"                  , 2        ); // item, end => items at the beginning (up to end)
 dstd( "tails"                  , 2        ); // item, beg => items up to beg
@@ -243,17 +248,18 @@ dstd( "copy"                   , 1        );
 
 dslf( "remove"                 , 3        );
 dslf( "insert"                 , 3        );
+   
+// sym   
+// decl( "ww_launch"              , "c"   ); // called from the scheduler WebWorker to launch the query
+// decl( "then"                   , "c"   ); // executed a function when value is known
+dstd( "symbolic_known_value"   , 1        ); // return a Link with symbol that wraps the first argument
 
 // changes
 dslf( "on_change"              , 1        ); // return an id (type PatchId), that can be used to remove the callback
 dstd( "sig_change"             , 1        ); //
 dslf( "rm_on_change"           , 1        ); // takes the id (type PatchId) that has been used for `on_change`
 dslf( "on_change_par"          , 1        ); // add a parent object for ob_change (if this is changed, sig_change will be called on this parent). Optionnal argument: something that will be sent to parent sig_change
-   
-// sym   
-// decl( "ww_launch"              , "c"   ); // called from the scheduler WebWorker to launch the query
-// decl( "then"                   , "c"   ); // executed a function when value is known
-   
+
 // db   
 // decl( "bind_by_path"           , "c"   ); // path , db, category, load_only_once
 // decl( "bind_by_object_id"      , "c"   ); // inode, db, category, load_only_once
@@ -269,6 +275,10 @@ dslf( "on_change_par"          , 1        ); // add a parent object for ob_chang
 // decl( "rem_grp_right"          , "r"   );
 // decl( "rem_usr_right"          , "r"   );
 
-import LvNumber  from "../LvNumber"
+base_methods_are_defined = true;
+waiting_bmar_cbs.forEach( cb => cb() );
+waiting_bmar_cbs.length = 0;
+
+import LvNumber from "../LvNumber"
 require( "./DefaultMethods" );
-// require( "./RefProxy" );
+require( "./Select" );

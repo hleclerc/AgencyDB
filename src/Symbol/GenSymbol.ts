@@ -5,10 +5,10 @@ import Sym       from "./Sym"
 
 export default 
 class GenSymbol extends Sym {
-    constructor( type: typeof Variable, name: string, p = GenSymbol as any ) {
-        super( p );
-        this.type = type;
-        this.name = name;
+    constructor( type: typeof Variable, name: string ) {
+        super( GenSymbol );
+        this.type     = type;
+        this.name     = name;
     }
 
     variable_type__b() {
@@ -17,6 +17,14 @@ class GenSymbol extends Sym {
 
     to_String__b(): string {
         return this.name;
+    }
+
+    key_type__b(): string {
+        return ( this.type as any ).key_type;
+    }
+
+    val_type__b(): string {
+        return ( this.type as any ).val_type;
     }
 
     block_code( cg, options ): void {
@@ -48,7 +56,7 @@ class GenSymbol extends Sym {
     //     return new String( br.read_String() );
     // }
 
-    type: typeof Variable; /**  */
-    name: string;
+    type    : typeof Variable; /**  */
+    name    : string;
 } 
 Sym.make_templ( GenSymbol );

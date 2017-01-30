@@ -1,16 +1,17 @@
-import Variable                         from "../Core/Variable"
-import methods                          from "../Core/methods"
-import Method                           from "../Core/Method"
-import Surdef                           from "../Core/Surdef"
-import Rp                               from "../Core/Rp"
-import SymbolicKnownValue, { skv_link } from "./SymbolicKnownValue"
-import BlockCodegen                     from "./BlockCodegen"
-import { cd }                           from "./Codegen"
-import { unget_nout, get_nout }         from "./GetNout"
-import Sym, { Link }                    from "./Sym"
-
-import LvBuffer                         from "../LvBuffer"
-import LvNumber                         from "../LvNumber"
+import Variable                           from "../Core/Variable"
+import methods                            from "../Core/methods"
+import Method                             from "../Core/Method"
+import Surdef                             from "../Core/Surdef"
+import RpList                             from "../Core/RpList"
+import Rp                                 from "../Core/Rp"
+import SymbolicKnownValue, { skv_link_o } from "./SymbolicKnownValue"
+import BlockCodegen                       from "./BlockCodegen"
+import { cd }                             from "./Codegen"
+import { unget_nout, get_nout }           from "./GetNout"
+import Sym, { Link }                      from "./Sym"
+  
+import LvBuffer                           from "../LvBuffer"
+import LvNumber                           from "../LvNumber"
 
 export default 
 class Operation extends Sym {
@@ -32,6 +33,18 @@ class Operation extends Sym {
         return `${ this.base_name }(${ lst.join( ',' ) })`;
     }
 
+    key_type__b() {
+        if ( this.method.pattern[ 0 ] == "s" )
+            return methods["key_type__b"].call_1( this.children[ 0 ].item );
+        throw new Error( "TODO" );
+    }
+
+    val_type__b() {
+        if ( this.method.pattern[ 0 ] == "s" )
+            return methods["val_type__b"].call_1( this.children[ 0 ].item );
+        throw new Error( "TODO" );
+    }
+
     /** this.method.base_name, with a '_s' if self method */
     get base_name(): string {
         const ind_und = this.method.name.indexOf( '__' );
@@ -47,47 +60,14 @@ class Operation extends Sym {
     }
 
     static prec = {
-        GROUP   : 0,
-        MEMBER  : 1,
-        NEW     : 1,
-        CALL    : 2,
-        INC_SUF : 3,
-        DEC_SUF : 3,
-        NOT     : 4,
-        NEG     : 4,
-        INC_PRE : 4,
-        DEC_PRE : 4,
-        TYPEOF  : 4,
-        DELETE  : 4,
-        MUL     : 5,
-        EXPO    : 5,
-        DIV     : 5,
-        REM     : 5,
-        ADD     : 6,
-        SUB     : 6,
-        LFT_SHT : 7,
-        RGT_SHT : 7,
-        SRGT_SHT: 7,
-        SLFT_SHT: 7,
-        INF     : 8,
-        INF_EQ  : 8,
-        SUP     : 8,
-        SUP_EQ  : 8,
-        IN      : 8,
-        INST_OF : 8,
-        EQU     : 9,
-        NEQ     : 9,
-        EQU_S   : 9,
-        NEQ_S   : 9,
-        AND_BIN : 10,
-        XOR_BIN : 11,
-        OR_BIN  : 12,
-        AND_LOG : 13,
-        OR_LOG  : 14,
-        COND_OP : 15,
-        ASSIGN  : 16,
-        YIELD   : 17,
-        COMMA   : 19,
+        GROUP   :  0, MEMBER  : 1, NEW     : 1, CALL    :  2, INC_SUF : 3, DEC_SUF : 3,
+        NOT     :  4, NEG     : 4, INC_PRE : 4, DEC_PRE :  4, TYPEOF  : 4, DELETE  : 4,
+        MUL     :  5, EXPO    : 5, DIV     : 5, REM     :  5,
+        ADD     :  6, SUB     : 6, LFT_SHT : 7, RGT_SHT :  7, SRGT_SHT: 7, SLFT_SHT: 7,
+        INF     :  8, INF_EQ  : 8, SUP     : 8, SUP_EQ  :  8, IN      : 8, INST_OF : 8,
+        EQU     :  9, NEQ     : 9, EQU_S   : 9, NEQ_S   :  9,
+        AND_BIN : 10, XOR_BIN : 11, OR_BIN : 12, AND_LOG: 13, OR_LOG  : 14,
+        COND_OP : 15, ASSIGN  : 16, YIELD  : 17, COMMA  : 19,
     }
 
     block_code( cg: BlockCodegen, options ): void {
@@ -117,6 +97,26 @@ class Operation extends Sym {
                 const res = name + op + cg.inline_code( this.children[ 1 ], Operation.prec.ASSIGN );
                 return Operation.prec.ASSIGN > prec ? `(${ res })` : res;
             }
+
+            // if ( this.method.select ) {
+            //     const rl = this.children[ 1 ].item;
+            //     if ( rl instanceof RpList ) {
+            //         switch ( this.method.base_name ) {
+            //             // binary
+            //             case "add": return bin( '+=' );
+            //             case "set":
+            //                 if ( rl.lst.length == 1 )
+            //                     return `${ name }.set(${ cg.inline_code( this.children[ 1 ], Operation.prec.COMMA ) },${ cg.inline_code( this.children[ 2 ], Operation.prec.COMMA ) })`;
+                            
+            //             default:
+            //                 return `${ name }.${ this.method.name }(${ [
+            //                     ...this.children.slice( 1 ).map( ch => cg.inline_code( ch, Operation.prec.COMMA ) ),
+            //                     ...this.args
+            //                 ].join( ',' ) })`;
+            //         }
+            //     } else
+            //         throw new Error( "TODO" );
+            // }
 
             switch ( this.method.base_name ) {
                 // binary
@@ -201,10 +201,10 @@ export function make_op( method: string | Method, ...args ): Link {
 
     // if everything is known => compute directly the result
     if ( args.slice( 0, method.nb_rp_args ).every( x => x.item instanceof SymbolicKnownValue ) ) {
-        return { item: new SymbolicKnownValue( method.call_gen(
+        return methods["symbolic_known_value__o"].call_1( method.call_gen(
             ...args.slice( 0, method.nb_rp_args ).map( x => ( x.item as SymbolicKnownValue ).value ),
             ...args.slice( method.nb_rp_args )
-        ) ), nout: 0 };
+        ) );
     }
 
     return { item: new Operation( method, ...args ), nout: 0 };
@@ -214,9 +214,9 @@ export function make_op( method: string | Method, ...args ): Link {
 // methods[ "copy__b" ].add_surdef( 2, ( type_0 ) => type_0.prototype instanceof Sym, ( a: Sym ) => new Operation( methods[ "copy__b" ], unget_nout( a ) ) );
 function uncopy( value: Sym ): Sym { return value instanceof Operation && value.method.name == "copy__b" ? get_nout( value.children[ 0 ].item, value.children[ 0 ].nout ) : value; }
 
-export function slb( value: Rp ) { return value instanceof Sym ? unget_nout( uncopy( value ) ) : { item: new SymbolicKnownValue( methods[ "copy__b" ].call_1( value ) ), nout: 0 }; }
-export function slo( value: Rp ) { return value instanceof Sym ? unget_nout( uncopy( value ) ) : { item: new SymbolicKnownValue( value ), nout: 0 }; }
-export function sls( value: Rp ) { return value instanceof Sym ? unget_nout( value ) : { item: new SymbolicKnownValue( value ), nout: 0 }; }
+export function slb( value: Rp ): Link { return value instanceof Sym ? unget_nout( uncopy( value ) ) : methods["symbolic_known_value__b"].call_1( value ); }
+export function slo( value: Rp ): Link { return value instanceof Sym ? unget_nout( uncopy( value ) ) : methods["symbolic_known_value__o"].call_1( value ); }
+export function sls( value: Rp ): Link { return value instanceof Sym ? unget_nout(         value   ) : methods["symbolic_known_value__o"].call_1( value ); }
 
 //
 Method.plugins.push( function( test_pf, for_a_test, method, type_0, type_1, type_2, type_4 ) {

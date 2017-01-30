@@ -8,7 +8,7 @@ class Method {
     static AVOID_BO_TRANS = 1;
     static AVOID_PROX = 2;
 
-    constructor( name: string, ok_sym: boolean ) {
+    constructor( name: string, ok_sym: boolean, select = false ) {
         const ind = name.indexOf( "__" );
         this.nb_rp_args = name.length - ind - 2;
         
@@ -16,6 +16,7 @@ class Method {
         this.pattern    = name.slice( ind + 2 );
         this.name       = name;
         this.ok_sym     = ok_sym;
+        this.select     = select;
 
         this.resize( 8 );
     }
@@ -248,8 +249,10 @@ class Method {
                     if ( s ) {
                         const bo_0 = this.pattern[ 0 ] == 'b' && ( variant[ 0 ] == 's' || variant[ 0 ] == 'o' ); 
                         switch ( Number( bo_0 ) ) {
-                        case 0: test_pf( new Surdef( pert += 0.0001, null, s.func                                                                 ) ); break;
-                        case 1: test_pf( new Surdef( pert += 0.0001, null, ( a: Rp, ...args ) => s.func( methods[ 'copy' ].call_1( a ), ...args ) ) ); break;
+                        case 0: test_pf( new Surdef( pert += 0.0001, null, s.func                                                                    ) ); break;
+                        case 1: 
+                            if ( this.base_name != "copy" )
+                                test_pf( new Surdef( pert += 0.0001, null, ( a: Rp, ...args ) => s.func( methods[ 'copy__b' ].call_1( a ), ...args ) ) ); break;
                         }
                     }
                 }
@@ -361,10 +364,10 @@ class Method {
                         const bo_0 = this.pattern[ 0 ] == 'b' && ( variant[ 0 ] == 's' || variant[ 0 ] == 'o' ); 
                         const bo_1 = this.pattern[ 1 ] == 'b' && ( variant[ 1 ] == 's' || variant[ 1 ] == 'o' ); 
                         switch ( Number( bo_0 ) + 2 * Number( bo_1 ) ) {
-                        case 0: test_pf( new Surdef( pert += 0.0001, null, s.func                                                                                                       ) ); break;
-                        case 1: test_pf( new Surdef( pert += 0.0001, null, ( a: Rp, b: Rp, ...args ) => s.func( methods[ 'copy' ].call_1( a ), b                            , ...args ) ) ); break;
-                        case 2: test_pf( new Surdef( pert += 0.0001, null, ( a: Rp, b: Rp, ...args ) => s.func( a                            , methods[ 'copy' ].call_1( b ), ...args ) ) ); break;
-                        case 3: test_pf( new Surdef( pert += 0.0001, null, ( a: Rp, b: Rp, ...args ) => s.func( methods[ 'copy' ].call_1( a ), methods[ 'copy' ].call_1( b ), ...args ) ) ); break;
+                        case 0: test_pf( new Surdef( pert += 0.0001, null, s.func                                                                                                             ) ); break;
+                        case 1: test_pf( new Surdef( pert += 0.0001, null, ( a: Rp, b: Rp, ...args ) => s.func( methods[ 'copy__b' ].call_1( a ), b                               , ...args ) ) ); break;
+                        case 2: test_pf( new Surdef( pert += 0.0001, null, ( a: Rp, b: Rp, ...args ) => s.func( a                               , methods[ 'copy__b' ].call_1( b ), ...args ) ) ); break;
+                        case 3: test_pf( new Surdef( pert += 0.0001, null, ( a: Rp, b: Rp, ...args ) => s.func( methods[ 'copy__b' ].call_1( a ), methods[ 'copy__b' ].call_1( b ), ...args ) ) ); break;
                         }
                     }
                 }
@@ -503,14 +506,14 @@ class Method {
                         const bo_1 = this.pattern[ 1 ] == 'b' && ( variant[ 1 ] == 's' || variant[ 1 ] == 'o' ); 
                         const bo_2 = this.pattern[ 2 ] == 'b' && ( variant[ 2 ] == 's' || variant[ 2 ] == 'o' ); 
                         switch ( Number( bo_0 ) + 2 * Number( bo_1 ) + 4 * Number( bo_2 ) ) {
-                        case 0: test_pf( new Surdef( pert, null, s.func                                                                                                                                             ) ); break;
-                        case 1: test_pf( new Surdef( pert, null, ( a: Rp, b: Rp, c: Rp, ...args ) => s.func( methods[ 'copy' ].call_1( a ), b                            , c                            , ...args ) ) ); break;
-                        case 2: test_pf( new Surdef( pert, null, ( a: Rp, b: Rp, c: Rp, ...args ) => s.func( a                            , methods[ 'copy' ].call_1( b ), c                            , ...args ) ) ); break;
-                        case 3: test_pf( new Surdef( pert, null, ( a: Rp, b: Rp, c: Rp, ...args ) => s.func( methods[ 'copy' ].call_1( a ), methods[ 'copy' ].call_1( b ), c                            , ...args ) ) ); break;
-                        case 4: test_pf( new Surdef( pert, null, ( a: Rp, b: Rp, c: Rp, ...args ) => s.func( methods[ 'copy' ].call_1( a ), b                            , methods[ 'copy' ].call_1( c ), ...args ) ) ); break;
-                        case 5: test_pf( new Surdef( pert, null, ( a: Rp, b: Rp, c: Rp, ...args ) => s.func( methods[ 'copy' ].call_1( a ), b                            , methods[ 'copy' ].call_1( c ), ...args ) ) ); break;
-                        case 6: test_pf( new Surdef( pert, null, ( a: Rp, b: Rp, c: Rp, ...args ) => s.func( a                            , methods[ 'copy' ].call_1( b ), methods[ 'copy' ].call_1( c ), ...args ) ) ); break;
-                        case 7: test_pf( new Surdef( pert, null, ( a: Rp, b: Rp, c: Rp, ...args ) => s.func( methods[ 'copy' ].call_1( a ), methods[ 'copy' ].call_1( b ), methods[ 'copy' ].call_1( c ), ...args ) ) ); break;
+                        case 0: test_pf( new Surdef( pert, null, s.func                                                                                                                                                      ) ); break;
+                        case 1: test_pf( new Surdef( pert, null, ( a: Rp, b: Rp, c: Rp, ...args ) => s.func( methods[ 'copy__b' ].call_1( a ), b                               , c                               , ...args ) ) ); break;
+                        case 2: test_pf( new Surdef( pert, null, ( a: Rp, b: Rp, c: Rp, ...args ) => s.func( a                               , methods[ 'copy__b' ].call_1( b ), c                               , ...args ) ) ); break;
+                        case 3: test_pf( new Surdef( pert, null, ( a: Rp, b: Rp, c: Rp, ...args ) => s.func( methods[ 'copy__b' ].call_1( a ), methods[ 'copy__b' ].call_1( b ), c                               , ...args ) ) ); break;
+                        case 4: test_pf( new Surdef( pert, null, ( a: Rp, b: Rp, c: Rp, ...args ) => s.func( methods[ 'copy__b' ].call_1( a ), b                               , methods[ 'copy__b' ].call_1( c ), ...args ) ) ); break;
+                        case 5: test_pf( new Surdef( pert, null, ( a: Rp, b: Rp, c: Rp, ...args ) => s.func( methods[ 'copy__b' ].call_1( a ), b                               , methods[ 'copy__b' ].call_1( c ), ...args ) ) ); break;
+                        case 6: test_pf( new Surdef( pert, null, ( a: Rp, b: Rp, c: Rp, ...args ) => s.func( a                               , methods[ 'copy__b' ].call_1( b ), methods[ 'copy__b' ].call_1( c ), ...args ) ) ); break;
+                        case 7: test_pf( new Surdef( pert, null, ( a: Rp, b: Rp, c: Rp, ...args ) => s.func( methods[ 'copy__b' ].call_1( a ), methods[ 'copy__b' ].call_1( b ), methods[ 'copy__b' ].call_1( c ), ...args ) ) ); break;
                         }
                     }
                 }
@@ -592,22 +595,22 @@ class Method {
                         const bo_2 = this.pattern[ 2 ] == 'b' && ( variant[ 2 ] == 's' || variant[ 2 ] == 'o' ); 
                         const bo_3 = this.pattern[ 3 ] == 'b' && ( variant[ 3 ] == 's' || variant[ 3 ] == 'o' ); 
                         switch ( Number( bo_0 ) + 2 * Number( bo_1 ) + 4 * Number( bo_2 ) + 8 * Number( bo_3 ) ) {
-                        case  0: test_pf( new Surdef( pert, null, s.func                                                                                                                                                                                   ) ); break;
-                        case  1: test_pf( new Surdef( pert, null, ( a: Rp, b: Rp, c: Rp, d: Rp, ...args ) => s.func( methods[ 'copy' ].call_1( a ), b                            , c                            , d                            , ...args ) ) ); break;
-                        case  2: test_pf( new Surdef( pert, null, ( a: Rp, b: Rp, c: Rp, d: Rp, ...args ) => s.func( a                            , methods[ 'copy' ].call_1( b ), c                            , d                            , ...args ) ) ); break;
-                        case  3: test_pf( new Surdef( pert, null, ( a: Rp, b: Rp, c: Rp, d: Rp, ...args ) => s.func( methods[ 'copy' ].call_1( a ), methods[ 'copy' ].call_1( b ), c                            , d                            , ...args ) ) ); break;
-                        case  4: test_pf( new Surdef( pert, null, ( a: Rp, b: Rp, c: Rp, d: Rp, ...args ) => s.func( methods[ 'copy' ].call_1( a ), b                            , methods[ 'copy' ].call_1( c ), d                            , ...args ) ) ); break;
-                        case  5: test_pf( new Surdef( pert, null, ( a: Rp, b: Rp, c: Rp, d: Rp, ...args ) => s.func( methods[ 'copy' ].call_1( a ), b                            , methods[ 'copy' ].call_1( c ), d                            , ...args ) ) ); break;
-                        case  6: test_pf( new Surdef( pert, null, ( a: Rp, b: Rp, c: Rp, d: Rp, ...args ) => s.func( a                            , methods[ 'copy' ].call_1( b ), methods[ 'copy' ].call_1( c ), d                            , ...args ) ) ); break;
-                        case  7: test_pf( new Surdef( pert, null, ( a: Rp, b: Rp, c: Rp, d: Rp, ...args ) => s.func( methods[ 'copy' ].call_1( a ), methods[ 'copy' ].call_1( b ), methods[ 'copy' ].call_1( c ), d                            , ...args ) ) ); break;
-                        case  8: test_pf( new Surdef( pert, null, ( a: Rp, b: Rp, c: Rp, d: Rp, ...args ) => s.func( a                            , b                            , c                            , methods[ 'copy' ].call_1( d ), ...args ) ) ); break;
-                        case  9: test_pf( new Surdef( pert, null, ( a: Rp, b: Rp, c: Rp, d: Rp, ...args ) => s.func( methods[ 'copy' ].call_1( a ), b                            , c                            , methods[ 'copy' ].call_1( d ), ...args ) ) ); break;
-                        case 10: test_pf( new Surdef( pert, null, ( a: Rp, b: Rp, c: Rp, d: Rp, ...args ) => s.func( a                            , methods[ 'copy' ].call_1( b ), c                            , methods[ 'copy' ].call_1( d ), ...args ) ) ); break;
-                        case 11: test_pf( new Surdef( pert, null, ( a: Rp, b: Rp, c: Rp, d: Rp, ...args ) => s.func( methods[ 'copy' ].call_1( a ), methods[ 'copy' ].call_1( b ), c                            , methods[ 'copy' ].call_1( d ), ...args ) ) ); break;
-                        case 12: test_pf( new Surdef( pert, null, ( a: Rp, b: Rp, c: Rp, d: Rp, ...args ) => s.func( methods[ 'copy' ].call_1( a ), b                            , methods[ 'copy' ].call_1( c ), methods[ 'copy' ].call_1( d ), ...args ) ) ); break;
-                        case 13: test_pf( new Surdef( pert, null, ( a: Rp, b: Rp, c: Rp, d: Rp, ...args ) => s.func( methods[ 'copy' ].call_1( a ), b                            , methods[ 'copy' ].call_1( c ), methods[ 'copy' ].call_1( d ), ...args ) ) ); break;
-                        case 14: test_pf( new Surdef( pert, null, ( a: Rp, b: Rp, c: Rp, d: Rp, ...args ) => s.func( a                            , methods[ 'copy' ].call_1( b ), methods[ 'copy' ].call_1( c ), methods[ 'copy' ].call_1( d ), ...args ) ) ); break;
-                        case 15: test_pf( new Surdef( pert, null, ( a: Rp, b: Rp, c: Rp, d: Rp, ...args ) => s.func( methods[ 'copy' ].call_1( a ), methods[ 'copy' ].call_1( b ), methods[ 'copy' ].call_1( c ), methods[ 'copy' ].call_1( d ), ...args ) ) ); break;
+                        case  0: test_pf( new Surdef( pert, null, s.func                                                                                                                                                                                               ) ); break;
+                        case  1: test_pf( new Surdef( pert, null, ( a: Rp, b: Rp, c: Rp, d: Rp, ...args ) => s.func( methods[ 'copy__b' ].call_1( a ), b                               , c                               , d                               , ...args ) ) ); break;
+                        case  2: test_pf( new Surdef( pert, null, ( a: Rp, b: Rp, c: Rp, d: Rp, ...args ) => s.func( a                               , methods[ 'copy__b' ].call_1( b ), c                               , d                               , ...args ) ) ); break;
+                        case  3: test_pf( new Surdef( pert, null, ( a: Rp, b: Rp, c: Rp, d: Rp, ...args ) => s.func( methods[ 'copy__b' ].call_1( a ), methods[ 'copy__b' ].call_1( b ), c                               , d                               , ...args ) ) ); break;
+                        case  4: test_pf( new Surdef( pert, null, ( a: Rp, b: Rp, c: Rp, d: Rp, ...args ) => s.func( methods[ 'copy__b' ].call_1( a ), b                               , methods[ 'copy__b' ].call_1( c ), d                               , ...args ) ) ); break;
+                        case  5: test_pf( new Surdef( pert, null, ( a: Rp, b: Rp, c: Rp, d: Rp, ...args ) => s.func( methods[ 'copy__b' ].call_1( a ), b                               , methods[ 'copy__b' ].call_1( c ), d                               , ...args ) ) ); break;
+                        case  6: test_pf( new Surdef( pert, null, ( a: Rp, b: Rp, c: Rp, d: Rp, ...args ) => s.func( a                               , methods[ 'copy__b' ].call_1( b ), methods[ 'copy__b' ].call_1( c ), d                               , ...args ) ) ); break;
+                        case  7: test_pf( new Surdef( pert, null, ( a: Rp, b: Rp, c: Rp, d: Rp, ...args ) => s.func( methods[ 'copy__b' ].call_1( a ), methods[ 'copy__b' ].call_1( b ), methods[ 'copy__b' ].call_1( c ), d                               , ...args ) ) ); break;
+                        case  8: test_pf( new Surdef( pert, null, ( a: Rp, b: Rp, c: Rp, d: Rp, ...args ) => s.func( a                               , b                               , c                               , methods[ 'copy__b' ].call_1( d ), ...args ) ) ); break;
+                        case  9: test_pf( new Surdef( pert, null, ( a: Rp, b: Rp, c: Rp, d: Rp, ...args ) => s.func( methods[ 'copy__b' ].call_1( a ), b                               , c                               , methods[ 'copy__b' ].call_1( d ), ...args ) ) ); break;
+                        case 10: test_pf( new Surdef( pert, null, ( a: Rp, b: Rp, c: Rp, d: Rp, ...args ) => s.func( a                               , methods[ 'copy__b' ].call_1( b ), c                               , methods[ 'copy__b' ].call_1( d ), ...args ) ) ); break;
+                        case 11: test_pf( new Surdef( pert, null, ( a: Rp, b: Rp, c: Rp, d: Rp, ...args ) => s.func( methods[ 'copy__b' ].call_1( a ), methods[ 'copy__b' ].call_1( b ), c                               , methods[ 'copy__b' ].call_1( d ), ...args ) ) ); break;
+                        case 12: test_pf( new Surdef( pert, null, ( a: Rp, b: Rp, c: Rp, d: Rp, ...args ) => s.func( methods[ 'copy__b' ].call_1( a ), b                               , methods[ 'copy__b' ].call_1( c ), methods[ 'copy__b' ].call_1( d ), ...args ) ) ); break;
+                        case 13: test_pf( new Surdef( pert, null, ( a: Rp, b: Rp, c: Rp, d: Rp, ...args ) => s.func( methods[ 'copy__b' ].call_1( a ), b                               , methods[ 'copy__b' ].call_1( c ), methods[ 'copy__b' ].call_1( d ), ...args ) ) ); break;
+                        case 14: test_pf( new Surdef( pert, null, ( a: Rp, b: Rp, c: Rp, d: Rp, ...args ) => s.func( a                               , methods[ 'copy__b' ].call_1( b ), methods[ 'copy__b' ].call_1( c ), methods[ 'copy__b' ].call_1( d ), ...args ) ) ); break;
+                        case 15: test_pf( new Surdef( pert, null, ( a: Rp, b: Rp, c: Rp, d: Rp, ...args ) => s.func( methods[ 'copy__b' ].call_1( a ), methods[ 'copy__b' ].call_1( b ), methods[ 'copy__b' ].call_1( c ), methods[ 'copy__b' ].call_1( d ), ...args ) ) ); break;
                         }
                     }
                 }
@@ -639,6 +642,7 @@ class Method {
     base_name         : string;
     pattern           : string; /** such as sob, bo, ... */
     ok_sym            : boolean; // true if can be transformed to operation(...) if symbolic operand(s)
+    select            : boolean; /** for operations (like set__sbb) which operate on a selection of the first argument */
     name              : string;
     extr              = ""; /** _extr if arg for extr */
 }

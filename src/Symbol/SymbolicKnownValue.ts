@@ -29,19 +29,22 @@ class SymbolicKnownValue extends Sym {
 } 
 Sym.make_templ( SymbolicKnownValue );
 
+methods["symbolic_known_value__o"].add_surdef( 2, type_0 => type_0.symbolic_value, function( sym: Sym ) {
+    return { item: sym, nout: 0 } as Link;
+} );
+
+methods["symbolic_known_value__o"].add_surdef( 1, [ () => true ], function( obj: Rp ) {
+    return { item: new SymbolicKnownValue( obj ), nout: 0 };
+} );
+
 
 /** turn to symbolic known value if not symbolic */
 export
-function skv( value: Rp, need_cp = false ): Sym {
-    if ( need_cp )
-        value = methods[ "copy__b" ].call_1( value );
-    return value instanceof Sym ? value : new SymbolicKnownValue( value );
+function skv_link_o( value: Rp ): Link {
+    return value instanceof Sym ? unget_nout( value ) : methods[ "symbolic_known_value__o" ].call_1( value );
 }
 
-/** turn to symbolic known value if not symbolic */
 export
-function skv_link( value: Rp, need_cp = false ): Link {
-    if ( need_cp )
-        value = methods[ "copy__b" ].call_1( value );
-    return value instanceof Sym ? unget_nout( value ) : { item: new SymbolicKnownValue( value ), nout: 0 };
+function skv_link_b( value: Rp ): Link {
+    return value instanceof Sym ? unget_nout( value ) : methods[ "symbolic_known_value__b" ].call_1( value );
 }
