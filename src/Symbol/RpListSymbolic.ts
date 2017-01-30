@@ -11,7 +11,7 @@ class RpListSymbolic extends Sym {
     }
 
     to_String__b(): string {
-        return `RpListSymbolic(${ this.children.map( x => methods["to_String__b"].call_1( x.item ) ).join( "," ) })`;
+        return `[${ this.children.map( x => methods["to_String__b"].call_1( x.item ) ).join( "," ) }]`;
     }
 }
 Rp.make_templ( RpListSymbolic );

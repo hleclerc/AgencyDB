@@ -70,8 +70,8 @@ function LvMap_fact<K extends VarAnc,V extends VarAnc>( k: { new(): K; make_Rp: 
         get( key ): V {
             return new v( 
                 key instanceof VarAnc ? 
-                    methods["select_ref__bb"].call_2( this.rp, key.rp, this ) :
-                    methods["select_ref__bo"].call_2( this.rp, k.make_Rp( key ), this )
+                    methods["select_ref__ob"].call_2( this.rp, key.rp, this ) :
+                    methods["select_ref__oo"].call_2( this.rp, k.make_Rp( key ), this )
             );
         }
 

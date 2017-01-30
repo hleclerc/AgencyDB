@@ -49,6 +49,14 @@ class GenMap extends Rp {
         return `{${ this.kmap.items.map( node => node.key.toString() + ":" + node.val.toString() ).join( "," ) }}`;
     }
 
+    // copy__b(): Rp {
+    //     let res = new GenMap( this.key_type, this.val_type );
+    //     res.loc_id_num = this.loc_id_num;
+    //     res.kmap       = this.kmap.copy();
+    //     res.imap       = this.imap.copy();
+    //     return res;
+    // }
+
     // js_repr__b( prec: number ): string {
     //     return `Buffer.from("${ this.data.toString() })")`;
     // }
@@ -112,7 +120,7 @@ methods["select__bb"].add_surdef( 2, [ GenMap, () => true ], function( map: GenM
     return node ? node.val.rp : null; // TODO: wrapped null
 } );
 
-methods["set__sbo"].add_surdef( 3, [ GenMap, RpList, ( type ) => ! type.symbolic_value ], function( map: GenMap, keys: RpList, val: Rp ) {
+methods["set__sbo"].add_surdef( 3, [ GenMap, RpList, type => ! type.symbolic_value ], function( map: GenMap, keys: RpList, val: Rp ) {
     let node = map.kmap.get( keys.cur, function() {
         if ( map.can_add_key() )
             return map._create_node( new map.key_type( methods["copy__b"].call_1( keys.cur ) ), new map.val_type(), false );
@@ -122,7 +130,7 @@ methods["set__sbo"].add_surdef( 3, [ GenMap, RpList, ( type ) => ! type.symbolic
         node.val.rp = methods["set__sbo"].call_3s( node.val, keys.nxt, val );
     return map;
 } );
-methods["set__sbo"].add_surdef( 2, [ GenMap, () => true, ( type ) => ! type.symbolic_value ], function( map: GenMap, key: Rp, val: Rp ) {
+methods["set__sbo"].add_surdef( 2, [ GenMap, type => ! type.symbolic_value, type => ! type.symbolic_value ], function( map: GenMap, key: Rp, val: Rp ) {
     let need_set = true, node = map.kmap.get( key, function() {
         if ( map.can_add_key() ) {
             need_set = false;

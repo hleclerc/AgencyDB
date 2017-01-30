@@ -89,8 +89,8 @@ class LvString extends Variable<LvString> {
     select( index: number | LvNumber ): LvString {
         return new LvString( 
             index instanceof LvNumber ? 
-                methods["select_ref__bb"].call_2( this.rp, index.rp, this ) :
-                methods["select_ref__bo"].call_2( this.rp, new BN_PT( index ), this )
+                methods["select_ref__ob"].call_2( this.rp, index.rp, this ) :
+                methods["select_ref__oo"].call_2( this.rp, new BN_PT( index ), this )
         );
     }
 

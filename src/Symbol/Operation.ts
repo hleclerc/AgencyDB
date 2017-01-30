@@ -2,9 +2,9 @@ import Variable                           from "../Core/Variable"
 import methods                            from "../Core/methods"
 import Method                             from "../Core/Method"
 import Surdef                             from "../Core/Surdef"
-import RpList                             from "../Core/RpList"
 import Rp                                 from "../Core/Rp"
 import SymbolicKnownValue, { skv_link_o } from "./SymbolicKnownValue"
+import RpListSymbolic                     from "./RpListSymbolic"
 import BlockCodegen                       from "./BlockCodegen"
 import { cd }                             from "./Codegen"
 import { unget_nout, get_nout }           from "./GetNout"
@@ -98,25 +98,25 @@ class Operation extends Sym {
                 return Operation.prec.ASSIGN > prec ? `(${ res })` : res;
             }
 
-            // if ( this.method.select ) {
-            //     const rl = this.children[ 1 ].item;
-            //     if ( rl instanceof RpList ) {
-            //         switch ( this.method.base_name ) {
-            //             // binary
-            //             case "add": return bin( '+=' );
-            //             case "set":
-            //                 if ( rl.lst.length == 1 )
-            //                     return `${ name }.set(${ cg.inline_code( this.children[ 1 ], Operation.prec.COMMA ) },${ cg.inline_code( this.children[ 2 ], Operation.prec.COMMA ) })`;
+            if ( this.method.select ) {
+                const rl = this.children[ 1 ].item;
+                if ( rl instanceof RpListSymbolic ) {
+                    switch ( this.method.base_name ) {
+                        // binary
+                        case "set":
+                            return `${ name }${ rl.children.length > 1 ? rl.children.slice( 0, rl.children.length - 1 ).map( x => `.get(${ cg.inline_code( x, Operation.prec.GROUP ) })` ).join( "" ) :
+                             "" }.set(${ cg.inline_code( rl.children[ rl.children.length - 1 ], Operation.prec.COMMA ) },${ cg.inline_code( this.children[ 2 ], Operation.prec.COMMA ) })`;
+                        case "add": return bin( '+=' );
                             
-            //             default:
-            //                 return `${ name }.${ this.method.name }(${ [
-            //                     ...this.children.slice( 1 ).map( ch => cg.inline_code( ch, Operation.prec.COMMA ) ),
-            //                     ...this.args
-            //                 ].join( ',' ) })`;
-            //         }
-            //     } else
-            //         throw new Error( "TODO" );
-            // }
+                        default:
+                            return `${ name }.${ this.method.name }(${ [
+                                ...this.children.slice( 1 ).map( ch => cg.inline_code( ch, Operation.prec.COMMA ) ),
+                                ...this.args
+                            ].join( ',' ) })`;
+                    }
+                } else
+                    throw new Error( "TODO" );
+            }
 
             switch ( this.method.base_name ) {
                 // binary

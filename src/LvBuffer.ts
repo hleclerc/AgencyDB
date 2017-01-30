@@ -65,8 +65,8 @@ class LvBuffer extends Variable<LvBuffer> {
     select( index: number | LvNumber ): LvNumber {
         return new LvNumber( 
             index instanceof LvNumber ? 
-                methods["select_ref__bb"].call_2( this.rp, index.rp, this ) :
-                methods["select_ref__bo"].call_2( this.rp, new BN_FP64( index ), this )
+                methods["select_ref__ob"].call_2( this.rp, index.rp, this ) :
+                methods["select_ref__oo"].call_2( this.rp, new BN_FP64( index ), this )
         );
     }
 
