@@ -1,14 +1,16 @@
-import Codegen  from "../Symbol/Codegen";
-import LvNumber from "../LvNumber";
-import LvString from "../LvString";
-import LvUsrId  from "../LvUsrId";
-import * as fs  from "fs";
+import Codegen  from "../Symbol/Codegen"
+import LvNumber from "../LvNumber"
+import LvString from "../LvString"
+import LvUsrId  from "../LvUsrId"
+import LvMap    from "../LvMap"
+import * as fs  from "fs"
 
 export { _if }  from "../Symbol/If";
 
 export class Op {}
 
-//export class OtWrapperWithRightFlags { right_flags: new LvMap<LvUsrId,LvNumber> }
+const Map_LvUsrId_LvNumber = LvMap( LvUsrId, LvNumber );
+export class OtWrapperWithRightFlags { right_flags = new Map_LvUsrId_LvNumber; }
 
 class OpInfo<UT> {
     inst   : any; /** instance of symbolic repr */
@@ -31,8 +33,6 @@ function wl( str = "" ) {
 class AddUsrRight { usr = new LvUsrId(); flags = new LvNumber(); };
 class RemUsrRight { usr = new LvUsrId(); flags = new LvNumber(); };
 
-class OtWrapperString { val = new LvString; }
-
 export default 
 class GenOperation<UT> {
     static AddUsrRight = AddUsrRight;
@@ -44,7 +44,7 @@ class GenOperation<UT> {
 
     /** this function install  */
     define_rights_by_flags( right_names: Array<string>, attr_name = "right_flags" ) {
-        // this.apply( AddUsrRight, ( d, o: AddUsrRight ) => ( d as OtWrapperString ).val.insert( o.pos, o.str        ) );
+        this.apply( AddUsrRight, ( d, o: AddUsrRight ) => ( d as any as OtWrapperWithRightFlags ).right_flags.set( o.usr, o.flags ) );
         // this.apply( RemUsrRight, ( d, o: RemUsrRight ) => ( d as OtWrapperString ).val.remove( o.pos, o.len        ) );
     }
 

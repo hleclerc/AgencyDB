@@ -1,11 +1,12 @@
 /// <reference path="../../node_modules/@types/mocha/index.d.ts"/>
 //// nsmake global define NO_OPERATIONAL_TRANSFORM
-import GenOperations, { _if, Op } from "../Core/GenOperations"
-import LvNumber                   from "../LvNumber"
-import LvString                   from "../LvString"
+import GenOperations, { _if, Op,
+       OtWrapperWithRightFlags } from "../Core/GenOperations"
+import LvNumber                  from "../LvNumber"
+import LvString                  from "../LvString"
 
 // symbolic representation
-class OtWrapperString { val = new LvString; }
+class OtWrapperString extends OtWrapperWithRightFlags { val = new LvString; }
 
 //
 let go = new GenOperations<OtWrapperString>( OtWrapperString, { val: "val.data" } );

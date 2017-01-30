@@ -92,13 +92,22 @@ class Operation extends Sym {
         if ( this.self_args.length ) {
             const name = cg.checked_var_name( this.children[ 0 ] );
 
-            // helpers
-            const bin = ( op: string ) => {
-                const res = name + op + cg.inline_code( this.children[ 1 ], Operation.prec.ASSIGN );
-                return Operation.prec.ASSIGN > prec ? `(${ res })` : res;
-            }
-
             if ( this.method.select ) {
+                // where smurf.get(x).self_op(y) works
+                // else, it should be a graph transformation as add__sbb( map, key, val ) => set__sbb( map, key, select_bb( map, key ) + val )
+                //
+                const bin_sop = ( op: string ) => {
+                    const res = `${ name }${ rl.children.length > 1 ? rl.children.slice( 0, rl.children.length - 1 ).map( x => `.get(${ cg.inline_code( x, Operation.prec.GROUP ) })` ).join( "" ) :
+                             "" }.get(${ cg.inline_code( rl.children[ rl.children.length - 1 ], Operation.prec.GROUP ) })${op}${ cg.inline_code( this.children[ 2 ], Operation.prec.COMMA ) }`;
+                    return Operation.prec.ASSIGN > prec ? `(${ res })` : res;
+                }
+                // const bin = ( op: string ) => {
+                //     const base
+                //     const res = `${ name }${ rl.children.length > 1 ? rl.children.slice( 0, rl.children.length - 1 ).map( x => `.get(${ cg.inline_code( x, Operation.prec.GROUP ) })` ).join( "" ) :
+                //              "" }.get(${ cg.inline_code( rl.children[ rl.children.length - 1 ], Operation.prec.GROUP ) })${op}${ cg.inline_code( this.children[ 2 ], Operation.prec.COMMA ) }`;
+                //     return Operation.prec.ASSIGN > prec ? `(${ res })` : res;
+                // }
+
                 const rl = this.children[ 1 ].item;
                 if ( rl instanceof RpListSymbolic ) {
                     switch ( this.method.base_name ) {
@@ -106,7 +115,8 @@ class Operation extends Sym {
                         case "set":
                             return `${ name }${ rl.children.length > 1 ? rl.children.slice( 0, rl.children.length - 1 ).map( x => `.get(${ cg.inline_code( x, Operation.prec.GROUP ) })` ).join( "" ) :
                              "" }.set(${ cg.inline_code( rl.children[ rl.children.length - 1 ], Operation.prec.COMMA ) },${ cg.inline_code( this.children[ 2 ], Operation.prec.COMMA ) })`;
-                        case "add": return bin( '+=' );
+
+                        case "add": return bin( "+=" );
                             
                         default:
                             return `${ name }.${ this.method.name }(${ [
@@ -118,6 +128,10 @@ class Operation extends Sym {
                     throw new Error( "TODO" );
             }
 
+            const bin = ( op: string ) => {
+                const res = name + op + cg.inline_code( this.children[ 1 ], Operation.prec.ASSIGN );
+                return Operation.prec.ASSIGN > prec ? `(${ res })` : res;
+            }
             switch ( this.method.base_name ) {
                 // binary
                 case "add": return bin( '+=' );

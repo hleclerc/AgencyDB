@@ -62,6 +62,14 @@ describe( 'LvMap', () => {
         t.set( "b", LvString.symbol( "B" ) );
         sequ( Codegen.make_code( [ t ] ), 'var T0={};T0.set("b",B);' );
     });
+
+    it( 'symbolic self ops', () => {
+        const S = LvMap( LvString, LvString );
+        let s = S.symbol( "s" );
+        
+        s.get( "b" ).append( "B" );
+        console.log( s.toString() );
+        console.log( Codegen.make_code( [ s ] ) );
+    });
 });
- 
 
