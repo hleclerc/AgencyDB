@@ -48,6 +48,8 @@ class GenOperation<UT> {
 
         this.right( AddUsrRight, ( d: UT, o: AddUsrRight, f: LvNumber, r: LvNumber ) => r.set( f.and_bin( this.flag( "add_usr_right" ) ) ) );
         this.right( RemUsrRight, ( d: UT, o: RemUsrRight, f: LvNumber, r: LvNumber ) => r.set( f.and_bin( this.flag( "rem_usr_right" ) ) ) );
+
+        
     }
 
     /** add description of permission */
@@ -193,8 +195,8 @@ class GenOperation<UT> {
         wl( `export default { read, right_to, bin_repr, new_patch, undo_patch, get_possible_rights__b };` );
     }
 
-    func_args_op( lang: string, op: OpInfo<UT> ): string {
-        return Object.keys( op.inst ).map( x => `${ x }: ${ this.loc_type( lang, op.inst[ x ] ) }` ).join( ', ' );
+    func_args_op( lang: string, op: OpInfo<UT>, types = true, suffix = "" ): string {
+        return Object.keys( op.inst ).map( x => x + suffix + ( types ? ": " + this.loc_type( lang, op.inst[ x ] ) : "" ) ).join( ', ' );
     }
 
     bw_write( lang: string, name: string, inst: any, bw = "bw", suffix = "" ): string {
@@ -268,6 +270,10 @@ class GenOperation<UT> {
         // read data
         wl( this.br_read_var( lang, op_new, "br_new", "_new" ) );
 
+        // test rights
+        wl( `if ( right_to.${ op_new.inst.constructor.name }( val, as_usr, ${ this.func_args_op( lang, op_new, false, "_new" ) } ) ) {` );
+        nb_sp += 4;
+
         // read unk data
         wl( `let br_unk = new BinaryReader( cq_unk.to_Uint8Array() );` );
         wl( `let bw_unk = new BinaryWriter;` );
@@ -324,6 +330,9 @@ class GenOperation<UT> {
         let o = this.make_symbolic_data( op_new.inst, "_new" );
         op_new.apply( d, o );
         wl( Codegen.make_code( Object.keys( d ).map( n => d[ n ] ), lang ) );
+
+        nb_sp -= 4;
+        wl( `}` );
     }
 
     _write_undo_patch( lang: string, op: OpInfo<UT> ) {

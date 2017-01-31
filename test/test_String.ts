@@ -143,12 +143,21 @@ describe( 'String', () => {
         sequ( s.getUsrRights( new UsrId ), pr );
         sequ( s.getUsrRights( new UsrId( new DevId, 2 ) ), [] );
 
-        s.remUsrRight( new UsrId, [ "insert" ] );
+        s.remUsrRight( new UsrId, "insert" );
         sequ( s.getUsrRights( new UsrId ), pr.filter( x => x != "insert" ) );
         s.insert( 0, "m" );
         sequ( s, "s" );
         s.insert( 1, "murf" ); // we still have to right to append
         sequ( s, "smurf" );
+
+        s.addUsrRight( new UsrId, "insert" );
+        sequ( s.getUsrRights( new UsrId ), pr );
+        s.remUsrRight( new UsrId, "insert" );
+
+        s.remUsrRight( new UsrId, "add_usr_right" );
+        sequ( s.getUsrRights( new UsrId ), pr.filter( x => x != "insert" && x != "add_usr_right" ) );
+        s.addUsrRight( new UsrId, "insert" ); // should fail
+        sequ( s.getUsrRights( new UsrId ), pr.filter( x => x != "insert" && x != "add_usr_right" ) );
     });
 
     // it( 'operationnal tranform, rights', () => {

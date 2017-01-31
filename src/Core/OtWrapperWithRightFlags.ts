@@ -37,7 +37,32 @@ abstract class OtWrapperWithRightFlags extends OtWrapper {
         return res;
     }
 
-    rem_usr_right__s( usr: UsrId, right_types: Array<string> ) {
+    add_usr_right__s( usr: UsrId, right_types: Array<string>, as_usr = new UsrId ) {
+        let flags = this._right_flags_from_right_type( right_types );
+        if ( flags ) {
+            const old_val = this.right_flags.get( usr ) || 0, new_val = old_val | flags;
+            if ( new_val != old_val && ( this.right_flags.get( as_usr ) || 0 ) & Math.pow( 2, this.get_possible_rights__b().indexOf( "add_usr_right" ) ) ) {
+                this.right_flags.set( usr, new_val );
+            }
+        }
+        return this;
+    }
+
+    rem_usr_right__s( usr: UsrId, right_types: Array<string>, as_usr = new UsrId ) {
+        let flags = this._right_flags_from_right_type( right_types );
+        if ( flags ) {
+            const old_val = this.right_flags.get( usr ) || 0, new_val = old_val & ~flags;
+            if ( new_val != old_val && ( this.right_flags.get( as_usr ) || 0 ) & Math.pow( 2, this.get_possible_rights__b().indexOf( "rem_usr_right" ) ) ) {
+                if ( new_val )
+                    this.right_flags.set( usr, new_val );
+                else
+                    this.right_flags.delete( usr );
+            }
+        }
+        return this;
+    }
+
+    _right_flags_from_right_type( right_types: Array<string> ): number {
         let flags = 0, cmp = 1, cp_rt = [ ...right_types ];
         this.get_possible_rights__b().forEach( val => {
             for( let ind; ( ind = cp_rt.indexOf( val ) ) >= 0; ) {
@@ -48,18 +73,7 @@ abstract class OtWrapperWithRightFlags extends OtWrapper {
         } );
         for( const right_type of cp_rt )
             console.error( `Error: unknown right type '${ right_type }'` );
-        
-        if ( flags ) {
-            let old_val = this.right_flags.get( usr );
-            if ( old_val ) {
-                old_val &= ~flags;
-                if ( old_val )
-                    this.right_flags.set( usr, old_val );
-                else
-                    this.right_flags.delete( usr );
-            }
-        }
-        return this;
+        return flags;
     }
 
     right_flags = new MapWithStringifiedKeys<UsrId,number>(); /** usr_id => flags */
