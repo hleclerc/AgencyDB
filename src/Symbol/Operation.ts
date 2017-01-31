@@ -155,13 +155,18 @@ class Operation extends Sym {
             case "to_BooleanVariable": return par( Operation.prec.CALL, options.conv_to_boolean ? cg.inline_code( this.children[ 0 ], prec, options ) : `Boolean(${ cg.inline_code( this.children[ 0 ], 1e6 ) })` );
             case "copy"              : return cg.inline_code( this.children[ 0 ], prec );
             case "get_size"          : return par( Operation.prec.MEMBER, `${ cg.inline_code( this.children[ 0 ], Operation.prec.MEMBER ) }.${ this.children[ 0 ].item.variable_type__b() == LvBuffer ? "byteLength" : "length" }` );
-            case "not"               : return una( Operation.prec.NOT, "!"   );
+            case "not_log"           : return una( Operation.prec.NOT, "!"   );
+            case "not_bin"           : return una( Operation.prec.NOT, "~"   );
             // binary
             case "add"               : return bin( Operation.prec.ADD     , "+"   );
             case "sub"               : return bin( Operation.prec.ADD     , "-"   );
             case "mul"               : return bin( Operation.prec.MUL     , "*"   );
             case "div"               : return bin( Operation.prec.MUL     , "/"   );
             case "mod"               : return bin( Operation.prec.MUL     , "%"   );
+            case "or_bin"            : return bin( Operation.prec.MUL     , "|"   );
+            case "and_bin"           : return bin( Operation.prec.MUL     , "&"   );
+            case "or_log"            : return bin( Operation.prec.MUL     , "||"  );
+            case "and_log"           : return bin( Operation.prec.MUL     , "&&"  );
             case "is_equ"            : return bin( Operation.prec.INF     , "=="  );
             case "is_inf"            : return bin( Operation.prec.INF     , "<"   );
             case "is_infeq"          : return bin( Operation.prec.INF     , "<="  );
@@ -296,7 +301,7 @@ Method.plugins.push( function( test_pf, for_a_test, method, type_0, type_1, type
 // default js_type definition
 Operation.add_variable_type_finder( 0, function( method, args ) {
     // -> bool
-    if ( [ "not", "neg", "is_pos", "is_neg", "is_eqz", "is_equ", "is_inf", "is_infeq", "get_size" ].indexOf( method.base_name ) >= 0 )
+    if ( [ "not_bin", "not_log", "neg", "is_pos", "is_neg", "is_eqz", "is_equ", "is_inf", "is_infeq", "get_size" ].indexOf( method.base_name ) >= 0 )
         return LvNumber;
     // self ops
     // if ( method.pattern[ 0 ] == "s" || method.base_name == "set" )

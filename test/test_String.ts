@@ -125,6 +125,9 @@ describe( 'String', () => {
         //     vls[ 1 ].remove( 1, 1 );
         // }, "02ab345", "concurrent insertion and removal" );
     });
+
+    it( 'basic rights', () => {
+    });
 });
  
 

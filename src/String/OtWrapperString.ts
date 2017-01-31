@@ -4,6 +4,8 @@
 import BinaryWriter              from "../System/BinaryWriter";
 import BinaryReader              from "../System/BinaryReader";
 import UsrId                     from "../System/UsrId";
+import DevId                     from "../System/DevId";
+import MapWithStringifiedKeys    from "../Core/MapWithStringifiedKeys";
 import PatchTypes                from "../Core/PatchTypes";
 import OtWrapper                 from "../Core/OtWrapper";
 import methods                   from "../Core/methods";
@@ -53,8 +55,8 @@ class OtWrapperString extends OtWrapper {
         return this;
     }
 
-    new_patch( res: BinaryWriter, msg: BinaryReader, as_usr: UsrId, cq_unk: BinaryWriter ) {
-        OtWrapperStringOperations.new_patch( this, res, msg, as_usr, cq_unk );
+    new_patch( res: BinaryWriter, msg: BinaryReader, as_usr: UsrId, cq_unk: BinaryWriter, src_dev?: DevId, src_usr?: UsrId, cur_dev?: DevId, cur_usr?: UsrId ) {
+        OtWrapperStringOperations.new_patch( this, res, msg, as_usr, cq_unk, src_dev, src_usr, cur_dev, cur_usr );
     }
 
     undo_patch( data: BinaryReader, as_usr: UsrId ) {
@@ -76,7 +78,7 @@ class OtWrapperString extends OtWrapper {
     // }
 
     val         : GenString;
-    right_flags = new Map<string,number>(); /** usr_id => flags */
+    right_flags = new MapWithStringifiedKeys<UsrId,number>(); /** usr_id => flags */
     // cursors    = new Array<Cursor>();
     // new_cursors= new Array<Cursor>();
     // mod_cursors= new Array<Cursor>();

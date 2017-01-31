@@ -129,7 +129,7 @@ let num_methods = {
 }
 
 // unary
-for( let n of [ "is_eqz", "is_pos", "not", "neg" ] )
+for( let n of [ "is_eqz", "is_pos", "not_bin", "not_log", "neg" ] )
     methods[ n + "__b" ].add_surdef( 1, [ "to_Number__b" ], num_methods[ n ] );
 
 // binary
