@@ -13,11 +13,12 @@ const Map_LvUsrId_LvNumber = LvMap( LvUsrId, LvNumber );
 export class OtWrapperWithRightFlags { right_flags = new Map_LvUsrId_LvNumber; }
 
 class OpInfo<UT> {
-    inst   : any; /** instance of symbolic repr */
-    num    : number;
-    apply ?: ( d: UT, o: Op ) => any;
-    undo  ?: ( d: UT, o: Op ) => any;
-    store ?: ( d: UT, o: Op ) => Array<{type:any,data:any}>;
+    inst     : any; /** instance of symbolic repr */
+    num      : number;
+    apply   ?: ( d: UT, o: Op ) => any;
+    undo    ?: ( d: UT, o: Op ) => any;
+    store   ?: ( d: UT, o: Op ) => Array<{type:any,data:any}>;
+    right_to?: ( d: UT, o, f: LvNumber, r: LvNumber ) => void;
 };
 
 /** helper */
@@ -26,12 +27,8 @@ function wl( str = "" ) {
     process.stdout.write( " ".repeat( nb_sp ) + str + "\n" );
 }
 
-// struct op_add_grp_right { static const char *name() { return "add_grp_right"; } static bool valid( GrpId, unsigned v ) { return v; } };
-// struct op_rem_grp_right { static const char *name() { return "rem_grp_right"; } static bool valid( GrpId, unsigned v ) { return v; } };
-// struct op_add_usr_right { static const char *name() { return "add_usr_right"; } static bool valid( UsrId, unsigned v ) { return v; } };
-// struct op_rem_usr_right { static const char *name() { return "rem_usr_right"; } static bool valid( UsrId, unsigned v ) { return v; } };
-class AddUsrRight { usr = new LvUsrId(); flags = new LvNumber(); };
-class RemUsrRight { usr = new LvUsrId(); flags = new LvNumber(); };
+export class AddUsrRight { usr = new LvUsrId(); flags = new LvNumber(); };
+export class RemUsrRight { usr = new LvUsrId(); flags = new LvNumber(); };
 
 export default 
 class GenOperation<UT> {
@@ -44,8 +41,23 @@ class GenOperation<UT> {
 
     /** this function install  */
     define_rights_by_flags( right_names: Array<string>, attr_name = "right_flags" ) {
+        this.right_names = [ "add_usr_right", "rem_usr_right", ...right_names ];
+
         this.apply( AddUsrRight, ( d, o: AddUsrRight ) => { const v = ( d as any as OtWrapperWithRightFlags ).right_flags.get( o.usr ); v.self_or_bin( o.flags ); } );
-        // this.apply( RemUsrRight, ( d, o: RemUsrRight ) => ( d as OtWrapperString ).val.remove( o.pos, o.len        ) );
+        this.apply( RemUsrRight, ( d, o: RemUsrRight ) => { const v = ( d as any as OtWrapperWithRightFlags ).right_flags.get( o.usr ); v.self_and_bin( o.flags.not_bin() ); } );
+
+        this.right( AddUsrRight, ( d: UT, o: AddUsrRight, f: LvNumber, r: LvNumber ) => r.set( f.and_bin( this.flag( "add_usr_right" ) ) ) );
+        this.right( RemUsrRight, ( d: UT, o: RemUsrRight, f: LvNumber, r: LvNumber ) => r.set( f.and_bin( this.flag( "rem_usr_right" ) ) ) );
+    }
+
+    /** add description of permission */
+    right( op_type, cb: ( d: UT, o, f: LvNumber, r: LvNumber ) => void ) {
+        this.reg_op( op_type ).right_to = cb;
+    }
+
+    /** flag associated with name */
+    flag( name: string ): number {
+        return Math.pow( 2, this.right_names.indexOf( name ) );
     }
 
     apply( op_type, cb: ( d: UT, o: Op ) => any ) {
@@ -98,6 +110,13 @@ class GenOperation<UT> {
         wl( `}` );
         wl();
 
+        // right to
+        wl( `var right_to = {` );
+        for( const op of this.operations )
+            wl( `    ${ op.inst.constructor.name }: function( val: ${ this.cl_inst.constructor.name }, _as_usr: UsrId, ${ this.func_args_op( lang, op ) } ): boolean { ${ this._write_right_to( lang, op ) } },` );
+        wl( `}` );
+        wl();
+
         // read
         wl( `function read( br: BinaryReader, cb: ( type: string, args: any ) => void, src_dev?: DevId, src_usr?: UsrId, cur_dev?: DevId, cur_usr?: UsrId ) {` );
         wl( `    switch ( br.read_PI8() ) {` );
@@ -133,7 +152,7 @@ class GenOperation<UT> {
             if ( op.undo ) {
                 wl( `        case ${ op.num }: {` );
                 nb_sp += 12;
-                this.write_undo_patch( lang, op );
+                this._write_undo_patch( lang, op );
                 nb_sp -= 12;
                 wl( `            break;` );
                 wl( `        }` );
@@ -144,6 +163,7 @@ class GenOperation<UT> {
         wl( `    return val;` );
         wl( `}` );
         wl();
+
         // new_patch
         wl( `function new_patch( val: ${ this.cl_inst.constructor.name }, bw_new: BinaryWriter, br_new: BinaryReader, as_usr: UsrId, cq_unk: BinaryWriter, src_dev?: DevId, src_usr?: UsrId, cur_dev?: DevId, cur_usr?: UsrId ) {` );
         wl( `    while ( br_new.size ) {` );
@@ -151,7 +171,7 @@ class GenOperation<UT> {
         for( const op of this.operations ) {
             wl( `        case ${ op.num }: {` );
             nb_sp += 12;
-            this.write_new_patch( lang, op );
+            this._write_new_patch( lang, op );
             nb_sp -= 12;
             wl( `            break;` );
             wl( `        }` );
@@ -162,9 +182,15 @@ class GenOperation<UT> {
         wl( `}` );
         wl();
 
+        // get_possible_rights__b
+        wl( `function get_possible_rights__b(): Array<string> {` );
+        wl( `    return ${ JSON.stringify( this.right_names ) };` );
+        wl( `}` );
+        wl();
+
 
         // exports
-        wl( `export default { read, bin_repr, new_patch, undo_patch };` );
+        wl( `export default { read, right_to, bin_repr, new_patch, undo_patch, get_possible_rights__b };` );
     }
 
     func_args_op( lang: string, op: OpInfo<UT> ): string {
@@ -238,7 +264,7 @@ class GenOperation<UT> {
         return res;
     }
 
-    write_new_patch( lang: string, op_new: OpInfo<UT> ) {
+    _write_new_patch( lang: string, op_new: OpInfo<UT> ) {
         // read data
         wl( this.br_read_var( lang, op_new, "br_new", "_new" ) );
 
@@ -300,7 +326,7 @@ class GenOperation<UT> {
         wl( Codegen.make_code( Object.keys( d ).map( n => d[ n ] ), lang ) );
     }
 
-    write_undo_patch( lang: string, op: OpInfo<UT> ) {
+    _write_undo_patch( lang: string, op: OpInfo<UT> ) {
         let d = this.make_symbolic_data( this.cl_inst, "", "val.", this.sym_corr );
         let o = this.make_symbolic_data( op.inst );
         op.undo( d, o );
@@ -308,9 +334,18 @@ class GenOperation<UT> {
         wl( Codegen.make_code( Object.keys( d ).map( n => d[ n ] ), lang ) );
     }
 
+    _write_right_to( lang: string, op: OpInfo<UT> ): string {
+        let d = this.make_symbolic_data( this.cl_inst, "", "val.", this.sym_corr );
+        let o = this.make_symbolic_data( op.inst );
+        let f = LvNumber.symbol( "_f" );
+        let r = LvNumber.symbol( "_r" );
+        op.right_to( d, o, f, r );
+        return "var _r,_f=val.right_flags.get(_as_usr);" + Codegen.make_code( [ r ], lang ) + "return _r;";
+    }
+
     cl_inst     : any; /** instance of symbolic repr of class */
     sym_corr    : { [ name: string ]: string }; /** names in symbolic repr to name in dst code */
     operations  = new Array<OpInfo<UT>>();
     trans_rules = new Map<string,(o,n)=>void>();
-    right_flags = new Array<string>();
+    right_names = new Array<string>();
 }

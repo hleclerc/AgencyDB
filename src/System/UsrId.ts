@@ -44,6 +44,7 @@ class UsrId {
         UsrId.read_from( br, null, null, null, null );
     }
 
+    /** true is local user */
     get loc(): boolean {
         return this.num == 0;
     }

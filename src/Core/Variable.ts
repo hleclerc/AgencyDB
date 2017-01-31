@@ -97,44 +97,31 @@ class VarAnc {
     //     return methods["obj_type"].call_1( this.rp );
     // }
 
-    // get_possible_rights(): Array<string> {
-    //     return methods["get_possible_rights"].call_1( this.rp );
-    // }
+    /** list of right names (e.g.: [ "add_usr_right", "append", ... ] ) */
+    getPossibleRights(): Array<string> {
+        return methods["get_possible_rights__b"].call_1( this.rp );
+    }
 
-    // add_usr_right( usr : UsrId, right_type : string ) : boolean {
-    //     return methods["add_usr_right"].call_1( this, usr, right_type );
-    // }
+    getUsersInAccessConstrolList() : Array<UsrId> {
+        return methods["get_users_in_acl__b"].call_1( this.rp );
+    }
 
-    // rem_usr_right( usr : UsrId, right_type : string ) : boolean {
-    //     return methods["rem_usr_right"].call_1( this, usr, right_type );
-    // }
+    getUsrRights( usr: UsrId ) : Array<string> {
+        return methods["get_usr_rights__b"].call_1( this.rp, usr );
+    }
 
-    // get_users_in_acl() : Array<UsrId> {
-    //     return methods["get_users_in_acl"].call_1( this.rp );
-    // }
+    addUsrRight( usr: UsrId, right_types: Array<string> ): VarAnc {
+        this.rp = methods["add_usr_right__s"].call_1s( this, usr, right_types );
+        return this;
+    }
 
-    // get_usr_rights( usr : UsrId ) : Array<string> {
-    //     return methods["get_usr_rights"].call_1( this, usr );
-    // }
-
-    // symbolic_children() : Array<Variable> {
-    //     return methods["symbolic_children"].call_1( this.rp );
-    // }
-
-    // graphviz_repr() : string {
-    //     return methods["graphviz_repr"].call_1( this.rp );
-    // }
-
-    // is_symbolic() : boolean {
-    //     return methods["is_symbolic"].call_1( this.rp );
-    // }
+    remUsrRight( usr: UsrId, right_types: Array<string> ): VarAnc {
+        this.rp = methods["rem_usr_right__s"].call_1s( this, usr, right_types );
+        return this;
+    }
 
     // then( callback ) {
     //     methods["then"].call_1( this, callback );
-    // }
-
-    // get_graph_data( graph_data, children, id ) : void {
-    //     methods["get_graph_data"].call_1( this, graph_data, children, id );
     // }
 
     // write_to( bw : BinaryWriter, only_for_a_copy : boolean, cur_dev : DevId, cur_usr : UsrId ) {
@@ -266,20 +253,18 @@ dslf( "on_change_par"          , 1        ); // add a parent object for ob_chang
 // decl( "bind_by_object_id"      , "c"   ); // inode, db, category, load_only_once
    
 // rights   
-// decl( "get_possible_rights"    , "c"   );
-// decl( "get_groups_in_acl"      , "c"   );
-// decl( "get_users_in_acl"       , "c"   );
-// decl( "get_grp_rights"         , "c"   );
-// decl( "get_usr_rights"         , "c"   );
-// decl( "add_grp_right"          , "r"   );
-// decl( "add_usr_right"          , "r"   );
-// decl( "rem_grp_right"          , "r"   );
-// decl( "rem_usr_right"          , "r"   );
+decl( "get_possible_rights__b" , false );
+decl( "get_users_in_acl__b"    , false );
+decl( "get_usr_rights__b"      , false );
+decl( "add_usr_right__s"       , false );
+decl( "rem_usr_right__s"       , false );
+
 
 base_methods_are_defined = true;
 waiting_bmar_cbs.forEach( cb => cb() );
 waiting_bmar_cbs.length = 0;
 
+import UsrId    from "../System/UsrId"
 import LvNumber from "../LvNumber"
 require( "./DefaultMethods" );
 require( "./Select" );

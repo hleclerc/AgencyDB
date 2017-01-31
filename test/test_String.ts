@@ -1,5 +1,6 @@
 /// <reference path="../node_modules/@types/mocha/index.d.ts"/>
 import DevId      from "../src/System/DevId";
+import UsrId      from "../src/System/UsrId";
 import { VarAnc } from "../src/Core/Variable";
 import Method     from "../src/Core/Method";
 import test_ot    from "../src/Test/test_ot";
@@ -127,7 +128,48 @@ describe( 'String', () => {
     });
 
     it( 'basic rights', () => {
+        const pr = [ 'add_usr_right', 'rem_usr_right', 'read', 'insert', 'remove', 'append' ];
+        // basic string
+        let s = new LvString( "s" );
+        sequ( s.getPossibleRights(), pr );
+        sequ( s.getUsersInAccessConstrolList(), [ new UsrId ] );
+        sequ( s.getUsrRights( new UsrId ), pr );
+        sequ( s.getUsrRights( new UsrId( new DevId, 2 ) ), [] );
+
+        // OtWrapper
+        s.onChange( val => console.log( "changed:", val.toString() ) );
+        sequ( s.getPossibleRights(), pr );
+        sequ( s.getUsersInAccessConstrolList(), [ new UsrId ] );
+        sequ( s.getUsrRights( new UsrId ), pr );
+        sequ( s.getUsrRights( new UsrId( new DevId, 2 ) ), [] );
+
+        s.remUsrRight( new UsrId, [ "insert" ] );
+        sequ( s.getUsrRights( new UsrId ), pr.filter( x => x != "insert" ) );
+        s.insert( 0, "m" );
+        sequ( s, "s" );
+        s.insert( 1, "murf" ); // we still have to right to append
+        sequ( s, "smurf" );
     });
+
+    // it( 'operationnal tranform, rights', () => {
+    //     const pr = [ 'add_usr_right', 'rem_usr_right', 'read', 'insert', 'remove', 'append' ];
+    //     // basic string
+    //     let s = new LvString( "s" );
+    //     sequ( s.getPossibleRights(), pr );
+    //     sequ( s.getUsersInAccessConstrolList(), [ new UsrId ] );
+    //     sequ( s.getUsrRights( new UsrId ), pr );
+    //     sequ( s.getUsrRights( new UsrId( new DevId, 2 ) ), [] );
+
+    //     // OtWrapper
+    //     s.onChange( val => console.log( "changed:", val.toString() ) );
+    //     sequ( s.getPossibleRights(), pr );
+    //     sequ( s.getUsersInAccessConstrolList(), [ new UsrId ] );
+    //     sequ( s.getUsrRights( new UsrId ), pr );
+    //     sequ( s.getUsrRights( new UsrId( new DevId, 2 ) ), [] );
+
+    //     s.remUsrRight( new UsrId, [ "insert" ] );
+    //     sequ( s.getUsrRights( new UsrId ), pr.filter( x => x != "insert" ) );
+    // });
 });
  
 

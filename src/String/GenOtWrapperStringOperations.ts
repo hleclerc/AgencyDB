@@ -29,6 +29,11 @@ go.undo ( RemUnd, ( d: OtWrapperString, o: RemUnd ) => d.val.insert( o.pos, o.st
 
 go.store( Remove, ( d: OtWrapperString, o: Remove ) => [ { type: RemUnd, data: { pos: o.pos, str: d.val.substr( o.pos, o.len ) } as RemUnd } ] );
 
+//
+go.right( Insert, ( d: OtWrapperString, o: Insert, f: LvNumber, r: LvNumber ) => r.set( f.and_bin( go.flag( "insert" ) ).or_log( f.and_bin( go.flag( "append" ) ).and_log( o.pos.is_equ( d.val.length ) ) ) ) );
+go.right( Remove, ( d: OtWrapperString, o: Insert, f: LvNumber, r: LvNumber ) => r.set( f.and_bin( go.flag( "remove" ) ) ) );
+go.right( RemUnd, ( d: OtWrapperString, o: Insert, f: LvNumber, r: LvNumber ) => r.set( f.and_bin( go.flag( "remove" ) ) ) );
+
 // combinations
 go.fwd_trans( Insert, Insert, ( o: Insert, n: Insert ) => {
     _if( o.pos.is_sup( n.pos ), () => {

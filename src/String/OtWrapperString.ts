@@ -5,9 +5,8 @@ import BinaryWriter              from "../System/BinaryWriter";
 import BinaryReader              from "../System/BinaryReader";
 import UsrId                     from "../System/UsrId";
 import DevId                     from "../System/DevId";
-import MapWithStringifiedKeys    from "../Core/MapWithStringifiedKeys";
 import PatchTypes                from "../Core/PatchTypes";
-import OtWrapper                 from "../Core/OtWrapper";
+import OtWrapperWithRightFlags   from "../Core/OtWrapperWithRightFlags";
 import methods                   from "../Core/methods";
 import Rp                        from "../Core/Rp";
 import OtWrapperStringOperations from "./OtWrapperStringOperations";
@@ -16,9 +15,9 @@ import Caret                     from "./Caret";
 
 //
 export default
-class OtWrapperString extends OtWrapper {
-    constructor( val: GenString ) {
-        super( OtWrapperString );
+class OtWrapperString extends OtWrapperWithRightFlags {
+    constructor( val: GenString, usr = new UsrId ) {
+        super( OtWrapperString, usr );
         this.val = val;
 
         // first patch
@@ -40,7 +39,7 @@ class OtWrapperString extends OtWrapper {
     }
 
     _self_insert( pos: number, sup: string, usr_id = new UsrId() ): Rp {
-        if ( sup.length ) { //  && OtWrapperString.op_insert.right( this, this.usr_right( usr_id ), pos, sup )
+        if ( sup.length && OtWrapperStringOperations.right_to.Insert( this, usr_id, pos, sup ) ) {
             this.val.data = this.val.data.slice( 0, pos ) + sup + this.val.data.slice( pos );
             this.sig_change( bw => OtWrapperStringOperations.bin_repr.Insert( bw, pos, sup ) );
         }
@@ -48,7 +47,7 @@ class OtWrapperString extends OtWrapper {
     }
 
     _self_remove( pos: number, len: number, usr_id = new UsrId() ): Rp {
-        if ( len ) { //  && OtWrapperString.op_insert.right( this, this.usr_right( usr_id ), pos, sup )
+        if ( len && OtWrapperStringOperations.right_to.Remove( this, usr_id, pos, len ) ) {
             this.val.data = this.val.data.slice( 0, pos ) + this.val.data.slice( pos + len );
             this.sig_change( bw => OtWrapperStringOperations.bin_repr.Remove( bw, pos, len ) );
         }
@@ -62,6 +61,11 @@ class OtWrapperString extends OtWrapper {
     undo_patch( data: BinaryReader, as_usr: UsrId ) {
         OtWrapperStringOperations.undo_patch( this, data, as_usr );
     }
+
+    get_possible_rights__b(): Array<string> {
+        return OtWrapperStringOperations.get_possible_rights__b();
+    }
+
 
     // _self_remove( pos : number, len : number, usr_id = new UsrId() ) : boolean {
     //     let str = this.val.val.substr( pos, len );
@@ -78,13 +82,12 @@ class OtWrapperString extends OtWrapper {
     // }
 
     val         : GenString;
-    right_flags = new MapWithStringifiedKeys<UsrId,number>(); /** usr_id => flags */
     // cursors    = new Array<Cursor>();
     // new_cursors= new Array<Cursor>();
     // mod_cursors= new Array<Cursor>();
     // rem_cursors= new Array<Cursor>();
 }
-OtWrapper.make_templ( OtWrapperString );
+OtWrapperWithRightFlags.make_templ( OtWrapperString );
 
 
 methods[ "add__sb" ].add_surdef( 2, [ OtWrapperString, "to_String__b" ], function( str: OtWrapperString, sup: Rp ): Rp {

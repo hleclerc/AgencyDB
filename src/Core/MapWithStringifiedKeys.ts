@@ -10,5 +10,10 @@ class MapWithStringifiedKeys<K,V> {
         return this;
     }
 
+    delete( key: K ): MapWithStringifiedKeys<K,V> {
+        this.map.delete( key.toString() );
+        return this;
+    }
+
     map = new Map<string,V>();
 }

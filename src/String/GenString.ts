@@ -50,6 +50,15 @@ class GenString extends Rp {
         //// nsmake endif // NO_OPERATIONAL_TRANSFORM
     }
 
+    get_possible_rights__b(): Array<string> {
+        //// nsmake ifndef NO_OPERATIONAL_TRANSFORM
+        return OtWrapperString.prototype.get_possible_rights__b();
+        //// nsmake endif // NO_OPERATIONAL_TRANSFORM
+        //// nsmake uncomment_ifdef NO_OPERATIONAL_TRANSFORM
+        // return ["NO_OPERATIONAL_TRANSFORM"];
+        //// nsmake endif // NO_OPERATIONAL_TRANSFORM
+    }
+
     //// nsmake endif // NO_OPERATIONAL_TRANSFORM
 
     // get_patch_type( bw : BinaryWriter ) {
