@@ -342,11 +342,11 @@ class Method {
             const thxo = methods[ this.base_name + '__' + this.pattern[ 0 ] + 'o' ];
 
             if ( sref_1 ) 
-                test_pf( new Surdef( dla_1, null, ( val_0: Rp, val_1: Rp, ...args ) => thxb.call_2( val_0, sref_0.func( val_1 ), ...args ) ) );
+                test_pf( new Surdef( dla_1, null, ( val_0: Rp, val_1: Rp, ...args ) => thxb.call_2( val_0, sref_1.func( val_1 ), ...args ) ) );
             else if ( sval_1 )
-                test_pf( new Surdef( dla_1, null, ( val_0: Rp, val_1: Rp, ...args ) => thxo.call_2( val_0, sval_0.func( val_1 ), ...args ) ) );
+                test_pf( new Surdef( dla_1, null, ( val_0: Rp, val_1: Rp, ...args ) => thxo.call_2( val_0, sval_1.func( val_1 ), ...args ) ) );
             else if ( sptr_1 )
-                test_pf( new Surdef( dla_1, null, ( val_0: Rp, val_1: Rp, ...args ) => thxb.call_2( val_0, sptr_0.func( val_1 ), ...args ) ) );
+                test_pf( new Surdef( dla_1, null, ( val_0: Rp, val_1: Rp, ...args ) => thxb.call_2( val_0, sptr_1.func( val_1 ), ...args ) ) );
         }
 
         // __xo, __sx, ... ?
@@ -444,16 +444,6 @@ class Method {
             else if ( sptr_0 )
                 test_pf( new Surdef( dla_0, null, ( val_0: Rp, val_1: Rp, val_2: Rp, ...args ) => thbxx.call_3( sptr_0.func( val_0 ), val_1, val_2, ...args ) ) );
 
-            // if ( this.pattern[ 0 ] == 's' ) {
-            //     if ( sptr_0 ) { // if we are going to modify the value, (currently) only prox_ptr is allowed
-            //         test_pf( new Surdef( 1, null, ( val_0, val_1, ...args ) => {
-            //             let ptr = sptr_0.func( val_0 );
-            //             methods[ 'set__so' ].call_2s( ptr, this.call_2( ptr, val_1, ...args ) );
-            //             return val_0;
-            //         } ) );
-            //     }
-            // }
-
             // test arg 1
             const pref_1 = methods[ 'prox_ref__' + this.pattern[ 1 ] ];
             const pval_1 = methods[ 'prox_val__' + this.pattern[ 1 ] ];
@@ -465,11 +455,11 @@ class Method {
             const thxox = methods[ this.base_name + '__' + this.pattern[ 0 ] + 'o' + this.pattern[ 2 ] ];
 
             if ( sref_1 ) 
-                test_pf( new Surdef( dla_1, null, ( val_0: Rp, val_1: Rp, val_2: Rp, ...args ) => thxbx.call_3( val_0, sref_0.func( val_1 ), val_2, ...args ) ) );
+                test_pf( new Surdef( dla_1, null, ( val_0: Rp, val_1: Rp, val_2: Rp, ...args ) => thxbx.call_3( val_0, sref_1.func( val_1 ), val_2, ...args ) ) );
             else if ( sval_1 )
-                test_pf( new Surdef( dla_1, null, ( val_0: Rp, val_1: Rp, val_2: Rp, ...args ) => thxox.call_3( val_0, sval_0.func( val_1 ), val_2, ...args ) ) );
+                test_pf( new Surdef( dla_1, null, ( val_0: Rp, val_1: Rp, val_2: Rp, ...args ) => thxox.call_3( val_0, sval_1.func( val_1 ), val_2, ...args ) ) );
             else if ( sptr_1 )
-                test_pf( new Surdef( dla_1, null, ( val_0: Rp, val_1: Rp, val_2: Rp, ...args ) => thxbx.call_3( val_0, sptr_0.func( val_1 ), val_2, ...args ) ) );
+                test_pf( new Surdef( dla_1, null, ( val_0: Rp, val_1: Rp, val_2: Rp, ...args ) => thxbx.call_3( val_0, sptr_1.func( val_1 ), val_2, ...args ) ) );
 
             // test arg 2
             const pref_2 = methods[ 'prox_ref__' + this.pattern[ 2 ] ];
@@ -482,11 +472,11 @@ class Method {
             const thxxo = methods[ this.base_name + '__' + this.pattern[ 0 ] + this.pattern[ 1 ] + 'o' ];
 
             if ( sref_2 ) 
-                test_pf( new Surdef( dla_2, null, ( val_0: Rp, val_1: Rp, val_2: Rp, ...args ) => thxbx.call_3( val_0, val_1, sref_0.func( val_2 ), ...args ) ) );
+                test_pf( new Surdef( dla_2, null, ( val_0: Rp, val_1: Rp, val_2: Rp, ...args ) => thxxb.call_3( val_0, val_1, sref_2.func( val_2 ), ...args ) ) );
             else if ( sval_2 )
-                test_pf( new Surdef( dla_2, null, ( val_0: Rp, val_1: Rp, val_2: Rp, ...args ) => thxox.call_3( val_0, val_1, sval_0.func( val_2 ), ...args ) ) );
+                test_pf( new Surdef( dla_2, null, ( val_0: Rp, val_1: Rp, val_2: Rp, ...args ) => thxxo.call_3( val_0, val_1, sval_2.func( val_2 ), ...args ) ) );
             else if ( sptr_2 )
-                test_pf( new Surdef( dla_2, null, ( val_0: Rp, val_1: Rp, val_2: Rp, ...args ) => thxbx.call_3( val_0, val_1, sptr_0.func( val_2 ), ...args ) ) );
+                test_pf( new Surdef( dla_2, null, ( val_0: Rp, val_1: Rp, val_2: Rp, ...args ) => thxxb.call_3( val_0, val_1, sptr_2.func( val_2 ), ...args ) ) );
         }
 
         // __xo, __sx, ... ?
@@ -576,6 +566,92 @@ class Method {
         //     }
 
         // }
+
+        // proxy ?
+        if ( for_a_test == 0 ) {
+            let dla_0 = 1 + 0.1 / ( 1 + type_0.data_loss_if_prox );
+            let dla_1 = 1 + 0.1 / ( 1 + type_1.data_loss_if_prox );
+            let dla_2 = 1 + 0.1 / ( 1 + type_2.data_loss_if_prox );
+            let dla_3 = 1 + 0.1 / ( 1 + type_3.data_loss_if_prox );
+            // if ( dla_2 == dla_0 && dla_1 == dla_0 ) {
+            //     dla_2 += 0.00002;
+            //     dla_1 += 0.00001;
+            // } else if ( dla_1 == dla_0 ) {
+            //     dla_1 += 0.00001;
+            // } else if ( dla_2 == dla_0 ) {
+            //     dla_2 += 0.00001;
+            // } else if ( dla_2 == dla_1 ) {
+            //     dla_2 += 0.00001;
+            // }
+
+            // test arg 0
+            const pref_0 = methods[ 'prox_ref__' + this.pattern[ 0 ] ];
+            const pval_0 = methods[ 'prox_val__' + this.pattern[ 0 ] ];
+            const pptr_0 = methods[ 'prox_ptr__' + this.pattern[ 0 ] ];
+            const sref_0 = pref_0 ? pref_0.find_best_func_1( type_0, 1 ) : null;
+            const sval_0 = pval_0 ? pval_0.find_best_func_1( type_0, 1 ) : null;
+            const sptr_0 = pptr_0 ? pptr_0.find_best_func_1( type_0, 1 ) : null;
+            const thbxxx = methods[ this.base_name + '__b' + this.pattern[ 1 ] + this.pattern[ 2 ] + this.pattern[ 3 ] ];
+            const thoxxx = methods[ this.base_name + '__o' + this.pattern[ 1 ] + this.pattern[ 2 ] + this.pattern[ 3 ] ];
+
+            if ( sref_0 ) 
+                test_pf( new Surdef( dla_0, null, ( val_0: Rp, val_1: Rp, val_2: Rp, val_3: Rp, ...args ) => thbxxx.call_3( sref_0.func( val_0 ), val_1, val_2, val_3, ...args ) ) );
+            else if ( sval_0 )
+                test_pf( new Surdef( dla_0, null, ( val_0: Rp, val_1: Rp, val_2: Rp, val_3: Rp, ...args ) => thoxxx.call_3( sval_0.func( val_0 ), val_1, val_2, val_3, ...args ) ) );
+            else if ( sptr_0 )
+                test_pf( new Surdef( dla_0, null, ( val_0: Rp, val_1: Rp, val_2: Rp, val_3: Rp, ...args ) => thbxxx.call_3( sptr_0.func( val_0 ), val_1, val_2, val_3, ...args ) ) );
+
+            // test arg 1
+            const pref_1 = methods[ 'prox_ref__' + this.pattern[ 1 ] ];
+            const pval_1 = methods[ 'prox_val__' + this.pattern[ 1 ] ];
+            const pptr_1 = methods[ 'prox_ptr__' + this.pattern[ 1 ] ];
+            const sref_1 = pref_1 ? pref_1.find_best_func_1( type_1, 1 ) : null;
+            const sval_1 = pval_1 ? pval_1.find_best_func_1( type_1, 1 ) : null;
+            const sptr_1 = pptr_1 ? pptr_1.find_best_func_1( type_1, 1 ) : null;
+            const thxbxx = methods[ this.base_name + '__' + this.pattern[ 0 ] + 'b' + this.pattern[ 2 ] + this.pattern[ 3 ] ];
+            const thxoxx = methods[ this.base_name + '__' + this.pattern[ 0 ] + 'o' + this.pattern[ 2 ] + this.pattern[ 3 ] ];
+
+            if ( sref_1 ) 
+                test_pf( new Surdef( dla_1, null, ( val_0: Rp, val_1: Rp, val_2: Rp, val_3: Rp, ...args ) => thxbxx.call_3( val_0, sref_1.func( val_1 ), val_2, val_3, ...args ) ) );
+            else if ( sval_1 )
+                test_pf( new Surdef( dla_1, null, ( val_0: Rp, val_1: Rp, val_2: Rp, val_3: Rp, ...args ) => thxoxx.call_3( val_0, sval_1.func( val_1 ), val_2, val_3, ...args ) ) );
+            else if ( sptr_1 )
+                test_pf( new Surdef( dla_1, null, ( val_0: Rp, val_1: Rp, val_2: Rp, val_3: Rp, ...args ) => thxbxx.call_3( val_0, sptr_1.func( val_1 ), val_2, val_3, ...args ) ) );
+
+            // test arg 2
+            const pref_2 = methods[ 'prox_ref__' + this.pattern[ 2 ] ];
+            const pval_2 = methods[ 'prox_val__' + this.pattern[ 2 ] ];
+            const pptr_2 = methods[ 'prox_ptr__' + this.pattern[ 2 ] ];
+            const sref_2 = pref_2 ? pref_2.find_best_func_1( type_2, 1 ) : null;
+            const sval_2 = pval_2 ? pval_2.find_best_func_1( type_2, 1 ) : null;
+            const sptr_2 = pptr_2 ? pptr_2.find_best_func_1( type_2, 1 ) : null;
+            const thxxbx = methods[ this.base_name + '__' + this.pattern[ 0 ] + this.pattern[ 1 ] + 'b' + this.pattern[ 3 ] ];
+            const thxxox = methods[ this.base_name + '__' + this.pattern[ 0 ] + this.pattern[ 1 ] + 'o' + this.pattern[ 3 ] ];
+
+            if ( sref_2 ) 
+                test_pf( new Surdef( dla_2, null, ( val_0: Rp, val_1: Rp, val_2: Rp, val_3: Rp, ...args ) => thxxbx.call_3( val_0, val_1, sref_2.func( val_2 ), val_3, ...args ) ) );
+            else if ( sval_2 )
+                test_pf( new Surdef( dla_2, null, ( val_0: Rp, val_1: Rp, val_2: Rp, val_3: Rp, ...args ) => thxxox.call_3( val_0, val_1, sval_2.func( val_2 ), val_3, ...args ) ) );
+            else if ( sptr_2 )
+                test_pf( new Surdef( dla_2, null, ( val_0: Rp, val_1: Rp, val_2: Rp, val_3: Rp, ...args ) => thxxbx.call_3( val_0, val_1, sptr_2.func( val_2 ), val_3, ...args ) ) );
+
+            // test arg 3
+            const pref_3 = methods[ 'prox_ref__' + this.pattern[ 2 ] ];
+            const pval_3 = methods[ 'prox_val__' + this.pattern[ 2 ] ];
+            const pptr_3 = methods[ 'prox_ptr__' + this.pattern[ 2 ] ];
+            const sref_3 = pref_3 ? pref_3.find_best_func_1( type_3, 1 ) : null;
+            const sval_3 = pval_3 ? pval_3.find_best_func_1( type_3, 1 ) : null;
+            const sptr_3 = pptr_3 ? pptr_3.find_best_func_1( type_3, 1 ) : null;
+            const thxxxb = methods[ this.base_name + '__' + this.pattern[ 0 ] + this.pattern[ 1 ] + this.pattern[ 2 ] + 'b' ];
+            const thxxxo = methods[ this.base_name + '__' + this.pattern[ 0 ] + this.pattern[ 1 ] + this.pattern[ 2 ] + 'o' ];
+
+            if ( sref_3 ) 
+                test_pf( new Surdef( dla_3, null, ( val_0: Rp, val_1: Rp, val_2: Rp, val_3: Rp, ...args ) => thxxxb.call_3( val_0, val_1, val_2, sref_3.func( val_3 ), ...args ) ) );
+            else if ( sval_3 )
+                test_pf( new Surdef( dla_3, null, ( val_0: Rp, val_1: Rp, val_2: Rp, val_3: Rp, ...args ) => thxxxo.call_3( val_0, val_1, val_2, sval_3.func( val_3 ), ...args ) ) );
+            else if ( sptr_3 )
+                test_pf( new Surdef( dla_3, null, ( val_0: Rp, val_1: Rp, val_2: Rp, val_3: Rp, ...args ) => thxxxb.call_3( val_0, val_1, val_2, sptr_3.func( val_3 ), ...args ) ) );
+        }
 
         // __xo, __sx, ... ?
         if ( for_a_test <= 1 ) {

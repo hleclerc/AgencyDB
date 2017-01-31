@@ -164,6 +164,7 @@ class Operation extends Sym {
             case "div"               : return bin( Operation.prec.DIV     , "/"   );
             case "mod"               : return bin( Operation.prec.REM     , "%"   );
             case "or_bin"            : return bin( Operation.prec.OR_BIN  , "|"   );
+            case "xor_bin"           : return bin( Operation.prec.AND_BIN , "^"   );
             case "and_bin"           : return bin( Operation.prec.AND_BIN , "&"   );
             case "or_log"            : return bin( Operation.prec.OR_LOG  , "||"  );
             case "and_log"           : return bin( Operation.prec.AND_LOG , "&&"  );

@@ -1,6 +1,7 @@
 /// <reference path="../node_modules/@types/mocha/index.d.ts"/>
 import Codegen    from "../src/Symbol/Codegen" 
 import LvString   from "../src/LvString"
+import LvNumber   from "../src/LvNumber"
 import LvMap      from "../src/LvMap"
 import { assert } from "chai"
 

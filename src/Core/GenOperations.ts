@@ -103,10 +103,10 @@ class GenOperation<UT> {
     // }
 
     write( lang: string ): void {
-        wl( `import BinaryWriter    from "../System/BinaryWriter"` );
-        wl( `import BinaryReader    from "../System/BinaryReader"` );
-        wl( `import UsrId           from "../System/UsrId"`        );
-        wl( `import DevId           from "../System/DevId"`        );
+        wl( `import BinaryWriter from "../System/BinaryWriter"` );
+        wl( `import BinaryReader from "../System/BinaryReader"` );
+        wl( `import UsrId        from "../System/UsrId"`        );
+        wl( `import DevId        from "../System/DevId"`        );
         wl();
 
         // bin_repr
@@ -318,7 +318,7 @@ class GenOperation<UT> {
                 nb_sp += 4;
                 wl( `let ${ Object.keys( op.inst ).map( x => x + "_tmp" ).join( ', ' ) };` );
                 wl( Codegen.make_code( li, lang ) );
-                wl( `bw_new.write_PI8( ${ op.num } );` + Object.keys( op.inst ).map( x => ` bw_new.write_${ this.gen_type( op.inst[ x ] ) }( ${ x }_tmp );` ).join( '' ) );
+                wl( `bw_new.write_PI8( ${ op.num } );` + this.bw_write_obj( lang, op, "bw_new", "_tmp" ) );
                 nb_sp -= 4;
                 wl( `}` ); 
             }

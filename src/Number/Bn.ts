@@ -125,7 +125,12 @@ let num_methods = {
     add:      ( o_0, o_1 ) => new BN_FP64(   methods[ "to_Number__b" ].call_1( o_0 ) +  methods[ "to_Number__b" ].call_1( o_1 ) ),
     sub:      ( o_0, o_1 ) => new BN_FP64(   methods[ "to_Number__b" ].call_1( o_0 ) -  methods[ "to_Number__b" ].call_1( o_1 ) ),
     mul:      ( o_0, o_1 ) => new BN_FP64(   methods[ "to_Number__b" ].call_1( o_0 ) *  methods[ "to_Number__b" ].call_1( o_1 ) ),
-    div:      ( o_0, o_1 ) => new BN_FP64(   methods[ "to_Number__b" ].call_1( o_0 ) /  methods[ "to_Number__b" ].call_1( o_1 ) )
+    div:      ( o_0, o_1 ) => new BN_FP64(   methods[ "to_Number__b" ].call_1( o_0 ) /  methods[ "to_Number__b" ].call_1( o_1 ) ),
+    or_log:   ( o_0, o_1 ) => new BN_FP64(   methods[ "to_Number__b" ].call_1( o_0 ) || methods[ "to_Number__b" ].call_1( o_1 ) ),
+    and_log:  ( o_0, o_1 ) => new BN_FP64(   methods[ "to_Number__b" ].call_1( o_0 ) && methods[ "to_Number__b" ].call_1( o_1 ) ),
+    or_bin:   ( o_0, o_1 ) => new BN_FP64(   methods[ "to_Number__b" ].call_1( o_0 ) |  methods[ "to_Number__b" ].call_1( o_1 ) ),
+    and_bin:  ( o_0, o_1 ) => new BN_FP64(   methods[ "to_Number__b" ].call_1( o_0 ) &  methods[ "to_Number__b" ].call_1( o_1 ) ),
+    xor_bin:  ( o_0, o_1 ) => new BN_FP64(   methods[ "to_Number__b" ].call_1( o_0 ) ^  methods[ "to_Number__b" ].call_1( o_1 ) ),
 }
 
 // unary
@@ -133,7 +138,7 @@ for( let n of [ "is_eqz", "is_pos", "not_bin", "not_log", "neg" ] )
     methods[ n + "__b" ].add_surdef( 1, [ "to_Number__b" ], num_methods[ n ] );
 
 // binary
-for( let n of [ "is_equ", "is_inf", "is_infeq", "add", "sub", "mul", "div" ] )
+for( let n of [ "is_equ", "is_inf", "is_infeq", "add", "sub", "mul", "div", "and_log", "or_log", "and_bin", "or_bin", "xor_bin" ] )
     methods[ n + "__bb" ].add_surdef( 1, [ "to_Number__b", "to_Number__b" ], num_methods[ n ] );
 
 methods[ "set__sb" ].add_surdef( 10, [ BN_FP64, BN_FP64 ], ( a, b ) => { a.val = b.val; return a; } );
