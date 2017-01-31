@@ -50,8 +50,9 @@ class LvNumber extends Variable<LvNumber> {
     self_mul    ( val: number | LvNumber ): LvNumber { this.rp = typeof val == 'number' ? methods[ "mul__so" ].call_2s( this, new BN_FP64( val ) ) : methods[ "mul__sb" ].call_2s( this, val.rp ); return this; }
     self_div    ( val: number | LvNumber ): LvNumber { this.rp = typeof val == 'number' ? methods[ "div__so" ].call_2s( this, new BN_FP64( val ) ) : methods[ "div__sb" ].call_2s( this, val.rp ); return this; }
 
-    self_or_bin ( val: number | LvNumber ): LvNumber { this.rp = typeof val == 'number' ? methods[ "or_bin__so" ].call_2s( this, new BN_FP64( val ) ) : methods[ "or_bin__sb" ].call_2s( this, val.rp ); return this; }
-    self_and_bin( val: number | LvNumber ): LvNumber { this.rp = typeof val == 'number' ? methods[ "or_bin__so" ].call_2s( this, new BN_FP64( val ) ) : methods[ "or_bin__sb" ].call_2s( this, val.rp ); return this; }
+    self_or_bin ( val: number | LvNumber ): LvNumber { this.rp = typeof val == 'number' ? methods[ "or_bin__so"  ].call_2s( this, new BN_FP64( val ) ) : methods[ "or_bin__sb"  ].call_2s( this, val.rp ); return this; }
+    self_xor_bin( val: number | LvNumber ): LvNumber { this.rp = typeof val == 'number' ? methods[ "xor_bin__so" ].call_2s( this, new BN_FP64( val ) ) : methods[ "xor_bin__sb" ].call_2s( this, val.rp ); return this; }
+    self_and_bin( val: number | LvNumber ): LvNumber { this.rp = typeof val == 'number' ? methods[ "and_bin__so" ].call_2s( this, new BN_FP64( val ) ) : methods[ "and_bin__sb" ].call_2s( this, val.rp ); return this; }
 
     self_not_bin(): LvNumber { this.rp = methods[ "not_bin__s" ].call_1s( this ); return this; }
     self_not_log(): LvNumber { this.rp = methods[ "not_log__s" ].call_1s( this ); return this; }

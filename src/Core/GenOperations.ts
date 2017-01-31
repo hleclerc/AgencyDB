@@ -46,10 +46,14 @@ class GenOperation<UT> {
         this.apply( AddUsrRight, ( d, o: AddUsrRight ) => { const v = ( d as any as OtWrapperWithRightFlags ).right_flags.get( o.usr ); v.self_or_bin( o.flags ); } );
         this.apply( RemUsrRight, ( d, o: RemUsrRight ) => { const v = ( d as any as OtWrapperWithRightFlags ).right_flags.get( o.usr ); v.self_and_bin( o.flags.not_bin() ); } );
 
-        this.right( AddUsrRight, ( d: UT, o: AddUsrRight, f: LvNumber, r: LvNumber ) => r.set( f.and_bin( this.flag( "add_usr_right" ) ) ) );
-        this.right( RemUsrRight, ( d: UT, o: RemUsrRight, f: LvNumber, r: LvNumber ) => r.set( f.and_bin( this.flag( "rem_usr_right" ) ) ) );
+        this.undo ( AddUsrRight, ( d, o: AddUsrRight ) => ( d as any as OtWrapperWithRightFlags ).right_flags.get( o.usr ).self_xor_bin( o.flags ) );
+        this.undo ( RemUsrRight, ( d, o: RemUsrRight ) => ( d as any as OtWrapperWithRightFlags ).right_flags.get( o.usr ).self_xor_bin( o.flags ) );
 
-        
+        this.right( AddUsrRight, ( d, o: AddUsrRight, f: LvNumber, r: LvNumber ) => r.set( f.and_bin( this.flag( "add_usr_right" ) ) ) );
+        this.right( RemUsrRight, ( d, o: RemUsrRight, f: LvNumber, r: LvNumber ) => r.set( f.and_bin( this.flag( "rem_usr_right" ) ) ) );
+
+        this.store( AddUsrRight, ( d, o: AddUsrRight ) => [ { type: AddUsrRight, data: { usr: o.usr, flags: o.flags.and_bin( ( d as any as OtWrapperWithRightFlags ).right_flags.get( o.usr ).not_bin() ) } as AddUsrRight } ] );
+        this.store( RemUsrRight, ( d, o: RemUsrRight ) => [ { type: RemUsrRight, data: { usr: o.usr, flags: o.flags.and_bin( ( d as any as OtWrapperWithRightFlags ).right_flags.get( o.usr )           ) } as RemUsrRight } ] );
     }
 
     /** add description of permission */
