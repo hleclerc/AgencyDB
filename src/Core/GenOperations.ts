@@ -1,4 +1,5 @@
 import Codegen  from "../Symbol/Codegen"
+import { _if }  from "../Symbol/If";
 import LvNumber from "../LvNumber"
 import LvString from "../LvString"
 import LvUsrId  from "../LvUsrId"
@@ -54,6 +55,24 @@ class GenOperation<UT> {
 
         this.store( AddUsrRight, ( d, o: AddUsrRight ) => [ { type: AddUsrRight, data: { usr: o.usr, flags: o.flags.and_bin( ( d as any as OtWrapperWithRightFlags ).right_flags.get( o.usr ).not_bin() ) } as AddUsrRight } ] );
         this.store( RemUsrRight, ( d, o: RemUsrRight ) => [ { type: RemUsrRight, data: { usr: o.usr, flags: o.flags.and_bin( ( d as any as OtWrapperWithRightFlags ).right_flags.get( o.usr )           ) } as RemUsrRight } ] );
+
+        // i: 010011
+        // o: 011111  ADD(001100)
+        // n: 111011  ADD(101000)
+        // r: 111111  (n:(o->r) = ADD(100000); o:(n->r) = unk: ADD(000100))
+        this.fwd_trans( AddUsrRight, AddUsrRight, ( o: AddUsrRight, n: AddUsrRight ) => _if( o.usr.equ( n.usr ), () => {
+            n.flags.self_and_bin( o.flags.not_bin() );
+            o.flags.self_and_bin( n.flags.not_bin() );
+        } ) );
+
+        // i: 010011
+        // o: 010000  REM(000011)
+        // n: 000010  REM(010001)
+        // r: 000000  (n:(o->r) = REM(010000); o:(n->r) = REM(000010))
+        this.fwd_trans( RemUsrRight, RemUsrRight, ( o: RemUsrRight, n: RemUsrRight ) => _if( o.usr.equ( n.usr ), () => {
+            n.flags.self_and_bin( o.flags.not_bin() );
+            o.flags.self_and_bin( n.flags.not_bin() );
+        } ) );
     }
 
     /** add description of permission */

@@ -135,7 +135,14 @@ class If extends Sym {
 Sym.make_templ( If );
 
 export 
-function _if( cond: any, ok: () => any, ko?: () => any ) {
+function _if( cond: any, ok: () => any, ...rem ) { // ko?: () => any
+    // helper
+    function ko() {
+        if ( rem.length == 0 ) return;
+        if ( rem.length == 1 ) return rem[ 0 ]();
+        return _if( rem[ 0 ], rem[ 1 ], ...rem.slice( 2 ) );
+    }
+
     if ( cond instanceof VarAnc ) {
         const b_cond = cond.toBooleanVariable;
         if ( ! ( b_cond.rp instanceof Sym ) )
@@ -179,5 +186,6 @@ function _if( cond: any, ok: () => any, ko?: () => any ) {
         inp_if.forEach( ( v, num ) => { v.rp = get_nout( rp_if, num ); } );
         return;
     }
+    //
     return cond ? ok() : ko();
 }

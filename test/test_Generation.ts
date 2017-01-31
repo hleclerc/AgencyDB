@@ -18,8 +18,8 @@ function sequ( a, b, msg?: string ) {
  */
 describe( 'Generation', () => {
     it( 'mixed self/not self', () => {
-        const a = LvString.symbol( "a" );
-        const b = LvString.symbol( "b" );
+        const a = LvString.symbol( "A" );
+        const b = LvString.symbol( "B" );
         const t = b.concat( a ); // ba
         const o = b.copy(); // b
         b.append( "c" ); // => bc
@@ -28,11 +28,11 @@ describe( 'Generation', () => {
 
         // Graphviz.display( [ b.rp ] );
         const code = Codegen.make_code( [ b ] );
-        sequ( code, 'var T0=b+a,T1=b;b+="c";b+=T0;b+=T1;' );
+        sequ( code, 'var T0=B+A,T1=B;B+="c";B+=T0;B+=T1;' );
         {
-            let b = "b", a = "a";
+            let B = "b", A = "a";
             eval( code );
-            sequ( b, "bcbab" );
+            sequ( B, "bcbab" );
         }
     } );
 
@@ -56,10 +56,18 @@ describe( 'Generation', () => {
         sequ( Codegen.make_code( [ str ] ), 'if(cond){str+="c";}str+="d";' );
     } );
 
+    it( 'if else', () => {
+        const str = LvString.symbol( "str" ), c0 = LvString.symbol( "c0" ), c1 = LvString.symbol( "c1" );
+        _if( c0, () => str.append( 's0' ), c1, () => str.append( 's1' ), () => str.append( 's2' ) );
+
+        // Graphviz.display( [ str.rp ] );
+        sequ( Codegen.make_code( [ str ] ), 'if(c0){str+="s0";}else{if(c1){str+="s1";}else{str+="s2";}}' );
+    } );
+
     it( 'if with interleaved outputs', () => {
-        const a = LvString.symbol( "a" );
-        const b = LvString.symbol( "b" );
-        const c = LvString.symbol( "c" );
+        const a = LvString.symbol( "A" );
+        const b = LvString.symbol( "B" );
+        const c = LvString.symbol( "C" );
         _if( c, () => {
             const t = a.copy();
             a.set( b );
@@ -68,16 +76,16 @@ describe( 'Generation', () => {
 
         const code = Codegen.make_code( [ a, b ] )
         // Graphviz.display( [ a.rp, b.rp ] );
-        sequ( code, 'if(c){var T0=a;a=b;b=T0;}' );
+        sequ( code, 'if(C){var T0=A;A=B;B=T0;}' );
         {
-            let b = "b", a = "a", c = null;
+            let A = "a", B = "b", C = null;
             eval( code );
-            sequ( a, "a" );
-            sequ( b, "b" );
-            c = '.';
+            sequ( A, "a" );
+            sequ( B, "b" );
+            C = '.';
             eval( code );
-            sequ( b, "a" );
-            sequ( a, "b" );
+            sequ( B, "a" );
+            sequ( A, "b" );
         }
     } );
 
@@ -197,18 +205,11 @@ describe( 'Generation', () => {
     //     sequ( Codegen.make_code( [ res ] ), 'r=(n+5)*10;' );
     // } );
 
-
-
-
-
-
-
     // it( 'while with known values', () => {
     //     let k = 0;
     //     _while( () => k < 10, () => k += 1 );
     //     sequ( k, 10 );
     // } );
-
 
     // it( 'pouet', () => {
         // let ofg = new OtFuncsGeneration();

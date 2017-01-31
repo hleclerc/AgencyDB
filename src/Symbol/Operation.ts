@@ -186,6 +186,7 @@ class Operation extends Sym {
                             lst.map( ch => "[" + cg.inline_code( ch, Operation.prec.GROUP ) + "]" ).join( "" ) );
                     // par( Operation.prec.CALL, cg.inline_code( this.children[ 0 ], Operation.prec.CALL ) + "[" + cg.inline_code( this.children[ 1 ], Operation.prec.GROUP ) + "]" )
                 }
+                console.error( this.children[ 1 ].item );
                 throw new Error( "TODO" );
             case "heads"             : return par( Operation.prec.MEMBER, `${ cg.inline_code( this.children[ 0 ], Operation.prec.MEMBER ) }.substr(0,${ cg.inline_code( this.children[ 1 ], Operation.prec.COMMA ) })` );
             case "tails"             : return par( Operation.prec.MEMBER, `${ cg.inline_code( this.children[ 0 ], Operation.prec.MEMBER ) }.substr(${ cg.inline_code( this.children[ 1 ], Operation.prec.GROUP ) })` );

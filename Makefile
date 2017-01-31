@@ -1,6 +1,7 @@
 all:
-	nsmake mocha test/test_String.ts
+	nsmake mocha -DNO_OPERATIONAL_TRANSFORM test/test_Generation.ts
 
+	# nsmake mocha test/test_String.ts
 	# nsmake mocha -DNO_OPERATIONAL_TRANSFORM test/test_LvMap.ts
 clean:
 	nsmake stop;

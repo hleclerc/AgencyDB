@@ -37,42 +37,42 @@ go.right( RemUnd, ( d: OtWrapperString, o: Insert, f: LvNumber, r: LvNumber ) =>
 // combinations
 go.fwd_trans( Insert, Insert, ( o: Insert, n: Insert ) => {
     _if( o.pos.is_sup( n.pos ), () => {
-        // orig 01234
-        // real 0123unk4    INS(args_o[ 0 ]=4,args_o[ 1 ]=unk)
-        // imag 0new1234    INS(args_n[ 0 ]=1,args_n[ 1 ]=new)
-        // obj  0new123unk4 (real -> obj = new: INS 1,new; imag -> obj = unk: INS 7,unk)
+        // i: 01234      
+        // o: 0123unk4    INS(4,unk)
+        // n: 0new1234    INS(1,new)
+        // r: 0new123unk4 n:(o->r) = INS(1,new); o:(n->r) = INS(7,unk)
         o.pos.self_add( n.str.length );
     }, () => {
-        // orig 01234
-        // real 0123unk4    INS(args_o[ 0 ]=4,args_o[ 1 ]=unk)
-        // imag 0new1234    INS(args_n[ 0 ]=1,args_n[ 1 ]=new)
-        // obj  0new123unk4 (real -> obj = new: INS 1,new; imag -> obj = unk: INS 7,unk)
+        // i: 01234
+        // o: 0123unk4    INS(4,unk)
+        // n: 0new1234    INS(1,new)
+        // r: 0new123unk4 n:(o->r) = INS(1,new); o:(n->r) = INS(7,unk)
         n.pos.self_add( o.str.length );
     } );
 } );
 
-// go.fwd_trans( Insert, Remove, ( o: Insert, n: Remove ) => {
-//     if ( p_n >= p_o + l_o ) {
-//         // orig 012345
-//         // real 0345      REM(p_o=1,l_o=2)
-//         // imag 01234new5 INS(p_n=5,d_n=new)
-//         // obj  034new5   (real -> obj = new: INS 3,new; imag -> obj = unk: REM 1,2)
-//         p_n -= l_o; // 3
-//     } else if ( p_n <= p_o ) {
-//         // orig 012345
-//         // real 0125      REM(p_o=3,l_o=2)
-//         // imag 0new12345 INS(p_n=1,d_n=new)
-//         // obj  0new125   (real -> obj = new: INS 1,new; imag -> obj = unk: REM 6,2)
-//         p_o += d_n.size();
-//     } else {
-//         // orig 012345
-//         // real 05        REM(p_o=1,l_o=4)
-//         // imag 012new345 INS(p_n=3,d_n=new)
-//         // obj  0new5     (real -> obj = new: INS 1,new; imag -> obj = unk: REM 1,2 + REM 4,2)
-//         reg_op_in( bq_o, op_remove{}, p_o, p_n - p_o ); // 1, 2
-//         l_o -= p_n - p_o;  // 2
-//         p_n = p_o;         // 1
-//         p_o += d_n.size(); // 4
+// go.fwd_trans( Remove, Insert, ( o: Remove, n: Insert ) => {
+//     _if( n.pos >= o.pos.add( o.len ), () => {
+//         // i: 012345
+//         // o: 0345      REM(1,2)
+//         // n: 01234new5 INS(5,new)
+//         // r: 034new5   n:(o->r) = INS(3,new); o:(n->r) = REM(1,2)
+//         n.pos.self_sub( o.len ); // 3
+//     }, n.pos.is_infeq( o.pos ), () => {
+//         // i: 012345
+//         // o: 0125      REM(o.pos=3,o.len=2)
+//         // n: 0new12345 INS(n.pos=1,d_n=new)
+//         // r: 0new125   n:(o->r) = INS 1,new; o:(n->r) = REM(6,2)
+//         o.pos.self_add( n.str.length );
+//     }, () => {
+//         // i: 012345
+//         // o: 05        REM(o.pos=1,o.len=4)
+//         // n: 012new345 INS(n.pos=3,d_n=new)
+//         // r: 0new5     n:(o->r) = INS 1,new; o:(n->r) = REM(1,2) + REM(4,2)
+//         reg_op_in( bq_o, op_remove{}, o.pos, n.pos - o.pos ); // 1, 2
+//         o.len -= n.pos - o.pos;  // 2
+//         n.pos = o.pos;         // 1
+//         o.pos += d_n.size(); // 4
 //     }
 // } );
 
@@ -84,7 +84,7 @@ go.write( "ts" );
 
 
 
-// void OtWrapperString::unk_new_or_new_unk( op_insert, op_remove, UsrId asu_n, BBQ bq_n, BBQ bq_o, PT &p_n, CbString &d_n, PT &p_o, PT &l_o ) {
+// void OtWrapperString::unk_new_or_new_unk( op_insert, op_remove, UsrId asu_n, BBQ bq_n, BBQ bq_o, PT &p_n, CbString &d_n, PT &p_o, PT &o.len ) {
 // }
 
 // void OtWrapperString::unk_new_or_new_unk( op_insert, op_remove_und, UsrId asu_n, BBQ bq_n, BBQ bq_o, PT &p_n, CbString &d_n, PT &p_o, CbString &d_o ) {

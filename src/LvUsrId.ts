@@ -5,6 +5,7 @@ import Rp          from "./Core/Rp"
 import GenSymbol   from "./Symbol/GenSymbol"
 import GenUsrId    from "./UsrId/GenUsrId"
 import UsrId       from "./System/UsrId"
+import LvNumber    from "./LvNumber"
 
 //
 export default
@@ -23,6 +24,10 @@ class LvUsrId extends Variable<LvUsrId> {
 
     static symbol( name: string ): LvUsrId {
         return new LvUsrId( new GenSymbol( LvUsrId, name ) );
+    }
+
+    equ( usr: LvUsrId ): LvNumber {
+        return new LvNumber( methods[ "is_neg__b" ].call_2( this.rp, usr.rp ) );
     }
 
     copy() : LvUsrId {
