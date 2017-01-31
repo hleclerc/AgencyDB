@@ -65,11 +65,16 @@ describe( 'LvMap', () => {
 
     it( 'symbolic self ops', () => {
         const S = LvMap( LvString, LvString );
+        // const T = LvMap( LvString, LvMap( LvString, LvString ) );
         let s = S.symbol( "s" );
+        // let t = T.symbol( "t" );
         
         s.get( "b" ).append( "B" );
-        console.log( s.toString() );
-        console.log( Codegen.make_code( [ s ] ) );
+        sequ( Codegen.make_code( [ s ] ), 's.set("b",s.get("b")+"B");' );
+
+        // t.get( "b" ).get( "c" ).append( "BC" );
+        // console.log( t.toString() );
+        // console.log( Codegen.make_code( [ t ] ) );
     });
 });
 

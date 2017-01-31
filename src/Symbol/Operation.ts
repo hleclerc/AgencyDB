@@ -170,7 +170,17 @@ class Operation extends Sym {
             case "signed_shift_left" : return bin( Operation.prec.SLFT_SHT, "<<"  );
             case "signed_shift_right": return bin( Operation.prec.SRGT_SHT, ">>"  );
             case "zfill_shift_right" : return bin( Operation.prec.RGT_SHT , ">>>" );
-            case "select"            : return par( Operation.prec.CALL, cg.inline_code( this.children[ 0 ], Operation.prec.CALL ) + "[" + cg.inline_code( this.children[ 1 ], Operation.prec.COMMA ) + "]" );
+            case "select"            :
+                if ( this.children[ 1 ].item instanceof RpListSymbolic ) {
+                    const lst = this.children[ 1 ].item.children;
+                    if ( this.children[ 0 ].item.variable_type__b().use_get_for_select )
+                        return par( Operation.prec.MEMBER, cg.inline_code( this.children[ 0 ], Operation.prec.MEMBER ) + 
+                            lst.map( ch => ".get(" + cg.inline_code( ch, Operation.prec.GROUP ) + ")" ).join( "" ) );
+                    return par( Operation.prec.CALL, cg.inline_code( this.children[ 0 ], Operation.prec.CALL ) + 
+                            lst.map( ch => "[" + cg.inline_code( ch, Operation.prec.GROUP ) + "]" ).join( "" ) );
+                    // par( Operation.prec.CALL, cg.inline_code( this.children[ 0 ], Operation.prec.CALL ) + "[" + cg.inline_code( this.children[ 1 ], Operation.prec.GROUP ) + "]" )
+                }
+                throw new Error( "TODO" );
             case "heads"             : return par( Operation.prec.MEMBER, `${ cg.inline_code( this.children[ 0 ], Operation.prec.MEMBER ) }.substr(0,${ cg.inline_code( this.children[ 1 ], Operation.prec.COMMA ) })` );
             case "tails"             : return par( Operation.prec.MEMBER, `${ cg.inline_code( this.children[ 0 ], Operation.prec.MEMBER ) }.substr(${ cg.inline_code( this.children[ 1 ], Operation.prec.GROUP ) })` );
             // ternary

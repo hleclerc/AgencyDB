@@ -45,6 +45,7 @@ export default function LvMap_func<K extends VarAnc,V extends VarAnc,U>( k: { ne
 //
 function LvMap_fact<K extends VarAnc,V extends VarAnc>( k: { new(): K; make_Rp: ( any ) => Rp; }, v: { new( rp?: Rp ): V; make_Rp: ( any ) => Rp; } ) {
     class _LvMap extends Variable<_LvMap> implements LvMap<K,V> {
+        static use_get_for_select = true; /** used for code generation. TODO: something that depends on Rp */
         static NativeType = Map;
         static key_type = k;
         static val_type = k;

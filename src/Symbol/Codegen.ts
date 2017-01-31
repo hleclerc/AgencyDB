@@ -110,16 +110,23 @@ function base_instruction_selection( targets: Array<Sym>, lang: string ) {
     targets.splice( 0, targets.length, ...Sym.dfs_repl_unique( targets, function( op: Sym ): Array<Link> {
         if ( op instanceof Operation ) {
             switch ( op.base_name ) {
-                case "remove_s": // a.substring( 0, children[ 1 ] ) + a.substring( children[ 1 + 2 ] )
+                // a.substring( 0, children[ 1 ] ) + a.substring( children[ 1 + 2 ] )
+                case "remove_s":
                     return [ make_op( "set__sb", op.children[ 0 ], make_op( "add__bb",
                         make_op( "heads__bb", op.children[ 0 ], op.children[ 1 ] ),
                         make_op( "tails__bb", op.children[ 0 ], make_op( "add__bb", op.children[ 1 ], op.children[ 2 ] ) )
                     ) ) ];
-                case "insert_s": // ( a.substring( 0, children[ 1 ] ) + children[ 2 ] ) + a.substring( children[ 1 ] )
+                // ( a.substring( 0, children[ 1 ] ) + children[ 2 ] ) + a.substring( children[ 1 ] )
+                case "insert_s":
                     return [ make_op( "set__sb", op.children[ 0 ], make_op( "add__bb", 
                         make_op( "add__bb", make_op( "heads__bb", op.children[ 0 ], op.children[ 1 ] ), op.children[ 2 ] ),
                         make_op( "tails__bb", op.children[ 0 ], op.children[ 1 ] )
                     ) ) ];
+            }
+
+            // ex: add__sbb( map, key, val ) => set__sbb( map, key, add__bb( select__bb( map, key ), val ) ) 
+            if ( op.method.select && op.method.base_name != "set" ) {
+                return [ make_op( "set__sbb", op.children[ 0 ], op.children[ 1 ], make_op( op.method.base_name + "__bb", make_op( "select__bb", op.children[ 0 ], op.children[ 1 ] ), op.children[ 2 ] ) ) ];
             }
         }
         return null;
@@ -141,7 +148,7 @@ class Codegen {
         return res;
     }
 
-    exec_wo_free( rp_targets: Array<Rp>, lang : string, prec = 0 ): string {
+    exec_wo_free( rp_targets: Array<Rp>, lang: string, prec = 0 ): string {
         const targets = rp_targets.filter( op => op instanceof Sym ) as Array<Sym>;
 
         // change instructions that can't be written in $lang (may change targets)
