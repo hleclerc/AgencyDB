@@ -132,10 +132,11 @@ class While extends Sym {
     }
     
     write_graphviz__b( gr: Graphviz ) {
-        gr.node( this, this.nb_inputs(), this.nb_outputs(), `While` );
-        gr.edge( this, -1, this.out_co, -1, { label: "co", style: "dashed", subgraph: { color: "yellow", style: "dotted" } } );
-        gr.edge( this, -1, this.out_bk, -1, { label: "bk", style: "dashed", subgraph: { color: "green" , style: "dotted" } } );
-        this.children.forEach( ( ch, num_ch ) => { gr.edge( this, num_ch, ch.item, ch.nout ); } );
+        if ( gr.node( this, this.nb_inputs(), this.nb_outputs(), `While` ) ) {
+            gr.edge( this, -1, this.out_co, -1, { label: "co", style: "dashed", subgraph: { color: "yellow", style: "dotted" } } );
+            gr.edge( this, -1, this.out_bk, -1, { label: "bk", style: "dashed", subgraph: { color: "green" , style: "dotted" } } );
+            this.children.forEach( ( ch, num_ch ) => { gr.edge( this, num_ch, ch.item, ch.nout ); } );
+        }
     }
 
     inp_co  : WhileInp;
@@ -151,10 +152,11 @@ function _while( cond_cb: () => any, block_cb?: () => void ) {
     let old_le = 0;
     let inp_co = new WhileInp();
     let inp_bk = new WhileInp();
-    let inp_wh = new Array<VarAnc>(); // variable modified during the while (cond or block)
+    let inp_wh = new Array<Rp>(); // variable modified during the while (cond or block)
+    let mod_xx = new Set<VarAnc>();
     let out_co = null as Array<Link>; // [ ...mod_co.entries() ].map( ( [ v, oan ] ) => skv_link( oan.n ) ).concat( cond );
     let out_bk = null as Array<Link>; // [ ...mod_co.entries() ].map( ( [ v, oan ] ) => skv_link( oan.n ) ).concat( cond );
-    let mod_co = new Map<VarAnc,{ o: Rp, b: Rp, n: Rp }>();
+    let mod_co = new Map<VarAnc,{o:Rp,b:Rp,n:Rp }>();
     while ( true ) {
         // condition
         let cond = null as Link;
@@ -162,8 +164,9 @@ function _while( cond_cb: () => any, block_cb?: () => void ) {
             const var_cond = new LvNumber( cond_cb() ).toBooleanVariable;
             cond = slo( var_cond.rp );
         }, function( val: VarAnc ) {
-            const ind = inp_wh.indexOf( val );
-            return get_nout( inp_co, ind >= 0 ? ind : inp_wh.push( val ) - 1 );
+            mod_xx.add( val );
+            const ind = inp_wh.indexOf( val.rp );
+            return get_nout( inp_co, ind >= 0 ? ind : inp_wh.push( val.rp ) - 1 );
         } );
 
         // save condition + modified variables 
@@ -172,14 +175,15 @@ function _while( cond_cb: () => any, block_cb?: () => void ) {
         // entry variables for the block
         let mod_bk = new Map<VarAnc,{ o: Rp, b: Rp, n: Rp }>();
         mod_co.forEach( ( oan, val ) => {
-            const n = get_nout( inp_bk, inp_wh.indexOf( val ) );
+            const n = get_nout( inp_bk, inp_wh.indexOf( val.rp ) );
             mod_bk.set( val, { o: oan.o, b: n, n } );
         } );
 
         // block (with mod_bk initialized by mod_co)
         Interceptor.run( mod_bk, block_cb, function( val: VarAnc ) {
-            const ind = inp_wh.indexOf( val );
-            return get_nout( inp_bk, ind >= 0 ? ind : inp_wh.push( val ) - 1 );
+            mod_xx.add( val );
+            const ind = inp_wh.indexOf( val.rp );
+            return get_nout( inp_bk, ind >= 0 ? ind : inp_wh.push( val.rp ) - 1 );
         } );
 
         // save modified variables 
@@ -193,7 +197,7 @@ function _while( cond_cb: () => any, block_cb?: () => void ) {
         // variables modified during bk, not seen by co
         mod_bk.forEach( ( oan, val ) => {
             if ( ! mod_co.get( val ) ) {
-                const n = get_nout( inp_co, inp_wh.indexOf( val ) );
+                const n = get_nout( inp_co, inp_wh.indexOf( val.rp ) );
                 mod_co.set( val, { o: oan.o, b: n, n } );
             }
         } );
@@ -201,10 +205,10 @@ function _while( cond_cb: () => any, block_cb?: () => void ) {
 
     // a While inst is basically a value modifier
     if ( Method.int_call_s )
-        inp_wh.forEach( ( v, num ) => { Method.int_call_s( v ); } );
+        mod_xx.forEach( Method.int_call_s );
 
     // modify variables to take while outputs
-    let rp_wh = new While( inp_wh.map( x => skv_link_o( x.rp ) ), inp_co, new WhileOutCond( out_co ), inp_bk, new WhileOut( out_bk ) );
-    inp_wh.forEach( ( v, num ) => { v.rp = get_nout( rp_wh, num ); } );
+    let rp_wh = new While( inp_wh.map( skv_link_o ), inp_co, new WhileOutCond( out_co ), inp_bk, new WhileOut( out_bk ) );
+    mod_xx.forEach(  v => v.rp = get_nout( rp_wh, inp_wh.indexOf( v.rp ) ) );
 }
 

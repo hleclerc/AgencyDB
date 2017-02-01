@@ -1,5 +1,8 @@
 import Codegen         from "../Symbol/Codegen"
 import { _if }         from "../Symbol/If"
+import Graphviz        from "../Core/Graphviz"
+import methods         from "../Core/methods" 
+import Rp              from "../Core/Rp"
 import LvNumber        from "../LvNumber"
 import LvString        from "../LvString"
 import LvUsrId         from "../LvUsrId"
@@ -26,16 +29,19 @@ class OpInfo<UT> {
 
 class BwRepr {
     constructor( go, suffix = "" ) {
+        const T = MA( LvAny as any );
         this.go  = go;
-        this.sym = MA( LvAny as any ).symbol( "lst_bw" + suffix ) as LvArray<LvAny>;
+        this.sym = T.symbol( "lst_bw" + suffix ) as LvArray<LvAny>;
+        this.orig_sym = this.sym.rp;
     }
     push( op_type, data ) {
         const op_info = this.go.operations.find( x => x.inst.constructor == op_type );
         this.sym.push( new LvNumber( op_info.num ) );
         Object.keys( op_info.inst ).forEach( name => this.sym.push( data[ name ] ) );
     }
-    go : any; /** GenOperation<...> */
-    sym: LvArray<LvAny>;
+    go      : any; /** GenOperation<...> */
+    sym     : LvArray<LvAny>;
+    orig_sym: Rp;
 }
 
 /** helper */
@@ -328,6 +334,8 @@ class GenOperation<UT> {
                 let data_new = this.make_symbolic_data( op_new.inst, "_new" );
                 let l = new BwRepr( this );
                 cb( data_unk, data_new, l );
+                if ( l.sym.rp != l.orig_sym )
+                    wl( `let ${ methods["to_String__b"].call_1( l.orig_sym ) } = [];` );
                 wl( Codegen.make_code( [
                     ...Object.keys( data_unk ).map( k => data_unk[ k ] ),
                     ...Object.keys( data_new ).map( k => data_new[ k ] ),

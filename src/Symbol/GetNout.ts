@@ -32,7 +32,12 @@ Sym.make_templ( GetNout );
 
 export
 function get_nout( item: Sym, nout: number ) {
-    return nout ? new GetNout( { item, nout } ) : item;
+    if ( nout ) {
+        if ( ! item.get_nouts[ nout - 1 ] )
+            item.get_nouts[ nout - 1 ] = new GetNout( { item, nout } );
+        return item.get_nouts[ nout - 1 ];
+    }
+    return item;
 }
  
 export

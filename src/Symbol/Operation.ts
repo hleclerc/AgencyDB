@@ -52,7 +52,7 @@ class Operation extends Sym {
     }
 
     repr_graphviz(): string {
-        return this.base_name;
+        return this.base_name + ( this.args.length ? "(" + this.args.map( x => x.toString() ).join( "," ) + ")" : "" );
     }
 
     self_ops(): Array<number> {
@@ -311,6 +311,15 @@ Method.plugins.push( function( test_pf, for_a_test, method, type_0, type_1, type
     }
 } )
 
+// particular case: args will become symbolic children
+methods[ "apply_method__s" ].add_surdef( 10, type => true, ( a: Rp, name: string, ...args: Array<Rp> ) => {
+    let res = new Operation( methods[ "apply_method__s" ], sls( a ), name );
+    for( const arg of args )
+        res.add_child( slb( arg ) );
+    return res;
+} );
+
+
 // default js_type definition
 Operation.add_variable_type_finder( 0, function( method, args ) {
     // -> bool
@@ -320,5 +329,5 @@ Operation.add_variable_type_finder( 0, function( method, args ) {
     // if ( method.pattern[ 0 ] == "s" || method.base_name == "set" )
     //     return args[ 0 ].variable_type__b();
     // by default, we return the first argument 
-    return args.length ? args[ 0 ].variable_type__b() : null;
+    return args.length && args[ 0 ].variable_type__b ? args[ 0 ].variable_type__b() : null;
 } );

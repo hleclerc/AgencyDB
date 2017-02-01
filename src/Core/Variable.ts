@@ -120,6 +120,11 @@ class VarAnc {
         return this;
     }
 
+    applyMethod( name, ...args: Array<VarAnc> ): VarAnc {
+        this.rp = methods["apply_method__s"].call_1s( this, name, ...args.map( x => x.rp ) );
+        return this;
+    }
+
     // then( callback ) {
     //     methods["then"].call_1( this, callback );
     // }
@@ -182,6 +187,10 @@ dstd( "to_native_type"         , 1, false ); //
 dstd( "prox_ptr"               , 1, false ); // returns a Variable, which can be modified
 dstd( "prox_ref"               , 1, false ); // returns an existing Variable, which should not be modified. prox_ref__o return the variable owned by the receiver. prox_ref__b return a variable that may have to be copied for a later use.
 dstd( "prox_val"               , 1, false ); // returns a computed Variable
+
+// generic calls
+dslf( "apply_method"           , 1        ); // takes a string (name of the method) + a list of parameters (Rp types)
+
 
 // OT   
 dslf( "add_patch_manager"      , 1        ); // enable notably to add a DbItem (which can be considered as a patch manager) 

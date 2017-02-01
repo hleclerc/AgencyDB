@@ -36,6 +36,16 @@ describe( 'Generation', () => {
         }
     } );
 
+    it( 'basic string operations', () => {
+        let s = LvString.symbol( "s" );
+        let t = LvString.symbol( "t" );
+        s.remove( 1, 2 );
+        t.insert( 1, "u" );
+        
+        sequ( Codegen.make_code( [ s ] ), "s=s.substr(0,1)+s.substr(3);" );
+        sequ( Codegen.make_code( [ t ] ), 't=t.substr(0,1)+"u"+t.substr(1);' );
+    });
+
     it( 'modify a new value', () => {
         const a = LvString.symbol( "a" );
         const b = LvString.symbol( "b" );

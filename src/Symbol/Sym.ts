@@ -1,8 +1,9 @@
 import methods       from "../Core/methods";
 import Graphviz      from "../Core/Graphviz";
 import Rp            from "../Core/Rp";
-import { cd }        from "./Codegen";
 import BlockCodegen  from "./BlockCodegen";
+import { cd }        from "./Codegen";
+import GetNout       from "./GetNout";
 
 export
 interface Link {
@@ -39,8 +40,8 @@ class Sym extends Rp {
     }
 
     write_graphviz__b( gr: Graphviz ) {
-        gr.node( this, this.nb_inputs(), this.nb_outputs(), this.repr_graphviz() );
-        this.children.forEach( ( ch, ind ) => gr.edge( this, ind, ch.item, ch.nout ) );
+        if ( gr.node( this, this.nb_inputs(), this.nb_outputs(), this.repr_graphviz() ) )
+            this.children.forEach( ( ch, ind ) => gr.edge( this, ind, ch.item, ch.nout ) );
     }
 
     repr_graphviz() {
@@ -87,6 +88,7 @@ class Sym extends Rp {
     children            = new Array<Link>();
     op_mp               = {} as any;
     op_id               = 0;
+    get_nouts           = new Array<GetNout>();
 
     static cur_op_id    = 0;
     static cur_sched_id = 0;
