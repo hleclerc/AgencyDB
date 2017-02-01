@@ -9,6 +9,7 @@ import LvNumber             from "./LvNumber"
 
 
 /** nasty stuff for typescipt: the actual content is defined inside LvArray_fact, which is inaccessible from here */
+export
 interface LvArray<V> extends Variable<LvArray<V>> {
     copy(): LvArray<V>;
     get( key: number | LvNumber ): V;                  /** return a proxy on the value */
@@ -29,7 +30,7 @@ interface LvArray_type<V> {
 const LvArray_map = new Map<any,any>();
 
 /** */
-export default function LvArray_func<V extends VarAnc,U>( v: { new(): V; make_Rp: ( any ) => Rp; } ): LvArray_type<V> {
+export default function LvArray_func<V extends VarAnc,U>( v: { new(): V; make_Rp: ( val: any ) => Rp; } ): LvArray_type<V> {
     let m = LvArray_map.get( v );
     if ( ! m ) 
         LvArray_map.set( v, m = LvArray_fact( v ) );
@@ -73,14 +74,14 @@ function LvArray_fact<V extends VarAnc>( v: { new( rp?: Rp ): V; make_Rp: ( any 
        
         set( key: number | LvNumber, val ): _LvArray {
             let sup = this.get( key );
-            sup.rp = val instanceof v ?
+            sup.rp = val instanceof VarAnc ?
                 methods["set__sb"].call_2s( sup, val.rp           ) :
                 methods["set__so"].call_2s( sup, v.make_Rp( val ) );
             return this;
         }
 
         push( val ): _LvArray {
-            this.rp = val instanceof v ?
+            this.rp = val instanceof VarAnc ?
                 methods["push__sb"].call_2s( this, val.rp           ) :
                 methods["push__so"].call_2s( this, v.make_Rp( val ) );
             return this;

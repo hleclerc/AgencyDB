@@ -21,7 +21,7 @@ class LvString extends Variable<LvString> {
         else                                super( LvString.make_Rp( val ) );
     }
 
-    static make_Rp( val: string ) {
+    static make_Rp( val: string ): Rp {
         return new GenString( val );
     }
 

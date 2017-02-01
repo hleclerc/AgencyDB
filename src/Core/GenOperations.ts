@@ -1,12 +1,15 @@
-import Codegen  from "../Symbol/Codegen"
-import { _if }  from "../Symbol/If";
-import LvNumber from "../LvNumber"
-import LvString from "../LvString"
-import LvUsrId  from "../LvUsrId"
-import LvMap    from "../LvMap"
-import * as fs  from "fs"
-
-export { _if }  from "../Symbol/If";
+import Codegen         from "../Symbol/Codegen"
+import Graphviz        from "../Core/Graphviz"
+import { _if }         from "../Symbol/If"
+import LvNumber        from "../LvNumber"
+import LvString        from "../LvString"
+import LvUsrId         from "../LvUsrId"
+import MA, { LvArray } from "../LvArray"
+import LvMap           from "../LvMap"
+import LvAny           from "../LvAny"
+import * as fs         from "fs"
+    
+export { _if }         from "../Symbol/If";
 
 export class Op {}
 
@@ -22,6 +25,20 @@ class OpInfo<UT> {
     right_to?: ( d: UT, o, f: LvNumber, r: LvNumber ) => void;
 };
 
+class BwRepr {
+    constructor( go, suffix = "" ) {
+        this.go  = go;
+        this.sym = MA( LvAny as any ).symbol( "lst_bw" + suffix ) as LvArray<LvAny>;
+    }
+    push( op_type, data ) {
+        const op_info = this.go.operations.find( x => x.inst.constructor == op_type );
+        this.sym.push( new LvNumber( op_info.num ) );
+        Object.keys( op_info.inst ).forEach( name => this.sym.push( data[ name ] ) );
+    }
+    go : any; /** GenOperation<...> */
+    sym: LvArray<LvAny>;
+}
+
 /** helper */
 let nb_sp = 0;
 function wl( str = "" ) {
@@ -30,6 +47,8 @@ function wl( str = "" ) {
 
 export class AddUsrRight { usr = new LvUsrId(); flags = new LvNumber(); };
 export class RemUsrRight { usr = new LvUsrId(); flags = new LvNumber(); };
+
+declare type TransFunc = ( o, n, l: BwRepr ) => void;
 
 export default 
 class GenOperation<UT> {
@@ -106,7 +125,7 @@ class GenOperation<UT> {
         return res;
     }
 
-    fwd_trans( o_op_type, n_op_type, cb: ( o, n, l: Array<{type:any,data:any}> ) => void ) {
+    fwd_trans( o_op_type, n_op_type, cb: TransFunc ) {
         this.trans_rules.set( `${ ( new o_op_type ).constructor.name } ${ ( new n_op_type ).constructor.name }`, cb );
     }
 
@@ -175,7 +194,7 @@ class GenOperation<UT> {
         wl( `        switch ( br.read_PI8() ) {` );
         for( const op of this.operations ) {
             if ( op.undo ) {
-                wl( `        case ${ op.num }: {` );
+                wl( `        case ${ op.num }: { // ${ op.inst.constructor.name }` );
                 nb_sp += 12;
                 this._write_undo_patch( lang, op );
                 nb_sp -= 12;
@@ -192,11 +211,13 @@ class GenOperation<UT> {
         // new_patch
         wl( `function new_patch( val: ${ this.cl_inst.constructor.name }, bw_new: BinaryWriter, br_new: BinaryReader, as_usr: UsrId, cq_unk: BinaryWriter, src_dev?: DevId, src_usr?: UsrId, cur_dev?: DevId, cur_usr?: UsrId ) {` );
         wl( `    while ( br_new.size ) {` );
+        wl( `        let br_unk = new BinaryReader( cq_unk.to_Uint8Array() );` );
+        wl( `        let bw_unk = new BinaryWriter;` );
         wl( `        switch ( br_new.read_PI8() ) {` );
-        for( const op of this.operations ) {
-            wl( `        case ${ op.num }: {` );
+        for( const op_new of this.operations ) {
+            wl( `        case ${ op_new.num }: { // ${ op_new.inst.constructor.name }` );
             nb_sp += 12;
-            this._write_new_patch( lang, op );
+            this._write_new_patch( lang, op_new );
             nb_sp -= 12;
             wl( `            break;` );
             wl( `        }` );
@@ -294,13 +315,11 @@ class GenOperation<UT> {
         wl( this.br_read_var( lang, op_new, "br_new", "_new" ) );
 
         // read unk data
-        wl( `let br_unk = new BinaryReader( cq_unk.to_Uint8Array() );` );
-        wl( `let bw_unk = new BinaryWriter;` );
         wl( `while ( br_unk.size ) {` );
         wl( `    const num_unk = br_unk.read_PI8();` );
         wl( `    switch ( num_unk ) {` );
         for( const op_unk of this.operations ) {
-            wl( `        case ${ op_unk.num }: {` );
+            wl( `        case ${ op_unk.num }: { // ${ op_unk.inst.constructor.name }` );
             nb_sp += 12;
             wl( this.br_read_var( lang, op_unk, "br_unk", "_unk", false ) );
             
@@ -308,12 +327,20 @@ class GenOperation<UT> {
             if ( cb ) {
                 let data_unk = this.make_symbolic_data( op_unk.inst, "_unk" );
                 let data_new = this.make_symbolic_data( op_new.inst, "_new" );
-                let l_sup = new Array<{type:any,data:any}>();
-                cb( data_unk, data_new, l_sup );
+                let l = new BwRepr( this );
+                cb( data_unk, data_new, l );
                 wl( Codegen.make_code( [
                     ...Object.keys( data_unk ).map( k => data_unk[ k ] ),
                     ...Object.keys( data_new ).map( k => data_new[ k ] ),
+                    l.sym
                 ], lang ) );
+                if ( l.sym.toString() != "lst_bw" )
+                    Graphviz.display( [
+                        ...Object.keys( data_unk ).map( k => data_unk[ k ].rp ),
+                        ...Object.keys( data_new ).map( k => data_new[ k ].rp ),
+                        l.sym.rp
+                    ] );
+                
             }
             wl( `bw_unk.write_PI8( ${ op_unk.num } ); ${ this.bw_write_obj( lang, op_unk, "bw_unk", "_unk" ) }` );
             nb_sp -= 12;
@@ -379,6 +406,6 @@ class GenOperation<UT> {
     cl_inst     : any; /** instance of symbolic repr of class */
     sym_corr    : { [ name: string ]: string }; /** names in symbolic repr to name in dst code */
     operations  = new Array<OpInfo<UT>>();
-    trans_rules = new Map<string,(o,n,l:Array<{type:any,data:any}>)=>void>();
+    trans_rules = new Map<string,TransFunc>();
     right_names = new Array<string>();
 }
