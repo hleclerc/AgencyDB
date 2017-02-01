@@ -27,12 +27,11 @@ describe( 'LvArray', () => {
 
         l.push( "a" );
         sequ( l, "push_s(l,a)" );
-        console.log( Codegen.make_code( [ l ] ) );
+        sequ( Codegen.make_code( [ l ] ), 'l.push("a");' );
         
-
         m.push( LvString.symbol( "a" ) );
         sequ( m, "push_s([],a)"  ); 
-        console.log( Codegen.make_code( [ m ] ) ); 
+        sequ( Codegen.make_code( [ m ] ), 'var T0=[];T0.push(a);' ); 
     });
 });
 
