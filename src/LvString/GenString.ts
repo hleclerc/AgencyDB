@@ -59,8 +59,6 @@ class GenString extends Rp {
         //// nsmake endif // NO_OPERATIONAL_TRANSFORM
     }
 
-    //// nsmake endif // NO_OPERATIONAL_TRANSFORM
-
     // get_patch_type( bw : BinaryWriter ) {
     //     bw.write_PT( PatchTypes.num.OtWrapperString_GenString );
     // }

@@ -2,8 +2,8 @@ import Variable       from "./Core/Variable"
 import methods        from "./Core/methods"
 import Rp             from "./Core/Rp"
 import GenSymbol      from "./Symbol/GenSymbol"
-import GenBuffer      from "./Buffer/GenBuffer"
-import { BN_FP64 }    from "./Number/Bn"
+import GenBuffer      from "./LvBuffer/GenBuffer"
+import { BN_FP64 }    from "./LvNumber/Bn"
 import LvNumber       from "./LvNumber"
 
 //

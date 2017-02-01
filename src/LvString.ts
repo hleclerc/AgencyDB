@@ -2,9 +2,9 @@ import Variable       from "./Core/Variable"
 import methods        from "./Core/methods"
 import Rp             from "./Core/Rp"
   
-import GenString      from "./String/GenString"
+import GenString      from "./LvString/GenString"
 import GenSymbol      from "./Symbol/GenSymbol"
-import { BN_PT }      from "./Number/Bn"
+import { BN_PT }      from "./LvNumber/Bn"
 import LvNumber       from "./LvNumber"
 
 // import Caret     from "./String/Caret";

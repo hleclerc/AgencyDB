@@ -3,8 +3,8 @@ import methods              from "./Core/methods"
 import Rp                   from "./Core/Rp"
            
 import GenSymbol            from "./Symbol/GenSymbol"
-import GenMap               from "./Map/GenMap"
-import { BN_PT }            from "./Number/Bn"
+import GenMap               from "./LvMap/GenMap"
+import { BN_PT }            from "./LvNumber/Bn"
 import LvNumber             from "./LvNumber"
 
 

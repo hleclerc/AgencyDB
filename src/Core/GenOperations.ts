@@ -106,7 +106,7 @@ class GenOperation<UT> {
         return res;
     }
 
-    fwd_trans( o_op_type, n_op_type, cb: ( o, n ) => void ) {
+    fwd_trans( o_op_type, n_op_type, cb: ( o, n, l: Array<{type:any,data:any}> ) => void ) {
         this.trans_rules.set( `${ ( new o_op_type ).constructor.name } ${ ( new n_op_type ).constructor.name }`, cb );
     }
 
@@ -293,10 +293,6 @@ class GenOperation<UT> {
         // read data
         wl( this.br_read_var( lang, op_new, "br_new", "_new" ) );
 
-        // test rights
-        wl( `if ( right_to.${ op_new.inst.constructor.name }( val, as_usr, ${ this.func_args_op( lang, op_new, false, "_new" ) } ) ) {` );
-        nb_sp += 4;
-
         // read unk data
         wl( `let br_unk = new BinaryReader( cq_unk.to_Uint8Array() );` );
         wl( `let bw_unk = new BinaryWriter;` );
@@ -312,7 +308,8 @@ class GenOperation<UT> {
             if ( cb ) {
                 let data_unk = this.make_symbolic_data( op_unk.inst, "_unk" );
                 let data_new = this.make_symbolic_data( op_new.inst, "_new" );
-                cb( data_unk, data_new );
+                let l_sup = new Array<{type:any,data:any}>();
+                cb( data_unk, data_new, l_sup );
                 wl( Codegen.make_code( [
                     ...Object.keys( data_unk ).map( k => data_unk[ k ] ),
                     ...Object.keys( data_new ).map( k => data_new[ k ] ),
@@ -325,6 +322,10 @@ class GenOperation<UT> {
         }
         wl( `    }` );
         wl( `}` );
+        
+        // test rights
+        wl( `if ( right_to.${ op_new.inst.constructor.name }( val, as_usr, ${ this.func_args_op( lang, op_new, false, "_new" ) } ) ) {` );
+        nb_sp += 4;
 
         // write back the new data
         if ( op_new.store ) {
@@ -378,6 +379,6 @@ class GenOperation<UT> {
     cl_inst     : any; /** instance of symbolic repr of class */
     sym_corr    : { [ name: string ]: string }; /** names in symbolic repr to name in dst code */
     operations  = new Array<OpInfo<UT>>();
-    trans_rules = new Map<string,(o,n)=>void>();
+    trans_rules = new Map<string,(o,n,l:Array<{type:any,data:any}>)=>void>();
     right_names = new Array<string>();
 }

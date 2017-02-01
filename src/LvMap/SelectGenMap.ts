@@ -1,6 +1,6 @@
 import { VarAnc }   from "../Core/Variable"
 import methods      from "../Core/methods"
-import { BN_PT }    from "../Number/Bn"
+import { BN_PT }    from "../LvNumber/Bn"
 import Rp           from "../Core/Rp"
 import GenMap       from "./GenMap"
 

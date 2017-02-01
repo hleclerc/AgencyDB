@@ -3,7 +3,7 @@ import methods     from "./Core/methods"
 import Rp          from "./Core/Rp"
 
 import GenSymbol   from "./Symbol/GenSymbol"
-import GenUsrId    from "./UsrId/GenUsrId"
+import GenUsrId    from "./LvUsrId/GenUsrId"
 import UsrId       from "./System/UsrId"
 import LvNumber    from "./LvNumber"
 
@@ -27,7 +27,7 @@ class LvUsrId extends Variable<LvUsrId> {
     }
 
     equ( usr: LvUsrId ): LvNumber {
-        return new LvNumber( methods[ "is_neg__b" ].call_2( this.rp, usr.rp ) );
+        return new LvNumber( methods[ "is_equ__bb" ].call_2( this.rp, usr.rp ) );
     }
 
     copy() : LvUsrId {

@@ -1,5 +1,5 @@
 import methods         from "../Core/methods"
-import { BN_FP64 }     from "../Number/Bn"
+import { BN_FP64 }     from "../LvNumber/Bn"
 import Rp              from "../Core/Rp"
 import LvNumber        from "../LvNumber"
 import LvBuffer        from "../LvBuffer"

@@ -116,7 +116,7 @@ class Operation extends Sym {
                             return `${ name }${ rl.children.length > 1 ? rl.children.slice( 0, rl.children.length - 1 ).map( x => `.get(${ cg.inline_code( x, Operation.prec.GROUP ) })` ).join( "" ) :
                              "" }.set(${ cg.inline_code( rl.children[ rl.children.length - 1 ], Operation.prec.COMMA ) },${ cg.inline_code( this.children[ 2 ], Operation.prec.COMMA ) })`;
 
-                        // case "add": return bin( "+=" );
+                        // case "and_bin": return bin_sop( "+=" );
                             
                         default:
                             return `${ name }.${ this.method.name }(${ [
@@ -134,8 +134,14 @@ class Operation extends Sym {
             }
             switch ( this.method.base_name ) {
                 // binary
-                case "add": return bin( '+=' );
-                case "set": return bin( '='  );
+                case "add"    : return bin( '+=' );
+                case "sub"    : return bin( '-=' );
+                case "mul"    : return bin( '*=' );
+                case "div"    : return bin( '/=' );
+                case "or_bin" : return bin( '|=' );
+                case "and_bin": return bin( '&=' );
+                case "xor_bin": return bin( '^=' );
+                case "set"    : return bin( '='  );
                 default:
                     return `${ name }.${ this.method.name }(${ [
                         ...this.children.slice( 1 ).map( ch => cg.inline_code( ch, Operation.prec.COMMA ) ),

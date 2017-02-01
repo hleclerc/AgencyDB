@@ -3,7 +3,7 @@ import methods     from "./Core/methods"
 import Rp          from "./Core/Rp"
 
 import GenSymbol   from "./Symbol/GenSymbol"
-import { BN_FP64 } from "./Number/Bn"
+import { BN_FP64 } from "./LvNumber/Bn"
 
 //
 export default
