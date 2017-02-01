@@ -31,6 +31,8 @@ class Graphviz {
     }
 
     node( val: Rp, nb_inputs: number, nb_outputs: number, label: string, info?: NodeInfo ) {
+        if ( this.map_item.has( val ) )
+            return;
         const name = `node_${ this.map_item.size }`;
         this.map_item.set( val, name );
         this.text += `  ${ name }`;

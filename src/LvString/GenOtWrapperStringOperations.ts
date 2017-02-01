@@ -73,8 +73,8 @@ go.fwd_trans( Remove, Insert, ( o: Remove, n: Insert, l ) => {
         l.push( Remove, { pos: o.pos, len: n.pos.sub( o.pos ) }  );
         // Prop 1: on fait un bq symbolique. Prop 2: on fait une liste JSON-like symbolique avec succession de données (typées UsrId, PT, ...)
         // genre les données à ajouter au bq
-        o.len.self_sub( n.pos.sub( o.pos ) ); // 2
-        n.pos.set( o.pos );                   // 1
+        // o.len.self_sub( n.pos.sub( o.pos ) ); // 2
+        // n.pos.set( o.pos );                   // 1
         o.pos.self_add( n.str.length );       // 4
     } );
 } );
