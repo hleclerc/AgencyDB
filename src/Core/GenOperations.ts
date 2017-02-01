@@ -1,5 +1,4 @@
 import Codegen         from "../Symbol/Codegen"
-import Graphviz        from "../Core/Graphviz"
 import { _if }         from "../Symbol/If"
 import LvNumber        from "../LvNumber"
 import LvString        from "../LvString"
@@ -334,13 +333,6 @@ class GenOperation<UT> {
                     ...Object.keys( data_new ).map( k => data_new[ k ] ),
                     l.sym
                 ], lang ) );
-                if ( l.sym.toString() != "lst_bw" )
-                    Graphviz.display( [
-                        ...Object.keys( data_unk ).map( k => data_unk[ k ].rp ),
-                        ...Object.keys( data_new ).map( k => data_new[ k ].rp ),
-                        l.sym.rp
-                    ] );
-                
             }
             wl( `bw_unk.write_PI8( ${ op_unk.num } ); ${ this.bw_write_obj( lang, op_unk, "bw_unk", "_unk" ) }` );
             nb_sp -= 12;

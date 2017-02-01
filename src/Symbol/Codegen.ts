@@ -161,6 +161,9 @@ class Codegen {
         // ensure that sub blocks (like the one with IfOut above) are totally independant 
         sep_sub_blocks( targets, 0 );
 
+        // if( methods["to_String__b"].call_1( rp_targets[ rp_targets.length - 1 ] ).startsWith( "GetNout" ) )
+        //     Graphviz.display( targets );
+                
         // set up parents, in current and sub blocks recursively
         set_up_parents( targets );
 

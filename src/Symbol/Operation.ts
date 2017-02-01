@@ -67,7 +67,7 @@ class Operation extends Sym {
         INF     :  8, INF_EQ  : 8, SUP     : 8, SUP_EQ  :  8, IN      : 8, INST_OF : 8,
         EQU     :  9, NEQ     : 9, EQU_S   : 9, NEQ_S   :  9,
         AND_BIN : 10, XOR_BIN : 11, OR_BIN : 12, AND_LOG: 13, OR_LOG  : 14,
-        COND_OP : 15, ASSIGN  : 16, YIELD  : 17, COMMA  : 19,
+        COND_OP : 15, ASSIGN  : 16, YIELD  : 17, COMMA  : 19, MAX_PREC: 20
     }
 
     block_code( cg: BlockCodegen, options ): void {
@@ -97,14 +97,14 @@ class Operation extends Sym {
                 // else, it should be a graph transformation as add__sbb( map, key, val ) => set__sbb( map, key, select_bb( map, key ) + val )
                 //
                 const bin_sop = ( op: string ) => {
-                    const res = `${ name }${ rl.children.length > 1 ? rl.children.slice( 0, rl.children.length - 1 ).map( x => `.get(${ cg.inline_code( x, Operation.prec.GROUP ) })` ).join( "" ) :
-                             "" }.get(${ cg.inline_code( rl.children[ rl.children.length - 1 ], Operation.prec.GROUP ) })${op}${ cg.inline_code( this.children[ 2 ], Operation.prec.COMMA ) }`;
+                    const res = `${ name }${ rl.children.length > 1 ? rl.children.slice( 0, rl.children.length - 1 ).map( x => `.get(${ cg.inline_code( x, Operation.prec.MAX_PREC ) })` ).join( "" ) :
+                             "" }.get(${ cg.inline_code( rl.children[ rl.children.length - 1 ], Operation.prec.MAX_PREC ) })${op}${ cg.inline_code( this.children[ 2 ], Operation.prec.COMMA ) }`;
                     return Operation.prec.ASSIGN > prec ? `(${ res })` : res;
                 }
                 // const bin = ( op: string ) => {
                 //     const base
-                //     const res = `${ name }${ rl.children.length > 1 ? rl.children.slice( 0, rl.children.length - 1 ).map( x => `.get(${ cg.inline_code( x, Operation.prec.GROUP ) })` ).join( "" ) :
-                //              "" }.get(${ cg.inline_code( rl.children[ rl.children.length - 1 ], Operation.prec.GROUP ) })${op}${ cg.inline_code( this.children[ 2 ], Operation.prec.COMMA ) }`;
+                //     const res = `${ name }${ rl.children.length > 1 ? rl.children.slice( 0, rl.children.length - 1 ).map( x => `.get(${ cg.inline_code( x, Operation.prec.MAX_PREC ) })` ).join( "" ) :
+                //              "" }.get(${ cg.inline_code( rl.children[ rl.children.length - 1 ], Operation.prec.MAX_PREC ) })${op}${ cg.inline_code( this.children[ 2 ], Operation.prec.COMMA ) }`;
                 //     return Operation.prec.ASSIGN > prec ? `(${ res })` : res;
                 // }
 
@@ -113,7 +113,7 @@ class Operation extends Sym {
                     switch ( this.method.base_name ) {
                         // binary
                         case "set":
-                            return `${ name }${ rl.children.length > 1 ? rl.children.slice( 0, rl.children.length - 1 ).map( x => `.get(${ cg.inline_code( x, Operation.prec.GROUP ) })` ).join( "" ) :
+                            return `${ name }${ rl.children.length > 1 ? rl.children.slice( 0, rl.children.length - 1 ).map( x => `.get(${ cg.inline_code( x, Operation.prec.MAX_PREC ) })` ).join( "" ) :
                              "" }.set(${ cg.inline_code( rl.children[ rl.children.length - 1 ], Operation.prec.COMMA ) },${ cg.inline_code( this.children[ 2 ], Operation.prec.COMMA ) })`;
 
                         // case "and_bin": return bin_sop( "+=" );
@@ -133,7 +133,7 @@ class Operation extends Sym {
                 return Operation.prec.ASSIGN > prec ? `(${ res })` : res;
             }
             const bim = ( op: string ) => {
-                const res = name + "." + op + "(" + cg.inline_code( this.children[ 1 ], Operation.prec.GROUP ) + ")";
+                const res = name + "." + op + "(" + cg.inline_code( this.children[ 1 ], Operation.prec.MAX_PREC ) + ")";
                 return Operation.prec.MEMBER > prec ? `(${ res })` : res;
             }
             switch ( this.method.base_name ) {
@@ -192,15 +192,15 @@ class Operation extends Sym {
                     const lst = this.children[ 1 ].item.children;
                     if ( this.children[ 0 ].item.variable_type__b().use_get_for_select )
                         return par( Operation.prec.MEMBER, cg.inline_code( this.children[ 0 ], Operation.prec.MEMBER ) + 
-                            lst.map( ch => ".get(" + cg.inline_code( ch, Operation.prec.GROUP ) + ")" ).join( "" ) );
+                            lst.map( ch => ".get(" + cg.inline_code( ch, Operation.prec.MAX_PREC ) + ")" ).join( "" ) );
                     return par( Operation.prec.CALL, cg.inline_code( this.children[ 0 ], Operation.prec.CALL ) + 
-                            lst.map( ch => "[" + cg.inline_code( ch, Operation.prec.GROUP ) + "]" ).join( "" ) );
-                    // par( Operation.prec.CALL, cg.inline_code( this.children[ 0 ], Operation.prec.CALL ) + "[" + cg.inline_code( this.children[ 1 ], Operation.prec.GROUP ) + "]" )
+                            lst.map( ch => "[" + cg.inline_code( ch, Operation.prec.MAX_PREC ) + "]" ).join( "" ) );
+                    // par( Operation.prec.CALL, cg.inline_code( this.children[ 0 ], Operation.prec.CALL ) + "[" + cg.inline_code( this.children[ 1 ], Operation.prec.MAX_PREC ) + "]" )
                 }
                 console.error( this.children[ 1 ].item );
                 throw new Error( "TODO" );
             case "heads"             : return par( Operation.prec.MEMBER, `${ cg.inline_code( this.children[ 0 ], Operation.prec.MEMBER ) }.substr(0,${ cg.inline_code( this.children[ 1 ], Operation.prec.COMMA ) })` );
-            case "tails"             : return par( Operation.prec.MEMBER, `${ cg.inline_code( this.children[ 0 ], Operation.prec.MEMBER ) }.substr(${ cg.inline_code( this.children[ 1 ], Operation.prec.GROUP ) })` );
+            case "tails"             : return par( Operation.prec.MEMBER, `${ cg.inline_code( this.children[ 0 ], Operation.prec.MEMBER ) }.substr(${ cg.inline_code( this.children[ 1 ], Operation.prec.MAX_PREC ) })` );
             // ternary
             case "slice"             : return par( Operation.prec.MEMBER, `${ cg.inline_code( this.children[ 0 ], Operation.prec.MEMBER ) }.substring(${ cg.inline_code( this.children[ 1 ], Operation.prec.COMMA ) },${ cg.inline_code( this.children[ 2 ], Operation.prec.COMMA ) })` );
             // default

@@ -26,13 +26,13 @@ class Graphviz {
         for( const val of lst )
             methods[ "write_graphviz__b" ].call_1( val, gr );
         fs.writeFileSync( `${ base_filename }.dot`, `digraph gr {\n${ gr.text }}\n` );
-        child_process.execSync( `dot -Tpdf ${ base_filename }.dot > ${ base_filename }.pdf` );
-        child_process.execSync( `okular ${ base_filename }.pdf 2> /dev/null` );
+        child_process.execSync( `dot -Tpdf '${ base_filename }.dot' > '${ base_filename }.pdf'`, { shell: "bash" } );
+        child_process.execSync( `okular '${ base_filename }.pdf' 2> /dev/null` );
     }
 
     node( val: Rp, nb_inputs: number, nb_outputs: number, label: string, info?: NodeInfo ) {
-        if ( this.map_item.has( val ) )
-            return;
+        const has = this.map_item.has( val );
+
         const name = `node_${ this.map_item.size }`;
         this.map_item.set( val, name );
         this.text += `  ${ name }`;
@@ -47,7 +47,7 @@ class Graphviz {
                     label += `|<f${ n }> `;
             }
         } 
-        const lst_attr = [ "shape=record", `label="${ grepr( label ) }"`, ...Object.keys( info || {} ).map( k => `${ k }="${ grepr( info[ k ] ) }"` ) ];
+        const lst_attr = [ "shape=record", `label="${ grepr( label ) }"`, ...Object.keys( info || {} ).map( k => `${ k }="${ grepr( info[ k ] ) }${ has ? "has" : "" }"` ) ];
         this.text += ` [${ lst_attr.join( ',' ) }]`;
 
         this.text += `;\n`;
