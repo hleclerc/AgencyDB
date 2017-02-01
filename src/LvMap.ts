@@ -8,7 +8,7 @@ import { BN_PT }            from "./LvNumber/Bn"
 import LvNumber             from "./LvNumber"
 
 
-/** a nasty trick for typescipt: the actual content is defined inside LvMap_fact, which is inaccessible from here */
+/** nasty stuff for typescipt: the actual content is defined inside LvMap_fact, which is inaccessible from here */
 interface LvMap<K,V> extends Variable<LvMap<K,V>> {
     copy(): LvMap<K,V>;
     get( key ): V;
@@ -48,14 +48,14 @@ function LvMap_fact<K extends VarAnc,V extends VarAnc>( k: { new(): K; make_Rp: 
         static use_get_for_select = true; /** used for code generation. TODO: something that depends on Rp */
         static NativeType = Map;
         static key_type = k;
-        static val_type = k;
+        static val_type = v;
 
         constructor( val: Rp ) { //  | LvMap | Map | string | Array<number>
             if ( val instanceof Rp ) super( val );
             else                     super( new GenMap( k, v ) );
         }
 
-        static symbol<K extends VarAnc,V extends VarAnc>( name: string ): _LvMap {
+        static symbol( name: string ): _LvMap {
             return new _LvMap( new GenSymbol( _LvMap, name ) );
         }
 
@@ -64,22 +64,21 @@ function LvMap_fact<K extends VarAnc,V extends VarAnc>( k: { new(): K; make_Rp: 
         }
 
         get size(): LvNumber {
-            return new LvNumber( methods[ "get_size__bo" ].call_1( this.rp ) );
+            return new LvNumber( methods[ "get_size__b" ].call_1( this.rp ) );
         }
 
         /** return a proxy on the value */
         get( key ): V {
-            return new v( 
-                key instanceof VarAnc ? 
-                    methods["select_ref__ob"].call_2( this.rp, key.rp, this ) :
-                    methods["select_ref__oo"].call_2( this.rp, k.make_Rp( key ), this )
+            return new v( key instanceof v ? 
+                methods["select_ref__ob"].call_2( this.rp, key.rp, this ) :
+                methods["select_ref__oo"].call_2( this.rp, k.make_Rp( key ), this )
             );
         }
 
         /**  */
         set( key, val ): _LvMap {
             let sup = this.get( key );
-            sup.rp = val instanceof VarAnc ?
+            sup.rp = val instanceof v ?
                 methods["set__sb"].call_2s( sup, val.rp           ) :
                 methods["set__so"].call_2s( sup, v.make_Rp( val ) );
             // this.rp = key instanceof VarAnc ? (

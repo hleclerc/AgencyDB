@@ -5,23 +5,28 @@ import methods         from "../Core/methods"
 import Rp              from "../Core/Rp"
 import LvNumber        from "../LvNumber"
 import LvObj           from "../LvObj"
+import GenObjItem      from "./GenObjItem"
 
 /**
+ * generic object. Stores
  * 
+ * Proposition de format: 
  */
 export default 
 class GenObj extends Rp {
+    static type_map = new Map<any,number>();
+
     constructor() {
         super( GenObj );
     }
 
-    to_String__b(): string {
-        return this.data;
-    }
+    // to_String__b(): string {
+    //     return this.data;
+    // }
 
-    js_repr__b( prec: number ): string {
-        return `"${ this.data }"`;
-    }
+    // js_repr__b( prec: number ): string {
+    //     return `"${ this.data }"`;
+    // }
 
     variable_type__b() {
         return LvObj;
@@ -43,7 +48,8 @@ class GenObj extends Rp {
         return Object;
     }
 
-    data: string;
+    data : Array<GenObjItem>; /** */
+    entry: number;            /** index of entry point in data */
 } 
 Rp.make_templ( GenObj );
 

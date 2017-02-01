@@ -236,6 +236,7 @@ dstd( "copy"                   , 1        );
 
 dslf( "remove"                 , 3        );
 dslf( "insert"                 , 3        );
+dslf( "push"                   , 2        );
    
 // sym   
 // decl( "ww_launch"              , "c"   ); // called from the scheduler WebWorker to launch the query

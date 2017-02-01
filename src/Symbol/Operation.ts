@@ -132,6 +132,10 @@ class Operation extends Sym {
                 const res = name + op + cg.inline_code( this.children[ 1 ], Operation.prec.ASSIGN );
                 return Operation.prec.ASSIGN > prec ? `(${ res })` : res;
             }
+            const bim = ( op: string ) => {
+                const res = name + "." + op + "(" + cg.inline_code( this.children[ 1 ], Operation.prec.GROUP ) + ")";
+                return Operation.prec.MEMBER > prec ? `(${ res })` : res;
+            }
             switch ( this.method.base_name ) {
                 // binary
                 case "add"    : return bin( '+=' );
@@ -142,6 +146,7 @@ class Operation extends Sym {
                 case "and_bin": return bin( '&=' );
                 case "xor_bin": return bin( '^=' );
                 case "set"    : return bin( '='  );
+                case "push"   : return bim( 'push' );
                 default:
                     return `${ name }.${ this.method.name }(${ [
                         ...this.children.slice( 1 ).map( ch => cg.inline_code( ch, Operation.prec.COMMA ) ),
