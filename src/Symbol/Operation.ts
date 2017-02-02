@@ -117,7 +117,6 @@ class Operation extends Sym {
                              "" }.set(${ cg.inline_code( rl.children[ rl.children.length - 1 ], Operation.prec.COMMA ) },${ cg.inline_code( this.children[ 2 ], Operation.prec.COMMA ) })`;
 
                         // case "and_bin": return bin_sop( "+=" );
-                            
                         default:
                             return `${ name }.${ this.method.name }(${ [
                                 ...this.children.slice( 1 ).map( ch => cg.inline_code( ch, Operation.prec.COMMA ) ),
@@ -138,15 +137,16 @@ class Operation extends Sym {
             }
             switch ( this.method.base_name ) {
                 // binary
-                case "add"    : return bin( '+=' );
-                case "sub"    : return bin( '-=' );
-                case "mul"    : return bin( '*=' );
-                case "div"    : return bin( '/=' );
-                case "or_bin" : return bin( '|=' );
-                case "and_bin": return bin( '&=' );
-                case "xor_bin": return bin( '^=' );
-                case "set"    : return bin( '='  );
-                case "push"   : return bim( 'push' );
+                case "add"         : return bin( '+=' );
+                case "sub"         : return bin( '-=' );
+                case "mul"         : return bin( '*=' );
+                case "div"         : return bin( '/=' );
+                case "or_bin"      : return bin( '|=' );
+                case "and_bin"     : return bin( '&=' );
+                case "xor_bin"     : return bin( '^=' );
+                case "set"         : return bin( '='  );
+                case "push"        : return bim( 'push' );
+                case "apply_method": return `${ name }.${ this.args[ 0 ] }(${ this.children.slice( 1 ).map( ch => cg.inline_code( ch, Operation.prec.COMMA ) ).join( ',' ) })`;
                 default:
                     return `${ name }.${ this.method.name }(${ [
                         ...this.children.slice( 1 ).map( ch => cg.inline_code( ch, Operation.prec.COMMA ) ),

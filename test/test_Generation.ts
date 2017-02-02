@@ -139,6 +139,12 @@ describe( 'Generation', () => {
         // Graphviz.display( [ r.rp ] );
         sequ( Codegen.make_code( [ r ] ), 'r=(n+5)*10;' );
     } );
+    
+    it( 'applyMethod', () => {
+        let s = LvString.symbol( "s" );
+        s.applyMethod( "murf", new LvString( "17" ) );
+        sequ( Codegen.make_code( [ s ] ), 's.murf("17");' );
+    });
 
     it( 'if if', () => {
         let v = LvNumber.symbol( "v" );

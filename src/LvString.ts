@@ -1,14 +1,14 @@
-import Variable       from "./Core/Variable"
-import methods        from "./Core/methods"
-import Rp             from "./Core/Rp"
-  
-import GenString      from "./LvString/GenString"
-import GenSymbol      from "./Symbol/GenSymbol"
-import { BN_PT }      from "./LvNumber/Bn"
-import LvNumber       from "./LvNumber"
-
-// import Caret     from "./String/Caret";
-// import DevId     from "../System/DevId"
+import Variable, { toLv_array } from "./Core/Variable"
+import methods                  from "./Core/methods"
+import Rp                       from "./Core/Rp"
+               
+import GenString                from "./LvString/GenString"
+import GenSymbol                from "./Symbol/GenSymbol"
+import { BN_PT }                from "./LvNumber/Bn"
+import LvNumber                 from "./LvNumber"
+             
+// import Caret                    from "./String/Caret";
+// import DevId                     from "../System/DevId"
 
 //
 export default
@@ -185,3 +185,7 @@ class LvString extends Variable<LvString> {
     // //     trim: -> // Removes whitespace from both ends of a string
     // //     valueOf: -> // Returns the primitive value of a String object
 }
+
+toLv_array.push( val =>
+    typeof val == "string" ? new LvString( val ) : null
+);

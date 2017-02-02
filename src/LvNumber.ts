@@ -1,10 +1,10 @@
-import Variable    from "./Core/Variable"
-import methods     from "./Core/methods"
-import Rp          from "./Core/Rp"
-
-import GenSymbol   from "./Symbol/GenSymbol"
-import { BN_FP64 } from "./LvNumber/Bn"
-
+import Variable, { toLv_array } from "./Core/Variable"
+import methods                  from "./Core/methods"
+import Rp                       from "./Core/Rp"
+             
+import GenSymbol                from "./Symbol/GenSymbol"
+import { BN_FP64 }              from "./LvNumber/Bn"
+             
 //
 export default
 class LvNumber extends Variable<LvNumber> {
@@ -87,3 +87,6 @@ class LvNumber extends Variable<LvNumber> {
     zfill_shift_right ( val: number | LvNumber ): LvNumber { return new LvNumber( typeof val == 'number' ? methods[ "zfill_shift_right__bo"  ].call_2( this.rp, new BN_FP64( val ) ) : methods[ "zfill_shift_right__bb"  ].call_2( this.rp, val.rp ) ); }
 }
 
+toLv_array.push( val =>
+    typeof val == "number" || typeof val == "boolean" ? new LvNumber( val ) : null
+);

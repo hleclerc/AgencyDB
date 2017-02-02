@@ -1,11 +1,11 @@
-import Variable    from "./Core/Variable"
-import methods     from "./Core/methods"
-import Rp          from "./Core/Rp"
-
-import GenSymbol   from "./Symbol/GenSymbol"
-import GenUsrId    from "./LvUsrId/GenUsrId"
-import UsrId       from "./System/UsrId"
-import LvNumber    from "./LvNumber"
+import Variable, { toLv_array } from "./Core/Variable"
+import methods                  from "./Core/methods"
+import Rp                       from "./Core/Rp"
+            
+import GenSymbol                from "./Symbol/GenSymbol"
+import GenUsrId                 from "./LvUsrId/GenUsrId"
+import UsrId                    from "./System/UsrId"
+import LvNumber                 from "./LvNumber"
 
 //
 export default
@@ -52,3 +52,6 @@ class LvUsrId extends Variable<LvUsrId> {
     }
 }
 
+toLv_array.push( val =>
+    val instanceof UsrId ? new LvUsrId( val ) : null
+);

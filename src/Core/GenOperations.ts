@@ -28,19 +28,21 @@ class OpInfo<UT> {
 };
 
 class BwRepr {
-    constructor( go, suffix = "" ) {
-        const T = MA( LvAny as any );
-        this.go  = go;
-        this.sym = T.symbol( "lst_bw" + suffix ) as LvArray<LvAny>;
+    constructor( go, name = "bw" ) {
+        this.sym      = LvString.symbol( name );
         this.orig_sym = this.sym.rp;
+        this.go       = go;
     }
     push( op_type, data ) {
         const op_info = this.go.operations.find( x => x.inst.constructor == op_type );
-        this.sym.push( new LvNumber( op_info.num ) );
-        Object.keys( op_info.inst ).forEach( name => this.sym.push( data[ name ] ) );
+        this.sym.applyMethod( "write_PI8", new LvNumber( op_info.num ) );
+        Object.keys( op_info.inst ).forEach( name => {
+            const gt = this.go.gen_type( data[ name ] );
+            this.sym.applyMethod( "write_" + ( gt || "obj" ), data[ name ] );
+        } );
     }
+    sym     : LvString;
     go      : any; /** GenOperation<...> */
-    sym     : LvArray<LvAny>;
     orig_sym: Rp;
 }
 
@@ -328,14 +330,17 @@ class GenOperation<UT> {
             nb_sp += 12;
             wl( this.br_read_var( lang, op_unk, "br_unk", "_unk", false ) );
             
-            let cb = this.trans_rules.get( `${ op_unk.inst.constructor.name } ${ op_new.inst.constructor.name }` );
+            let cb = this.trans_rules.get( `${ op_unk.inst.constructor.name } ${ op_new.inst.constructor.name }` ), inv = false;
+            if ( ! cb )
+                cb = this.trans_rules.get( `${ op_new.inst.constructor.name } ${ op_unk.inst.constructor.name }` ), inv = true;
             if ( cb ) {
                 let data_unk = this.make_symbolic_data( op_unk.inst, "_unk" );
                 let data_new = this.make_symbolic_data( op_new.inst, "_new" );
-                let l = new BwRepr( this );
-                cb( data_unk, data_new, l );
-                if ( l.sym.rp != l.orig_sym )
-                    wl( `let ${ methods["to_String__b"].call_1( l.orig_sym ) } = [];` );
+                let l = new BwRepr( this, "bw_unk" );
+                if ( inv )
+                    cb( data_new, data_unk, l );
+                else
+                    cb( data_unk, data_new, l );
                 wl( Codegen.make_code( [
                     ...Object.keys( data_unk ).map( k => data_unk[ k ] ),
                     ...Object.keys( data_new ).map( k => data_new[ k ] ),

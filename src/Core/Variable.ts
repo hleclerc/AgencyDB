@@ -120,8 +120,8 @@ class VarAnc {
         return this;
     }
 
-    applyMethod( name, ...args: Array<VarAnc> ): VarAnc {
-        this.rp = methods["apply_method__s"].call_1s( this, name, ...args.map( x => x.rp ) );
+    applyMethod( name, ...args ): VarAnc {
+        this.rp = methods["apply_method__s"].call_1s( this, name, ...args.map( x => toRp( x ) ) );
         return this;
     }
 
@@ -166,6 +166,19 @@ class Variable<T> extends VarAnc {
 } 
 
 /** */
+export var toLv_array = new Array< ( val: any ) => VarAnc >();
+export function toRp( val: any ): Rp {
+    if ( val instanceof VarAnc )
+        return methods["copy__b"].call_1( val.rp );
+    for( const f of toLv_array ) {
+        let r = f( val );
+        if ( r )
+            return r.rp;
+    }
+    return null;
+}
+
+/** to register methods... */
 export function od( cb ) { if ( base_methods_are_defined ) cb(); else waiting_bmar_cbs.push( cb ); }
 let base_methods_are_defined = false, waiting_bmar_cbs = [];
 

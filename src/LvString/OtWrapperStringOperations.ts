@@ -192,8 +192,7 @@ function new_patch( val: OtWrapperString, bw_new: BinaryWriter, br_new: BinaryRe
                     }
                     case 3: { // Remove
                         let pos_unk = br_unk.read_PT(), len_unk = br_unk.read_PT();
-                        let lst_bw = [];
-                        if(!(pos_new<pos_unk+len_unk)){pos_new-=len_unk;}else{if(pos_new<=pos_unk){pos_unk+=str_new.length;}else{var T0,T1;lst_bw.push(3);T0=pos_unk;T1=pos_new-pos_unk;pos_unk+=str_new.length;lst_bw.push(T0);lst_bw.push(T1);}}
+                        if(!(pos_new<pos_unk+len_unk)){pos_new-=len_unk;}else{if(pos_new<=pos_unk){pos_unk+=str_new.length;}else{var T0,T1;bw_unk.write_PI8(3);T0=pos_unk;T1=pos_new-pos_unk;pos_unk+=str_new.length;bw_unk.write_PT(T0);bw_unk.write_PT(T1);}}
                         bw_unk.write_PI8( 3 ); bw_unk.write_PT( pos_unk ); bw_unk.write_PT( len_unk );
                         break;
                     }

@@ -12,16 +12,6 @@ function sequ( a, b, msg?: string ) {
 /**
  */
 describe( 'Codegen', () => {
-    it( 'basic operations', () => {
-        let s = LvString.symbol( "s" );
-        s.applyMethod( "pouet", new LvString( "17" ) );
-
-        console.log( s.toString() );
-        Graphviz.display( [ s.rp ] );
-        
-        // sequ( Codegen.make_code( [ s ] ), 't=t.substr(0,1)+"u"+t.substr(1);' );
-    });
-
 });
  
 
