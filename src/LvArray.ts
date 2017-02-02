@@ -22,7 +22,7 @@ interface LvArray<V> extends Variable<LvArray<V>> {
 /** */
 interface LvArray_type<V> {
     new( val?: Rp ): LvArray<V>;
-    make_Rp( any ): Rp;
+    makeRp( any ): Rp;
     symbol( name: string ): LvArray<V>;
 }
 
@@ -30,7 +30,7 @@ interface LvArray_type<V> {
 const LvArray_map = new Map<any,any>();
 
 /** */
-export default function LvArray_func<V extends VarAnc,U>( v: { new(): V; make_Rp: ( val: any ) => Rp; } ): LvArray_type<V> {
+export default function LvArray_func<V extends VarAnc,U>( v: { new(): V; makeRp: ( val: any ) => Rp; } ): LvArray_type<V> {
     let m = LvArray_map.get( v );
     if ( ! m ) 
         LvArray_map.set( v, m = LvArray_fact( v ) );
@@ -38,7 +38,7 @@ export default function LvArray_func<V extends VarAnc,U>( v: { new(): V; make_Rp
 }
 
 //
-function LvArray_fact<V extends VarAnc>( v: { new( rp?: Rp ): V; make_Rp: ( any ) => Rp; } ) {
+function LvArray_fact<V extends VarAnc>( v: { new( rp?: Rp ): V; makeRp: ( any ) => Rp; } ) {
     class _LvArray extends Variable<_LvArray> implements LvArray<V> {
         static use_get_for_select = true; /** used for code generation. TODO: something that depends on Rp */
         static NativeType = Array;
@@ -67,7 +67,7 @@ function LvArray_fact<V extends VarAnc>( v: { new( rp?: Rp ): V; make_Rp: ( any 
 
         get( key: number | LvNumber ): V {
             return new v( typeof key == "number" ? 
-                methods["select_ref__oo"].call_2( this.rp, LvNumber.make_Rp( key ), this ) :
+                methods["select_ref__oo"].call_2( this.rp, LvNumber.makeRp( key ), this ) :
                 methods["select_ref__ob"].call_2( this.rp, key.rp, this )
             );
         }
@@ -76,14 +76,14 @@ function LvArray_fact<V extends VarAnc>( v: { new( rp?: Rp ): V; make_Rp: ( any 
             let sup = this.get( key );
             sup.rp = val instanceof VarAnc ?
                 methods["set__sb"].call_2s( sup, val.rp           ) :
-                methods["set__so"].call_2s( sup, v.make_Rp( val ) );
+                methods["set__so"].call_2s( sup, v.makeRp( val ) );
             return this;
         }
 
         push( val ): _LvArray {
             this.rp = val instanceof VarAnc ?
                 methods["push__sb"].call_2s( this, val.rp           ) :
-                methods["push__so"].call_2s( this, v.make_Rp( val ) );
+                methods["push__so"].call_2s( this, v.makeRp( val ) );
             return this;
         }
     }

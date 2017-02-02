@@ -30,51 +30,81 @@ go.undo ( RemUnd, ( d: OtWrapperString, o: RemUnd ) => d.val.insert( o.pos, o.st
 go.store( Remove, ( d: OtWrapperString, o: Remove ) => [ { type: RemUnd, data: { pos: o.pos, str: d.val.substr( o.pos, o.len ) } as RemUnd } ] );
 
 //
-go.right( Insert, ( d: OtWrapperString, o: Insert, f: LvNumber, r: LvNumber ) => r.set( f.and_bin( go.flag( "insert" ) ).or_log( f.and_bin( go.flag( "append" ) ).and_log( o.pos.is_equ( d.val.length ) ) ) ) );
-go.right( Remove, ( d: OtWrapperString, o: Insert, f: LvNumber, r: LvNumber ) => r.set( f.and_bin( go.flag( "remove" ) ) ) );
-go.right( RemUnd, ( d: OtWrapperString, o: Insert, f: LvNumber, r: LvNumber ) => r.set( f.and_bin( go.flag( "remove" ) ) ) );
+go.right( Insert, ( d: OtWrapperString, o: Insert, f: LvNumber, r: LvNumber ) => r.set( f.andBin( go.flag( "insert" ) ).orLog( f.andBin( go.flag( "append" ) ).andLog( o.pos.isEqu( d.val.length ) ) ) ) );
+go.right( Remove, ( d: OtWrapperString, o: Insert, f: LvNumber, r: LvNumber ) => r.set( f.andBin( go.flag( "remove" ) ) ) );
+go.right( RemUnd, ( d: OtWrapperString, o: Insert, f: LvNumber, r: LvNumber ) => r.set( f.andBin( go.flag( "remove" ) ) ) );
 
 // combinations
 go.fwd_trans( Insert, Insert, ( o: Insert, n: Insert ) => {
-    _if( o.pos.is_sup( n.pos ), () => {
+    _if( o.pos.isSup( n.pos ), () => {
         // i: 01234      
         // o: 0123unk4    INS(4,unk)
         // n: 0new1234    INS(1,new)
         // r: 0new123unk4 n:(o->r) = INS(1,new); o:(n->r) = INS(7,unk)
-        o.pos.self_add( n.str.length );
+        o.pos.selfAdd( n.str.length );
     }, () => {
         // i: 01234
         // o: 0123unk4    INS(4,unk)
         // n: 0new1234    INS(1,new)
         // r: 0new123unk4 n:(o->r) = INS(1,new); o:(n->r) = INS(7,unk)
-        n.pos.self_add( o.str.length );
+        n.pos.selfAdd( o.str.length );
     } );
 } );
 
-go.fwd_trans( Remove, Insert, ( o: Remove, n: Insert, l ) => {
-    _if( n.pos.is_supeq( o.pos.add( o.len ) ), () => {
+go.fwd_trans( Remove, Insert, ( o: Remove, n: Insert, l_old ) => {
+    _if( n.pos.isSupEq( o.pos.add( o.len ) ), () => {
         // i: 012345
         // o: 0345      REM(1,2)
         // n: 01234new5 INS(5,new)
         // r: 034new5   n:(o->r) = INS(3,new); o:(n->r) = REM(1,2)
-        n.pos.self_sub( o.len ); // 3
-    }, n.pos.is_infeq( o.pos ), () => {
+        n.pos.selfSub( o.len ); // 3
+    }, n.pos.isInfEq( o.pos ), () => {
         // i: 012345
         // o: 0125      REM(3,2)
         // n: 0new12345 INS(1,new)
         // r: 0new125   n:(o->r) = INS(1,new); o:(n->r) = REM(6,2)
-        o.pos.self_add( n.str.length );
+        o.pos.selfAdd( n.str.length );
     }, () => {
         // i: 012345
         // o: 05        REM(1,4)
         // n: 012new345 INS(3,new)
         // r: 0new5     n:(o->r) = INS(1,new); o:(n->r) = REM(1,2) + REM(4,2)
-        l.push( Remove, { pos: o.pos, len: n.pos.sub( o.pos ) }  ); // 1, 2
-        o.len.self_sub( n.pos.sub( o.pos ) ); // 2
-        n.pos.set( o.pos );                   // 1
-        o.pos.self_add( n.str.length );       // 4
+        l_old.push( Remove, { pos: o.pos, len: n.pos.sub( o.pos ) }  ); // 1, 2
+        o.len.selfSub( n.pos.sub( o.pos ) ); // 2
+        n.pos.set( o.pos );                  // 1
+        o.pos.selfAdd( n.str.length );       // 4
     } );
 } );
+
+go.fwd_trans( RemUnd, Insert, ( o: RemUnd, n: Insert, l_old ) => {
+    _if( n.pos.isSupEq( o.pos.add( o.str.length ) ), () => {
+        // i: 012345
+        // o: 0345      REM(1,2)
+        // n: 01234new5 INS(5,new)
+        // r: 034new5   n:(o->r) = INS(3,new); o:(n->r) = REM(1,2)
+        // n.pos.self_sub( o.len ); // 3
+        n.str.append( "f" );
+    }, n.pos.isInfEq( o.pos ), () => {
+        // i: 012345
+        // o: 0125      REM(3,2)
+        // n: 0new12345 INS(1,new)
+        // r: 0new125   n:(o->r) = INS(1,new); o:(n->r) = REM(6,2)
+        // o.pos.self_add( n.str.length );
+        n.str.append( "x" );
+    }, () => {
+        // i: 012345
+        // o: 05        REM(1,4)
+        // n: 012new345 INS(3,new)
+        // r: 0new5     n:(o->r) = INS(1,new); o:(n->r) = REM(1,2) + REM(4,2)
+        // l_old.push( Remove, { pos: o.pos, len: n.pos.sub( o.pos ) }  ); // 1, 2
+        // o.len.self_sub( n.pos.sub( o.pos ) ); // 2
+        // n.pos.set( o.pos );                   // 1
+        // o.pos.self_add( n.str.length );       // 4
+        // n.str.append( "smurf" );
+        n.str.append( "s" );
+    } );
+} );
+
 
 
 

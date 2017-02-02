@@ -9,7 +9,7 @@ class LvAny extends Variable<LvAny> {
         super( val instanceof Rp ? val : val.rp );
     }
 
-    static make_Rp( val: string ): Rp {
+    static makeRp( val: string ): Rp {
         return null;
     }
 

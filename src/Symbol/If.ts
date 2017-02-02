@@ -24,7 +24,7 @@ class IfInp extends Sym {
     }
 
     to_String__b(): string {
-        return `IfInp`;
+        return `IfInp:${ Object.keys( this.op_mp ) }`;
     }
 
     block_code( cg: BlockCodegen, options ): void {
@@ -152,20 +152,24 @@ function _if( cond: any, ok: () => any, ...rem ) { // ko?: () => any
         // intercept calls to get modified variables
         let inp_ok = new IfInp();
         let inp_if = new Array<Rp>(); // If inputs
-        let mod_xx = new Set<VarAnc>();
+        let mod_xx = new Map<VarAnc,number>();
         let mod_ok = new Map<VarAnc,{ o: Rp, b: Rp, n: Rp }>();
         Interceptor.run( mod_ok, ok, function( v: VarAnc ) {
-            mod_xx.add( v );
-            const ind = inp_if.indexOf( v.rp );
-            return get_nout( inp_ok, ind >= 0 ? ind : inp_if.push( v.rp ) - 1 );
+            let ind = inp_if.indexOf( v.rp );
+            if ( ind < 0 )
+                ind = inp_if.push( v.rp ) - 1;
+            mod_xx.set( v, ind );
+            return get_nout( inp_ok, ind );
         } );
 
         let inp_ko = new IfInp();
         let mod_ko = new Map<VarAnc,{ o: Rp, b: Rp, n: Rp }>();
         Interceptor.run( mod_ko, ko, function( v: VarAnc ) {
-            mod_xx.add( v );
-            const ind = inp_if.indexOf( v.rp );
-            return get_nout( inp_ko, ind >= 0 ? ind : inp_if.push( v.rp ) - 1 );
+            let ind = inp_if.indexOf( v.rp );
+            if ( ind < 0 )
+                ind = inp_if.push( v.rp ) - 1;
+            mod_xx.set( v, ind );
+            return get_nout( inp_ko, ind );
         } );        
 
         //
@@ -173,22 +177,22 @@ function _if( cond: any, ok: () => any, ...rem ) { // ko?: () => any
         for( let [ v, oan ] of mod_ok ) {
             out_ok.push( skv_link_o( oan.n ) );
             const oan_ko = mod_ko.get( v );
-            out_ko.push( oan_ko ? skv_link_o( oan_ko.n ) : { item: inp_ko, nout: inp_if.indexOf( v.rp ) } );
+            out_ko.push( oan_ko ? skv_link_o( oan_ko.n ) : { item: inp_ko, nout: mod_xx.get( v ) } );
         }
         for( let [ v, oan ] of mod_ko ) {
             if ( mod_ok.get( v ) )
                 continue;
-            out_ok.push( { item: inp_ok, nout: inp_if.indexOf( v.rp ) } );
+            out_ok.push( { item: inp_ok, nout: mod_xx.get( v ) } );
             out_ko.push( skv_link_o( oan.n ) );
         }
 
         // excepted for condition variable, an If inst is basically a value modifier
         if ( Method.int_call_s )
-            mod_xx.forEach( Method.int_call_s );
+            mod_xx.forEach( ( num, val ) => Method.int_call_s( val ) );
 
         // modify variables to take if outputs
         let rp_if = new If( [ ...inp_if, b_cond.rp ].map( skv_link_o ), inp_ok, new IfOut( out_ok ), inp_ko, new IfOut( out_ko ) );
-        mod_xx.forEach( v => v.rp = get_nout( rp_if, inp_if.indexOf( v.rp ) ) );
+        mod_xx.forEach( ( num, val ) => val.rp = get_nout( rp_if, num ) );
         return;
     }
     //

@@ -18,10 +18,10 @@ class LvString extends Variable<LvString> {
     constructor( val = "" as Rp | LvString | string ) {
         if      ( val instanceof Rp       ) super( val );
         else if ( val instanceof LvString ) super( methods[ "copy__b" ].call_1( this.rp ) );
-        else                                super( LvString.make_Rp( val ) );
+        else                                super( LvString.makeRp( val ) );
     }
 
-    static make_Rp( val: string ): Rp {
+    static makeRp( val: string ): Rp {
         return new GenString( val );
     }
 

@@ -19,7 +19,7 @@ interface LvMap<K,V> extends Variable<LvMap<K,V>> {
 /** */
 interface LvMap_type<K,V> {
     new( val?: Rp ): LvMap<K,V>;
-    make_Rp( any ): Rp;
+    makeRp( any ): Rp;
     symbol( name: string ): LvMap<K,V>;
 }
 
@@ -27,7 +27,7 @@ interface LvMap_type<K,V> {
 const LvMap_map = new Map<any,Map<any,any>>();
 
 /** */
-export default function LvMap_func<K extends VarAnc,V extends VarAnc,U>( k: { new(): K; make_Rp: ( any ) => Rp; }, v: { new(): V; make_Rp: ( any ) => Rp; } ): LvMap_type<K,V> {
+export default function LvMap_func<K extends VarAnc,V extends VarAnc,U>( k: { new(): K; makeRp: ( any ) => Rp; }, v: { new(): V; makeRp: ( any ) => Rp; } ): LvMap_type<K,V> {
     let m = LvMap_map.get( k );
     if ( ! m ) 
         LvMap_map.set( k, m = new Map<any,any>() );
@@ -43,7 +43,7 @@ export default function LvMap_func<K extends VarAnc,V extends VarAnc,U>( k: { ne
 // }
 
 //
-function LvMap_fact<K extends VarAnc,V extends VarAnc>( k: { new(): K; make_Rp: ( any ) => Rp; }, v: { new( rp?: Rp ): V; make_Rp: ( any ) => Rp; } ) {
+function LvMap_fact<K extends VarAnc,V extends VarAnc>( k: { new(): K; makeRp: ( any ) => Rp; }, v: { new( rp?: Rp ): V; makeRp: ( any ) => Rp; } ) {
     class _LvMap extends Variable<_LvMap> implements LvMap<K,V> {
         static use_get_for_select = true; /** used for code generation. TODO: something that depends on Rp */
         static NativeType = Map;
@@ -71,7 +71,7 @@ function LvMap_fact<K extends VarAnc,V extends VarAnc>( k: { new(): K; make_Rp: 
         get( key ): V {
             return new v( key instanceof VarAnc ? 
                 methods["select_ref__ob"].call_2( this.rp, key.rp, this ) :
-                methods["select_ref__oo"].call_2( this.rp, k.make_Rp( key ), this )
+                methods["select_ref__oo"].call_2( this.rp, k.makeRp( key ), this )
             );
         }
 
@@ -80,15 +80,15 @@ function LvMap_fact<K extends VarAnc,V extends VarAnc>( k: { new(): K; make_Rp: 
             let sup = this.get( key );
             sup.rp = val instanceof v ?
                 methods["set__sb"].call_2s( sup, val.rp           ) :
-                methods["set__so"].call_2s( sup, v.make_Rp( val ) );
+                methods["set__so"].call_2s( sup, v.makeRp( val ) );
             // this.rp = key instanceof VarAnc ? (
             //     val instanceof VarAnc ?
             //         methods["set_val__sbb"].call_3s( this, key.rp                                                 , val.rp ) :
-            //         methods["set_val__sbo"].call_3s( this, key.rp                                                 , v.make_Rp( val ) )
+            //         methods["set_val__sbo"].call_3s( this, key.rp                                                 , v.makeRp( val ) )
             // ) : (
             //     val instanceof VarAnc ?
-            //         methods["set_val__sob"].call_3s( this, methods["key_type__b"].call_1( this.rp ).make_Rp( key ), val.rp                                                  ) :
-            //         methods["set_val__soo"].call_3s( this, methods["key_type__b"].call_1( this.rp ).make_Rp( key ), v.make_Rp( val ) )
+            //         methods["set_val__sob"].call_3s( this, methods["key_type__b"].call_1( this.rp ).makeRp( key ), val.rp                                                  ) :
+            //         methods["set_val__soo"].call_3s( this, methods["key_type__b"].call_1( this.rp ).makeRp( key ), v.makeRp( val ) )
             // );
             return this;
         }

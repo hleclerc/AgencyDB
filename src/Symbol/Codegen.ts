@@ -39,9 +39,9 @@ function init_codegen_data( pos_codegen_data: Array<Sym>, targets: Array<Sym> ) 
     }, true );
 }
 
-function externalize_ext_vars( inst: If | While, inp: IfInp | WhileInp, target: Sym, cond_var: boolean, num_sub_block: number ) {
+function externalize_ext_vars( pos_codegen_data: Array<Sym>, inst: If | While, inp: IfInp | WhileInp, target: Sym, cond_var: boolean, num_sub_block: number ) {
     // we need sub block to be already "externalized"
-    sep_sub_blocks( [ target ], num_sub_block + 1 );
+    sep_sub_blocks( pos_codegen_data, [ target ], num_sub_block + 1 );
 
     //
     Sym.dfs_unique( [ target ], ( pa: Sym ) => {
@@ -71,7 +71,7 @@ function externalize_ext_vars( inst: If | While, inp: IfInp | WhileInp, target: 
  * 
  * Il faut 
 */
-function sep_sub_blocks( targets: Array<Sym>, num_sub_block: number ) {
+function sep_sub_blocks( pos_codegen_data: Array<Sym>, targets: Array<Sym>, num_sub_block: number ) {
     // in_ext_blk for each inst of block of targets
     let if_out_vars = new Array<If>();
     let wh_out_vars = new Array<While>();
@@ -86,12 +86,16 @@ function sep_sub_blocks( targets: Array<Sym>, num_sub_block: number ) {
 
     // for each out_var, look if there is a sub var with a in_ext_blk
     for( let out_var of if_out_vars ) {
-        externalize_ext_vars( out_var, out_var.inp_ok, out_var.out_ok, true , num_sub_block );
-        externalize_ext_vars( out_var, out_var.inp_ko, out_var.out_ko, true , num_sub_block );
+        init_codegen_data( pos_codegen_data, [ out_var.inp_ok ] ); // inp_xx may have been ignored (because not used before)
+        init_codegen_data( pos_codegen_data, [ out_var.inp_ko ] );
+        externalize_ext_vars( pos_codegen_data, out_var, out_var.inp_ok, out_var.out_ok, true , num_sub_block );
+        externalize_ext_vars( pos_codegen_data, out_var, out_var.inp_ko, out_var.out_ko, true , num_sub_block );
     }
     for( let out_var of wh_out_vars ) {
-        externalize_ext_vars( out_var, out_var.inp_co, out_var.out_co, true , num_sub_block );
-        externalize_ext_vars( out_var, out_var.inp_bk, out_var.out_bk, false, num_sub_block );
+        init_codegen_data( pos_codegen_data, [ out_var.inp_co ] ); // inp_xx may have been ignored (because not used before)
+        init_codegen_data( pos_codegen_data, [ out_var.inp_bk ] );
+        externalize_ext_vars( pos_codegen_data, out_var, out_var.inp_co, out_var.out_co, true , num_sub_block );
+        externalize_ext_vars( pos_codegen_data, out_var, out_var.inp_bk, out_var.out_bk, false, num_sub_block );
     }
 }
 
@@ -153,14 +157,13 @@ class Codegen {
 
         // change instructions that can't be written in $lang (may change targets)
         base_instruction_selection( targets, lang );
-        // Graphviz.display( targets );
 
         // assign CodegenData in op_mp.codegen_data
         init_codegen_data( this.pos_codegen_data, targets );
 
-        // ensure that sub blocks (like the one with IfOut above) are totally independant 
-        sep_sub_blocks( targets, 0 );
-            
+        // ensure that sub blocks (like the ones with IfOut above) are totally independant 
+        sep_sub_blocks( this.pos_codegen_data, targets, 0 );
+        
         // set up parents, in current and sub blocks recursively
         set_up_parents( targets );
 

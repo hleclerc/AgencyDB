@@ -12,6 +12,17 @@ function sequ( a, b, msg?: string ) {
     assert.equal( a.toString(), b.toString(), msg );
 }
 
+/** helper */
+function test_ot_str( init: string, operations: ( vars: Array<LvString>, dbs: Array<Db> ) => void, expected: string, explanation: string, nb_dbs = 2 ) {
+    test_ot<LvString>( LvString, nb_dbs, ( vls, dbs ) => {
+        if ( init ) {
+            vls[ 0 ].append( init );
+            dbs[ 0 ].send_changes();
+        }
+        operations( vls, dbs );
+    }, expected, explanation );
+}
+
 /**
  * OnChange; 
  *   changement permanent => remonte à chaque opération _sxx
@@ -80,7 +91,7 @@ describe( 'String', () => {
         assert.equal( intercept[ 0 ], a, "interception of the right variable" );
     });
 
-    it( 'operationnal tranform, sending', () => {
+    it( 'operationnal tranform, basic sending', () => {
         test_ot<LvString>( LvString, 2, ( vls, dbs ) => {
             vls[ 0 ].append( "a" );
         }, "a", "send from 0" );
@@ -90,41 +101,31 @@ describe( 'String', () => {
         }, "a", "send from 1" );
     });
 
-    it( 'operationnal tranform, succession remove / insertions', () => {
-        test_ot<LvString>( LvString, 2, ( vls, dbs ) => {
-            vls[ 0 ].append( "a" );
-            dbs[ 0 ].send_changes();
+    it( 'operationnal tranform, successive remove or insertion', () => {
+        test_ot_str( "a", ( vls, dbs ) => {
             vls[ 1 ].append( "b" );
         }, "ab", "succession of insertions" );
 
-        test_ot<LvString>( LvString, 2, ( vls, dbs ) => {
-            vls[ 0 ].append( "abcd" );
-            dbs[ 0 ].send_changes();
+        test_ot_str( "abcd", ( vls, dbs ) => {
             vls[ 1 ].remove( 1, 2 );
-        }, "ad", "succession of insertion + removal" );
+        }, "ad", "succession insertion + removal" );
     });
 
     it( 'operationnal tranform, parallel remove / insertions', () => {
-        test_ot<LvString>( LvString, 2, ( vls, dbs ) => {
-            vls[ 0 ].insert( 0, "abcd" );
-            dbs.forEach( x => x.send_changes() );
+        test_ot_str( "abcd", ( vls, dbs ) => {
             vls[ 0 ].insert( 1, "X" );
             vls[ 1 ].insert( 3, "Y" );
         }, "aXbcYd", "concurrent insertions" );
 
-        test_ot<LvString>( LvString, 2, ( vls, dbs ) => {
-            vls[ 0 ].insert( 0, "abcd" );
-            dbs.forEach( x => x.send_changes() );
+        test_ot_str( "abcd", ( vls, dbs ) => {
             vls[ 1 ].insert( 3, "Y" );
             vls[ 0 ].insert( 1, "X" );
         }, "aXbcYd", "concurrent insertions" );
 
-        // test_ot<LvString>( LvString, 2, ( vls, dbs ) => {
-        //     vls[ 0 ].insert( 0, "012345" );
-        //     dbs.forEach( x => x.send_changes() );
-        //     vls[ 0 ].insert( 3, "ab" );
-        //     vls[ 1 ].remove( 1, 1 );
-        // }, "02ab345", "concurrent insertion and removal" );
+        test_ot_str( "012345", ( vls, dbs ) => {
+            vls[ 0 ].insert( 3, "ab" );
+            vls[ 1 ].remove( 1, 1 );
+        }, "02ab345", "concurrent insertion and removal" );
     });
 
     it( 'basic rights', () => {

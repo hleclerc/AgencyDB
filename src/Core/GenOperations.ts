@@ -55,7 +55,7 @@ function wl( str = "" ) {
 export class AddUsrRight { usr = new LvUsrId(); flags = new LvNumber(); };
 export class RemUsrRight { usr = new LvUsrId(); flags = new LvNumber(); };
 
-declare type TransFunc = ( o, n, l: BwRepr ) => void;
+declare type TransFunc = ( o, n, lo: BwRepr, ln: BwRepr ) => void;
 
 export default 
 class GenOperation<UT> {
@@ -70,25 +70,25 @@ class GenOperation<UT> {
     define_rights_by_flags( right_names: Array<string>, attr_name = "right_flags" ) {
         this.right_names = [ "add_usr_right", "rem_usr_right", ...right_names ];
 
-        this.apply( AddUsrRight, ( d, o: AddUsrRight ) => { const v = ( d as any as OtWrapperWithRightFlags ).right_flags.get( o.usr ); v.self_or_bin( o.flags ); } );
-        this.apply( RemUsrRight, ( d, o: RemUsrRight ) => { const v = ( d as any as OtWrapperWithRightFlags ).right_flags.get( o.usr ); v.self_and_bin( o.flags.not_bin() ); } );
+        this.apply( AddUsrRight, ( d, o: AddUsrRight ) => { const v = ( d as any as OtWrapperWithRightFlags ).right_flags.get( o.usr ); v.selfOrBin( o.flags ); } );
+        this.apply( RemUsrRight, ( d, o: RemUsrRight ) => { const v = ( d as any as OtWrapperWithRightFlags ).right_flags.get( o.usr ); v.selfAndBin( o.flags.notBin() ); } );
 
-        this.undo ( AddUsrRight, ( d, o: AddUsrRight ) => ( d as any as OtWrapperWithRightFlags ).right_flags.get( o.usr ).self_xor_bin( o.flags ) );
-        this.undo ( RemUsrRight, ( d, o: RemUsrRight ) => ( d as any as OtWrapperWithRightFlags ).right_flags.get( o.usr ).self_xor_bin( o.flags ) );
+        this.undo ( AddUsrRight, ( d, o: AddUsrRight ) => ( d as any as OtWrapperWithRightFlags ).right_flags.get( o.usr ).selfXorBin( o.flags ) );
+        this.undo ( RemUsrRight, ( d, o: RemUsrRight ) => ( d as any as OtWrapperWithRightFlags ).right_flags.get( o.usr ).selfXorBin( o.flags ) );
 
-        this.right( AddUsrRight, ( d, o: AddUsrRight, f: LvNumber, r: LvNumber ) => r.set( f.and_bin( this.flag( "add_usr_right" ) ) ) );
-        this.right( RemUsrRight, ( d, o: RemUsrRight, f: LvNumber, r: LvNumber ) => r.set( f.and_bin( this.flag( "rem_usr_right" ) ) ) );
+        this.right( AddUsrRight, ( d, o: AddUsrRight, f: LvNumber, r: LvNumber ) => r.set( f.andBin( this.flag( "add_usr_right" ) ) ) );
+        this.right( RemUsrRight, ( d, o: RemUsrRight, f: LvNumber, r: LvNumber ) => r.set( f.andBin( this.flag( "rem_usr_right" ) ) ) );
 
-        this.store( AddUsrRight, ( d, o: AddUsrRight ) => [ { type: AddUsrRight, data: { usr: o.usr, flags: o.flags.and_bin( ( d as any as OtWrapperWithRightFlags ).right_flags.get( o.usr ).not_bin() ) } as AddUsrRight } ] );
-        this.store( RemUsrRight, ( d, o: RemUsrRight ) => [ { type: RemUsrRight, data: { usr: o.usr, flags: o.flags.and_bin( ( d as any as OtWrapperWithRightFlags ).right_flags.get( o.usr )           ) } as RemUsrRight } ] );
+        this.store( AddUsrRight, ( d, o: AddUsrRight ) => [ { type: AddUsrRight, data: { usr: o.usr, flags: o.flags.andBin( ( d as any as OtWrapperWithRightFlags ).right_flags.get( o.usr ).notBin() ) } as AddUsrRight } ] );
+        this.store( RemUsrRight, ( d, o: RemUsrRight ) => [ { type: RemUsrRight, data: { usr: o.usr, flags: o.flags.andBin( ( d as any as OtWrapperWithRightFlags ).right_flags.get( o.usr )          ) } as RemUsrRight } ] );
 
         // i: 010011
         // o: 011111  ADD(001100)
         // n: 111011  ADD(101000)
         // r: 111111  (n:(o->r) = ADD(100000); o:(n->r) = unk: ADD(000100))
         this.fwd_trans( AddUsrRight, AddUsrRight, ( o: AddUsrRight, n: AddUsrRight ) => _if( o.usr.equ( n.usr ), () => {
-            n.flags.self_and_bin( o.flags.not_bin() );
-            o.flags.self_and_bin( n.flags.not_bin() );
+            n.flags.selfAndBin( o.flags.notBin() );
+            o.flags.selfAndBin( n.flags.notBin() );
         } ) );
 
         // i: 010011
@@ -96,8 +96,8 @@ class GenOperation<UT> {
         // n: 000010  REM(010001)
         // r: 000000  (n:(o->r) = REM(010000); o:(n->r) = REM(000010))
         this.fwd_trans( RemUsrRight, RemUsrRight, ( o: RemUsrRight, n: RemUsrRight ) => _if( o.usr.equ( n.usr ), () => {
-            n.flags.self_and_bin( o.flags.not_bin() );
-            o.flags.self_and_bin( n.flags.not_bin() );
+            n.flags.selfAndBin( o.flags.notBin() );
+            o.flags.selfAndBin( n.flags.notBin() );
         } ) );
     }
 
@@ -336,15 +336,27 @@ class GenOperation<UT> {
             if ( cb ) {
                 let data_unk = this.make_symbolic_data( op_unk.inst, "_unk" );
                 let data_new = this.make_symbolic_data( op_new.inst, "_new" );
-                let l = new BwRepr( this, "bw_unk" );
+                let lo = new BwRepr( this, "bw_unk" );
+                let ln = new BwRepr( this, "bw_new" );
                 if ( inv )
-                    cb( data_new, data_unk, l );
+                    cb( data_new, data_unk, ln, lo );
                 else
-                    cb( data_unk, data_new, l );
+                    cb( data_unk, data_new, lo, ln );
+
+                // if ( lo.sym.rp != lo.orig_sym ) {
+                //     Graphviz.display( [
+                //         ...Object.keys( data_unk ).map( k => data_unk[ k ].rp ),
+                //         ...Object.keys( data_new ).map( k => data_new[ k ].rp ),
+                //         lo.sym.rp,
+                //         ln.sym.rp,
+                //     ] );
+                // }
+
                 wl( Codegen.make_code( [
                     ...Object.keys( data_unk ).map( k => data_unk[ k ] ),
                     ...Object.keys( data_new ).map( k => data_new[ k ] ),
-                    l.sym
+                    lo.sym,
+                    ln.sym,
                 ], lang ) );
             }
             wl( `bw_unk.write_PI8( ${ op_unk.num } ); ${ this.bw_write_obj( lang, op_unk, "bw_unk", "_unk" ) }` );

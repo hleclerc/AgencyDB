@@ -15,10 +15,10 @@ class LvObj extends Variable<LvObj> {
 
     constructor( val = null as Rp ) {
         if ( val instanceof Rp ) super( val );
-        else                     super( LvObj.make_Rp( val ) );
+        else                     super( LvObj.makeRp( val ) );
     }
 
-    static make_Rp( val ) {
+    static makeRp( val ) {
         return new GenObj;
     }
 

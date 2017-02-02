@@ -15,10 +15,10 @@ class LvUsrId extends Variable<LvUsrId> {
     constructor( val = new UsrId() as Rp | LvUsrId | UsrId ) {
         if      ( val instanceof Rp            ) super( val );
         else if ( val instanceof LvUsrId       ) super( methods[ "copy__b" ].call_1( val.rp ) );
-        else                                     super( LvUsrId.make_Rp( val ) );
+        else                                     super( LvUsrId.makeRp( val ) );
     }
 
-    static make_Rp( val: UsrId ) {
+    static makeRp( val: UsrId ) {
         return new GenUsrId( val );
     }
 
