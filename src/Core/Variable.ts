@@ -236,9 +236,9 @@ dstd( "equ_immediate"          , 2, false );
    
 dstd( "select_ref"             , 2        ); // make a Select (or a SelectSym, ...)
 dstd( "select"                 , 2        ); // select for read
-dstd( "heads"                  , 2        ); // item, end => items at the beginning (up to end)
-dstd( "tails"                  , 2        ); // item, beg => items up to beg
-dstd( "slice"                  , 3        ); // lst, beg, end (get a copy)
+dslf( "beginning"              , 2        ); // item, end => items at the beginning (up to end)
+dslf( "ending"                 , 2        ); // item, beg => items up to beg
+dslf( "slice"                  , 3        ); // lst, beg, end (get a copy)
    
 dstd( "get_size"               , 1        ); // return a Variable (probably a number)
    
@@ -247,14 +247,34 @@ dstd( "to_BooleanVariable"     , 1        ); // conversion to Boolean variable (
 
 dstd( "copy"                   , 1        );
 
-[ "not_log", "not_bin", "neg"                          ].forEach( x => dslf( x, 1 ) );
-[ "set", "add", "sub", "mul", "div",
-  "or_log", "and_log", "xor_log",
-  "or_bin", "and_bin", "xor_bin",
-  "signed_shift_left", "signed_shift_right", 
-  "zfill_shift_left"                                   ].forEach( x => dslf( x, 2 ) );
-[ "is_pos", "is_neg", "is_eqz"                         ].forEach( x => dstd( x, 1 ) );
-[ "is_equ", "is_inf", "is_infeq", "is_sup", "is_supeq" ].forEach( x => dstd( x, 2 ) );
+dslf( "not_log"                , 1        );
+dslf( "not_bin"                , 1        );
+dslf( "neg"                    , 1        );
+       
+dslf( "set"                    , 2        );
+dslf( "add"                    , 2        );
+dslf( "sub"                    , 2        );
+dslf( "mul"                    , 2        );
+dslf( "div"                    , 2        );
+dslf( "or_log"                 , 2        );
+dslf( "and_log"                , 2        );
+dslf( "xor_log"                , 2        );
+dslf( "or_bin"                 , 2        );
+dslf( "and_bin"                , 2        );
+dslf( "xor_bin"                , 2        );
+dslf( "signed_shift_left"      , 2        );
+dslf( "signed_shift_right"     , 2        );
+dslf( "zfill_shift_left"       , 2        );
+       
+dstd( "is_pos"                 , 1        );
+dstd( "is_neg"                 , 1        );
+dstd( "is_eqz"                 , 1        );
+       
+dstd( "is_equ"                 , 2        );
+dstd( "is_inf"                 , 2        );
+dstd( "is_infeq"               , 2        );
+dstd( "is_sup"                 , 2        );
+dstd( "is_supeq"               , 2        );
 
 dslf( "remove"                 , 3        );
 dslf( "insert"                 , 3        );

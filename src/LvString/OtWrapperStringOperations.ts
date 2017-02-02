@@ -87,27 +87,32 @@ function new_patch( val: OtWrapperString, bw_new: BinaryWriter, br_new: BinaryRe
                 const num_unk = br_unk.read_PI8();
                 switch ( num_unk ) {
                     case 0: { // AddUsrRight
+                        console.log( 'AddUsrRight', 'AddUsrRight' );
                         let usr_unk = UsrId.read_from( br_unk ), flags_unk = br_unk.read_PT();
                         if(usr_unk==usr_new){flags_new&=~flags_unk;flags_unk&=~flags_new;}
                         bw_unk.write_PI8( 0 ); usr_unk.write_to( bw_unk ); bw_unk.write_PT( flags_unk );
                         break;
                     }
                     case 1: { // RemUsrRight
+                        console.log( 'RemUsrRight', 'AddUsrRight' );
                         let usr_unk = UsrId.read_from( br_unk ), flags_unk = br_unk.read_PT();
                         bw_unk.write_PI8( 1 ); usr_unk.write_to( bw_unk ); bw_unk.write_PT( flags_unk );
                         break;
                     }
                     case 2: { // Insert
+                        console.log( 'Insert', 'AddUsrRight' );
                         let pos_unk = br_unk.read_PT(), str_unk = br_unk.read_String();
                         bw_unk.write_PI8( 2 ); bw_unk.write_PT( pos_unk ); bw_unk.write_String( str_unk );
                         break;
                     }
                     case 3: { // Remove
+                        console.log( 'Remove', 'AddUsrRight' );
                         let pos_unk = br_unk.read_PT(), len_unk = br_unk.read_PT();
                         bw_unk.write_PI8( 3 ); bw_unk.write_PT( pos_unk ); bw_unk.write_PT( len_unk );
                         break;
                     }
                     case 4: { // RemUnd
+                        console.log( 'RemUnd', 'AddUsrRight' );
                         let pos_unk = br_unk.read_PT(), str_unk = br_unk.read_String();
                         bw_unk.write_PI8( 4 ); bw_unk.write_PT( pos_unk ); bw_unk.write_String( str_unk );
                         break;
@@ -131,27 +136,32 @@ function new_patch( val: OtWrapperString, bw_new: BinaryWriter, br_new: BinaryRe
                 const num_unk = br_unk.read_PI8();
                 switch ( num_unk ) {
                     case 0: { // AddUsrRight
+                        console.log( 'AddUsrRight', 'RemUsrRight' );
                         let usr_unk = UsrId.read_from( br_unk ), flags_unk = br_unk.read_PT();
                         bw_unk.write_PI8( 0 ); usr_unk.write_to( bw_unk ); bw_unk.write_PT( flags_unk );
                         break;
                     }
                     case 1: { // RemUsrRight
+                        console.log( 'RemUsrRight', 'RemUsrRight' );
                         let usr_unk = UsrId.read_from( br_unk ), flags_unk = br_unk.read_PT();
                         if(usr_unk==usr_new){flags_new&=~flags_unk;flags_unk&=~flags_new;}
                         bw_unk.write_PI8( 1 ); usr_unk.write_to( bw_unk ); bw_unk.write_PT( flags_unk );
                         break;
                     }
                     case 2: { // Insert
+                        console.log( 'Insert', 'RemUsrRight' );
                         let pos_unk = br_unk.read_PT(), str_unk = br_unk.read_String();
                         bw_unk.write_PI8( 2 ); bw_unk.write_PT( pos_unk ); bw_unk.write_String( str_unk );
                         break;
                     }
                     case 3: { // Remove
+                        console.log( 'Remove', 'RemUsrRight' );
                         let pos_unk = br_unk.read_PT(), len_unk = br_unk.read_PT();
                         bw_unk.write_PI8( 3 ); bw_unk.write_PT( pos_unk ); bw_unk.write_PT( len_unk );
                         break;
                     }
                     case 4: { // RemUnd
+                        console.log( 'RemUnd', 'RemUsrRight' );
                         let pos_unk = br_unk.read_PT(), str_unk = br_unk.read_String();
                         bw_unk.write_PI8( 4 ); bw_unk.write_PT( pos_unk ); bw_unk.write_String( str_unk );
                         break;
@@ -175,30 +185,35 @@ function new_patch( val: OtWrapperString, bw_new: BinaryWriter, br_new: BinaryRe
                 const num_unk = br_unk.read_PI8();
                 switch ( num_unk ) {
                     case 0: { // AddUsrRight
+                        console.log( 'AddUsrRight', 'Insert' );
                         let usr_unk = UsrId.read_from( br_unk ), flags_unk = br_unk.read_PT();
                         bw_unk.write_PI8( 0 ); usr_unk.write_to( bw_unk ); bw_unk.write_PT( flags_unk );
                         break;
                     }
                     case 1: { // RemUsrRight
+                        console.log( 'RemUsrRight', 'Insert' );
                         let usr_unk = UsrId.read_from( br_unk ), flags_unk = br_unk.read_PT();
                         bw_unk.write_PI8( 1 ); usr_unk.write_to( bw_unk ); bw_unk.write_PT( flags_unk );
                         break;
                     }
                     case 2: { // Insert
+                        console.log( 'Insert', 'Insert' );
                         let pos_unk = br_unk.read_PT(), str_unk = br_unk.read_String();
                         if(pos_unk>pos_new){pos_unk+=str_new.length;}else{pos_new+=str_unk.length;}
                         bw_unk.write_PI8( 2 ); bw_unk.write_PT( pos_unk ); bw_unk.write_String( str_unk );
                         break;
                     }
                     case 3: { // Remove
+                        console.log( 'Remove', 'Insert' );
                         let pos_unk = br_unk.read_PT(), len_unk = br_unk.read_PT();
-                        if(pos_new>=pos_unk+len_unk){pos_new-=len_unk;}else{if(pos_new<=pos_unk){pos_unk+=str_new.length;}else{var T0=pos_new-pos_unk,T1=pos_new-pos_unk,T2,T3,T4;pos_new=pos_unk;bw_unk.write_PI8(3);T2=pos_unk;T3=T0;T4=T1;pos_unk+=str_new.length;len_unk-=T4;bw_unk.write_PT(T2);bw_unk.write_PT(T3);}}
+                        if(pos_new>=pos_unk+len_unk){pos_new-=len_unk;}else{if(pos_new<=pos_unk){pos_unk+=str_new.length;}else{let T0=pos_new-pos_unk,T1=pos_new-pos_unk,T2,T3,T4;pos_new=pos_unk;bw_unk.write_PI8(3);T2=pos_unk;T3=T0;T4=T1;pos_unk+=str_new.length;len_unk-=T4;bw_unk.write_PT(T2);bw_unk.write_PT(T3);}}
                         bw_unk.write_PI8( 3 ); bw_unk.write_PT( pos_unk ); bw_unk.write_PT( len_unk );
                         break;
                     }
                     case 4: { // RemUnd
+                        console.log( 'RemUnd', 'Insert' );
                         let pos_unk = br_unk.read_PT(), str_unk = br_unk.read_String();
-                        if(pos_new>=pos_unk+str_unk.length){str_new+="f";}else{if(pos_new<=pos_unk){str_new+="x";}else{str_new+="s";}}
+                        if(pos_new>=pos_unk+str_unk.length){pos_new-=str_unk.length;}else{if(pos_new<=pos_unk){pos_unk+=str_new.length;}else{str_unk="";}}
                         bw_unk.write_PI8( 4 ); bw_unk.write_PT( pos_unk ); bw_unk.write_String( str_unk );
                         break;
                     }
@@ -217,28 +232,35 @@ function new_patch( val: OtWrapperString, bw_new: BinaryWriter, br_new: BinaryRe
                 const num_unk = br_unk.read_PI8();
                 switch ( num_unk ) {
                     case 0: { // AddUsrRight
+                        console.log( 'AddUsrRight', 'Remove' );
                         let usr_unk = UsrId.read_from( br_unk ), flags_unk = br_unk.read_PT();
                         bw_unk.write_PI8( 0 ); usr_unk.write_to( bw_unk ); bw_unk.write_PT( flags_unk );
                         break;
                     }
                     case 1: { // RemUsrRight
+                        console.log( 'RemUsrRight', 'Remove' );
                         let usr_unk = UsrId.read_from( br_unk ), flags_unk = br_unk.read_PT();
                         bw_unk.write_PI8( 1 ); usr_unk.write_to( bw_unk ); bw_unk.write_PT( flags_unk );
                         break;
                     }
                     case 2: { // Insert
+                        console.log( 'Insert', 'Remove' );
                         let pos_unk = br_unk.read_PT(), str_unk = br_unk.read_String();
-                        if(pos_unk>=pos_new+len_new){pos_unk-=len_new;}else{if(pos_unk<=pos_new){pos_new+=str_unk.length;}else{var T0=pos_unk-pos_new,T1=pos_unk-pos_new,T2,T3,T4;pos_unk=pos_new;bw_new.write_PI8(3);T2=pos_new;T3=T0;T4=T1;pos_new+=str_unk.length;len_new-=T4;bw_new.write_PT(T2);bw_new.write_PT(T3);}}
+                        if(pos_unk>=pos_new+len_new){pos_unk-=len_new;}else{if(pos_unk<=pos_new){pos_new+=str_unk.length;}else{let T0=pos_unk-pos_new,T1=pos_unk-pos_new,T2,T3,T4;pos_unk=pos_new;bw_new.write_PI8(3);T2=pos_new;T3=T0;T4=T1;pos_new+=str_unk.length;len_new-=T4;bw_new.write_PT(T2);bw_new.write_PT(T3);}}
                         bw_unk.write_PI8( 2 ); bw_unk.write_PT( pos_unk ); bw_unk.write_String( str_unk );
                         break;
                     }
                     case 3: { // Remove
+                        console.log( 'Remove', 'Remove' );
                         let pos_unk = br_unk.read_PT(), len_unk = br_unk.read_PT();
+                        if(pos_unk<=pos_new){if(pos_unk+len_unk<=pos_new){pos_new-=len_unk;}else{if(pos_unk+len_unk<=pos_new+len_new){let T0=pos_unk+len_unk-pos_new;pos_new=pos_unk;len_new-=T0;len_unk-=T0;}else{len_unk-=len_new;len_new=0;}}}else{if(pos_new+len_new<=pos_unk){pos_unk-=len_new;}else{if(pos_new+len_new<=pos_unk+len_unk){let T1=pos_new+len_new-pos_unk;pos_unk=pos_new;len_unk-=T1;len_new-=T1;}else{len_new-=len_unk;len_unk=0;}}}
                         bw_unk.write_PI8( 3 ); bw_unk.write_PT( pos_unk ); bw_unk.write_PT( len_unk );
                         break;
                     }
                     case 4: { // RemUnd
+                        console.log( 'RemUnd', 'Remove' );
                         let pos_unk = br_unk.read_PT(), str_unk = br_unk.read_String();
+                        let T0=pos_unk+str_unk.length-pos_new,T1=len_new,T2=Boolean(pos_unk<=pos_new),T3=pos_new,T4=str_unk.substr(0,str_unk.length-T0);if(pos_unk+str_unk.length<=pos_new+len_new){len_new-=T0;pos_new=pos_unk;}else{let T5=pos_new-pos_unk,T6=T4.substr(0,T5)+T4.substr(T5+pos_new-pos_unk+len_new-pos_new);len_new=0;T4=T6;}if(T2){if(pos_unk+str_unk.length<=T3){T3-=str_unk.length;}}else{if(T3+T1<=pos_unk){pos_unk-=T1;}else{if(T3+T1<=pos_unk+T4.length){let T7=T3+T1-pos_unk;pos_unk=T3;T1-=T7;T4=T4.substr(T7);}else{let T8=T4.length;T4="";T1-=T8;}}}
                         bw_unk.write_PI8( 4 ); bw_unk.write_PT( pos_unk ); bw_unk.write_String( str_unk );
                         break;
                     }
@@ -261,28 +283,35 @@ function new_patch( val: OtWrapperString, bw_new: BinaryWriter, br_new: BinaryRe
                 const num_unk = br_unk.read_PI8();
                 switch ( num_unk ) {
                     case 0: { // AddUsrRight
+                        console.log( 'AddUsrRight', 'RemUnd' );
                         let usr_unk = UsrId.read_from( br_unk ), flags_unk = br_unk.read_PT();
                         bw_unk.write_PI8( 0 ); usr_unk.write_to( bw_unk ); bw_unk.write_PT( flags_unk );
                         break;
                     }
                     case 1: { // RemUsrRight
+                        console.log( 'RemUsrRight', 'RemUnd' );
                         let usr_unk = UsrId.read_from( br_unk ), flags_unk = br_unk.read_PT();
                         bw_unk.write_PI8( 1 ); usr_unk.write_to( bw_unk ); bw_unk.write_PT( flags_unk );
                         break;
                     }
                     case 2: { // Insert
+                        console.log( 'Insert', 'RemUnd' );
                         let pos_unk = br_unk.read_PT(), str_unk = br_unk.read_String();
-                        if(pos_unk>=pos_new+str_new.length){str_unk+="f";}else{if(pos_unk<=pos_new){str_unk+="x";}else{str_unk+="s";}}
+                        if(pos_unk>=pos_new+str_new.length){pos_unk-=str_new.length;}else{if(pos_unk<=pos_new){pos_new+=str_unk.length;}else{let T0=str_new.substr(0,pos_unk-pos_new),T1=str_new.substr(pos_unk-pos_new),T2,T3,T4,T5;pos_unk=pos_new;bw_new.write_PI8(4);T2=pos_new;T3=T0;T4=T1;pos_new+=str_unk.length;T5=T3;str_new=T4;bw_new.write_PT(T2);bw_new.write_String(T5);}}
                         bw_unk.write_PI8( 2 ); bw_unk.write_PT( pos_unk ); bw_unk.write_String( str_unk );
                         break;
                     }
                     case 3: { // Remove
+                        console.log( 'Remove', 'RemUnd' );
                         let pos_unk = br_unk.read_PT(), len_unk = br_unk.read_PT();
+                        let T0=pos_new+str_new.length-pos_unk,T1=len_unk,T2=Boolean(pos_new<=pos_unk),T3=pos_unk,T4=str_new.substr(0,str_new.length-T0);if(pos_new+str_new.length<=pos_unk+len_unk){len_unk-=T0;pos_unk=pos_new;}else{let T5=pos_unk-pos_new,T6=T4.substr(0,T5)+T4.substr(T5+pos_unk-pos_new+len_unk-pos_unk);len_unk=0;T4=T6;}if(T2){if(pos_new+str_new.length<=T3){T3-=str_new.length;}}else{if(T3+T1<=pos_new){pos_new-=T1;}else{if(T3+T1<=pos_new+T4.length){let T7=T3+T1-pos_new;pos_new=T3;T1-=T7;T4=T4.substr(T7);}else{let T8=T4.length;T4="";T1-=T8;}}}
                         bw_unk.write_PI8( 3 ); bw_unk.write_PT( pos_unk ); bw_unk.write_PT( len_unk );
                         break;
                     }
                     case 4: { // RemUnd
+                        console.log( 'RemUnd', 'RemUnd' );
                         let pos_unk = br_unk.read_PT(), str_unk = br_unk.read_String();
+                        let T0=pos_unk+str_unk.length-pos_new,T1=str_new,T2=Boolean(pos_unk<=pos_new),T3=pos_new,T4=str_unk.substr(0,str_unk.length-T0);if(pos_unk+str_unk.length<=pos_new+str_new.length){pos_new=pos_unk;str_new=str_new.substr(str_new.length-T0);}else{let T5=pos_new-pos_unk,T6=T4.substr(0,T5)+T4.substr(T5+pos_new-pos_unk+str_new.length-pos_new);str_new="";T4=T6;}if(T2){if(pos_unk+str_unk.length<=T3){T3-=str_unk.length;}}else{if(T3+T1.length<=pos_unk){pos_unk-=T1.length;}else{if(T3+T1.length<=pos_unk+T4.length){let T7=T4.substr(T3+T1.length-pos_unk),T8=T1.substr(0,pos_unk-T3),T9;pos_unk=T3;T9=T7;T1=T8;T4=T9;}else{let T10=pos_unk-T3,T11=T1.substr(0,T10)+T1.substr(T10+T4.length);T4="";T1=T11;}}}
                         bw_unk.write_PI8( 4 ); bw_unk.write_PT( pos_unk ); bw_unk.write_String( str_unk );
                         break;
                     }

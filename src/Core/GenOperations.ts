@@ -328,6 +328,7 @@ class GenOperation<UT> {
         for( const op_unk of this.operations ) {
             wl( `        case ${ op_unk.num }: { // ${ op_unk.inst.constructor.name }` );
             nb_sp += 12;
+            wl( `console.log( '${ op_unk.inst.constructor.name }', '${ op_new.inst.constructor.name }' );` );
             wl( this.br_read_var( lang, op_unk, "br_unk", "_unk", false ) );
             
             let cb = this.trans_rules.get( `${ op_unk.inst.constructor.name } ${ op_new.inst.constructor.name }` ), inv = false;

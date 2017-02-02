@@ -69,7 +69,7 @@ go.fwd_trans( Remove, Insert, ( o: Remove, n: Insert, l_old ) => {
         // o: 05        REM(1,4)
         // n: 012new345 INS(3,new)
         // r: 0new5     n:(o->r) = INS(1,new); o:(n->r) = REM(1,2) + REM(4,2)
-        l_old.push( Remove, { pos: o.pos, len: n.pos.sub( o.pos ) }  ); // 1, 2
+        l_old.push( Remove, { pos: o.pos, len: n.pos.sub( o.pos ) } as Remove ); // 1, 2
         o.len.selfSub( n.pos.sub( o.pos ) ); // 2
         n.pos.set( o.pos );                  // 1
         o.pos.selfAdd( n.str.length );       // 4
@@ -82,60 +82,212 @@ go.fwd_trans( RemUnd, Insert, ( o: RemUnd, n: Insert, l_old ) => {
         // o: 0345      REM(1,2)
         // n: 01234new5 INS(5,new)
         // r: 034new5   n:(o->r) = INS(3,new); o:(n->r) = REM(1,2)
-        // n.pos.self_sub( o.len ); // 3
-        n.str.append( "f" );
+        n.pos.selfSub( o.str.length ); // 3
     }, n.pos.isInfEq( o.pos ), () => {
         // i: 012345
         // o: 0125      REM(3,2)
         // n: 0new12345 INS(1,new)
         // r: 0new125   n:(o->r) = INS(1,new); o:(n->r) = REM(6,2)
-        // o.pos.self_add( n.str.length );
-        n.str.append( "x" );
+        o.pos.selfAdd( n.str.length );
     }, () => {
         // i: 012345
         // o: 05        REM(1,4)
         // n: 012new345 INS(3,new)
-        // r: 0new5     n:(o->r) = INS(1,new); o:(n->r) = REM(1,2) + REM(4,2)
-        // l_old.push( Remove, { pos: o.pos, len: n.pos.sub( o.pos ) }  ); // 1, 2
-        // o.len.self_sub( n.pos.sub( o.pos ) ); // 2
-        // n.pos.set( o.pos );                   // 1
-        // o.pos.self_add( n.str.length );       // 4
-        // n.str.append( "smurf" );
-        n.str.append( "s" );
+        // r: 0new5     n:(o->r) = INS(1,new); o:(n->r) = REM(1,'01') + REM(4,'34')
+        l_old.push( RemUnd, { pos: o.pos, str: o.str.beginning( n.pos.sub( o.pos ) ) } as RemUnd ); // 1, '12'
+        o.str.selfEnding( n.pos.sub( o.pos ) ); // '34'
+        n.pos.set( o.pos );                     // 1
+        o.pos.selfAdd( n.str.length );          // 4
+    } );
+} );
+
+// ---------------------<
+go.fwd_trans( Insert, RemUnd, ( o: Insert, n: RemUnd, l_old, l_new ) => {
+    _if( o.pos.isSupEq( n.pos.add( n.str.length ) ), () => {
+        // i: 012345
+        // o: 01234new5 INS(5,new)
+        // n: 0345      REM(1,2)
+        // r: 034new5   n:(o->r) = INS(3,new); o:(n->r) = REM(1,2)
+        o.pos.selfSub( n.str.length ); // 3
+    }, o.pos.isInfEq( n.pos ), () => {
+        // i: 012345
+        // o: 0new12345 INS(1,new)
+        // n: 0125      REM(3,2)
+        // r: 0new125   n:(o->r) = INS(1,new); o:(n->r) = REM(6,2)
+        n.pos.selfAdd( o.str.length );
+    }, () => {
+        // i: 012345
+        // o: 012new345 INS(3,new)
+        // n: 05        REM(1,4)
+        // r: 0new5     n:(o->r) = INS(1,new); o:(n->r) = REM(1,'01') + REM(4,'34')
+        l_new.push( RemUnd, { pos: n.pos, str: n.str.beginning( o.pos.sub( n.pos ) ) } as RemUnd ); // 1, '12'
+        n.str.selfEnding( o.pos.sub( n.pos ) ); // '34'
+        o.pos.set( n.pos );                     // 1
+        n.pos.selfAdd( o.str.length );          // 4
     } );
 } );
 
 
+go.fwd_trans( Remove, Remove, ( o: Remove, n: Remove, l_old ) => {
+    _if ( o.pos.isInfEq( n.pos ), () => {
+        _if ( o.pos.add( o.len ).isInfEq( n.pos ), () => {
+            // i: 0123456789
+            // o: 0456789    REM(1,3)
+            // n: 01234589   REM(6,2)
+            // r: 04589      n:(o->r) = REM(3,2); o:(n->r) = REM(1,3)
+            n.pos.selfSub( o.len ); // 3
+        }, o.pos.add( o.len ).isInfEq( n.pos.add( n.len ) ), () => {
+            // i: 0123456789
+            // o: 06789      REM(1,5)
+            // n: 012389     REM(4,4)
+            // r: 089        n:(o->r) = REM(1,2); o:(n->r) = REM(1,3)
+            let d = o.pos.add( o.len ).sub( n.pos ); // 2
+            n.len.selfSub( d );                      // 2
+            o.len.selfSub( d );                      // 3
+            n.pos.set( o.pos );                      // 1
+        }, () => {
+            // i: 0123456789
+            // o: 09         REM(1,8)
+            // n: 01236789   REM(4,2)
+            // r: 09         n:(o->r) = VOID; o:(n->r) = REM(1,6)
+            o.len.selfSub( n.len );
+            n.len.set( 0 );
+        } );
+    }, () => {
+        _if ( n.pos.add( n.len ).isInfEq( o.pos ), () => {
+            // i: 0123456789
+            // o: 01234589   REM(6,2)
+            // n: 0456789    REM(1,3)
+            // r: 04589      n:(o->r) = REM(1,3); o:(n->r) = REM(3,2)
+            o.pos.selfSub( n.len ); // 3
+        }, n.pos.add( n.len ).isInfEq( o.pos.add( o.len ) ), () => {
+            // i: 0123456789
+            // o: 012389     REM(4,4)
+            // n: 06789      REM(1,5)
+            // r: 089        n:(o->r) = REM(1,3); o:(n->r) = REM(1,2)
+            let d = n.pos.add( n.len ).sub( o.pos ); // 2
+            o.len.selfSub( d ); // 2
+            n.len.selfSub( d ); // 3
+            o.pos.set( n.pos ); // 1
+        }, () => {
+            // i: 0123456789
+            // o: 01236789   REM(4,2)
+            // n: 09         REM(1,8)
+            // r: 09         n:(o->r) = REM(1,6); o:(n->r) = VOID)
+            n.len.selfSub( o.len );
+            o.len.set( 0 );
+        } );
+    } );
+} );
+
+go.fwd_trans( RemUnd, Remove, ( o: RemUnd, n: Remove, l_old ) => {
+    _if ( o.pos.isInfEq( n.pos ), () => {
+        _if ( o.pos.add( o.str.length ).isInfEq( n.pos ), () => {
+            // i: 0123456789
+            // o: 0456789    REM(1,'123')
+            // n: 01234589   REM(6,2)
+            // r: 04589      n:(o->r) = REM(3,2); o:(n->r) = REM_UND(1,'123')
+            n.pos.selfSub( o.str.length ); // 3
+        }, o.pos.add( o.str.length ).isInfEq( n.pos.add( n.len ) ), () => {
+            // i: 0123456789
+            // o: 06789      REM_UND(1,'12345')
+            // n: 012389     REM(4,4)
+            // r:  089        n:(o->r) = REM(1,2); o:(n->r) = REM_UND(1,'123')
+            let d = o.pos.add( o.str.length ).sub( n.pos );   // 2
+            o.str = o.str.beginning( o.str.length.sub( d ) ); // '123'
+            n.len.selfSub( d );                               // 2
+            n.pos.set( o.pos );                               // 1
+        }, () => {
+            // i: 0123456789
+            // o: 09         REM_UND(1,'12345678')
+            // n: 01236789   REM(4,2)
+            // r: 09         n:(o->r) = VOID; o:(n->r) = REM_UND(1,'123678')
+            o.str.remove( n.pos.sub( o.pos ), n.pos.sub( o.pos ).add( n.len ).sub( n.pos ) );
+            n.len.set( 0 );
+        } );
+    }, () => {
+        _if ( n.pos.add( n.len ).isInfEq( o.pos ), () => {
+            // i: 0123456789
+            // o: 01234589   REM_UND(6,'67')
+            // n: 0456789    REM(1,3)
+            // r: 04589      n:(o->r) = REM(1,3); o:(n->r) = REM_UND(3,'67')
+            o.pos.selfSub( n.len ); // 3
+        }, n.pos.add( n.len ).isInfEq( o.pos.add( o.str.length ) ), () => {
+            // i: 0123456789
+            // o: 012389     REM_UND(4,'4567')
+            // n: 06789      REM(1,5)
+            // r: 089        n:(o->r) = REM(1,3); o:(n->r) = REM_UND(1,'67')
+            let d = n.pos.add( n.len ).sub( o.pos ); // 2
+            o.str.selfEnding( d );                   // '67'
+            n.len.selfSub( d );                      // 3
+            o.pos.set( n.pos );                      // 1
+        }, () => {
+            // i: 0123456789
+            // o: 01236789   REM(4,2)
+            // n: 09         REM(1,8)
+            // r: 09         n:(o->r) = REM(1,6); o:(n->r) = VOID
+            n.len.selfSub( o.str.length );
+            o.str.set( "" );
+        } );
+    } );
+} );
+
+go.fwd_trans( RemUnd, RemUnd, ( o: RemUnd, n: RemUnd, l_old, l_new ) => {
+    _if ( o.pos.isInfEq( n.pos ), () => {
+        _if ( o.pos.add( o.str.length ).isInfEq( n.pos ), () => {
+            // i: 0123456789
+            // o: 0456789    REM_UND(1,'123')
+            // n: 01234589   REM_UND(6,'67')
+            // r: 04589      n:(o->r) = REM_UND(3,'67'); o:(n->r) = REM_UND(1,'123')
+            n.pos.selfSub( o.str.length ); // 3
+        }, o.pos.add( o.str.length ).isInfEq( n.pos.add( n.str.length ) ), () => {
+            // i: 0123456789
+            // o: 06789      REM_UND(1,'12345')
+            // n: 012389     REM_UND(4,'4567')
+            // r: 089        n:(o->r) = REM_UND(1,'67'); o:(n->r) = REM_UND(1,'123')
+            let d = o.pos.add( o.str.length ).sub( n.pos );   // 2
+            o.str = o.str.beginning( o.str.length.sub( d ) ); // '123'
+            n.str.selfEnding( n.str.length.sub( d ) );        // '67'
+            n.pos.set( o.pos );                               // 1
+        }, () => {
+            // i: 0123456789
+            // o: 09         REM_UND(1,'12345678')
+            // n: 01236789   REM_UND(4,'45')
+            // r: 09         n:(o->r) = VOID; o:(n->r) = REM_UND(1,'123678')
+            o.str.remove( n.pos.sub( o.pos ), n.pos.sub( o.pos ).add( n.str.length ).sub( n.pos ) );
+            n.str.set( "" );
+        } );
+    }, () => {
+        _if ( n.pos.add( n.str.length ).isInfEq( o.pos ), () => {
+            // i: 0123456789
+            // o: 01234589   REM_UND(6,'67')
+            // n: 0456789    REM_UND(1,'123')
+            // r: 04589      n:(o->r) = REM_UND(1,'123'); o:(n->r) = REM_UND(3,'67')
+            o.pos.selfSub( n.str.length ); // 3
+        }, n.pos.add( n.str.length ).isInfEq( o.pos.add( o.str.length ) ), () => {
+            // i: 0123456789
+            // o: 012389     REM_UND(4,'4567')
+            // n: 06789      REM_UND(1,'12345')
+            // r: 089        n:(o->r) = REM_UND(1,'123'); o:(n->r) = REM_UND(1,'67')
+            let d = n.pos.add( n.str.length ).sub( o.pos ); // 2
+            o.str.selfEnding( d );                          // '67'
+            n.str.selfBeginning( o.pos.sub( n.pos ) );      // '123'
+            o.pos.set( n.pos );                             // 1
+        }, () => {
+            // i: 0123456789
+            // o: 01236789   REM_UND(4,'45')
+            // n: 09         REM_UND(1,'12345678')
+            // r: 09         n:(o->r) = REM_UND(1,'123678'); o:(n->r) = VOID
+            n.str.remove( o.pos.sub( n.pos ), o.str.length );
+            o.str.set( "" );
+        } );
+    } );
+} );
 
 
 process.stdout.write( `import OtWrapperString from "./OtWrapperString"\n` );
 go.write( "ts" );
 
-
-// void OtWrapperString::unk_new_or_new_unk( op_insert, op_remove_und, UsrId asu_n, BBQ bq_n, BBQ bq_o, PT &p_n, CbString &d_n, PT &p_o, CbString &d_o ) {
-//     if ( p_n >= p_o + d_o.size() ) {
-//         // orig 012345
-//         // real 0345      REM(p_o=1,l_o=2)
-//         // imag 01234new5 INS(p_n=5,d_n=new)
-//         // obj  034new5   (real -> obj = new: INS 3,new; imag -> obj = unk: REM 1,2)
-//         p_n -= d_o.size(); // 3
-//     } else if ( p_n <= p_o ) {
-//         // orig 012345
-//         // real 0125      REM(p_o=3,l_o=2)
-//         // imag 0new12345 INS(p_n=1,d_n=new)
-//         // obj  0new125   (real -> obj = new: INS 1,new; imag -> obj = unk: REM 6,2)
-//         p_o += d_n.size();
-//     } else {
-//         // orig 012345
-//         // real 05        REM(p_o=1,l_o=4)
-//         // imag 012new345 INS(p_n=3,d_n=new)
-//         // obj  0new5     (real -> obj = new: INS 1,new; imag -> obj = unk: REM 1,'01' + REM 4,'34')
-//         reg_op_in( bq_o, op_remove_und{}, p_o, d_o.beg_upto( p_n - p_o ) ); // 1, '12'
-//         d_o.skip_some( p_n - p_o );  // '34'
-//         p_n = p_o;         // 1
-//         p_o += d_n.size(); // 4
-//     }
-// }
 
 // void OtWrapperString::unk_new_or_new_unk( op_insert, op_set_cursor, UsrId asu_n, BBQ bq_n, BBQ bq_o, PT &p_n, CbString &d_n, DevId &dev_id_o, PI64 &loc_id_o, PT &pos_o ) {
 //     if ( pos_o >= p_n )
@@ -154,22 +306,22 @@ go.write( "ts" );
 
 // void OtWrapperString::unk_new_or_new_unk( op_remove, op_insert, UsrId asu_n, BBQ bq_n, BBQ bq_o, PT &p_n, PT &l_n, PT &p_o, CbString &d_o ) {
 //     if ( p_o <= p_n ) {
-//         // orig 01234567
-//         // real 01ab234567 INS(p_o=2,d_o=ab)
-//         // imag 012347     REM(p_n=5,l_n=2)
-//         // obj  01ab2347   (real -> obj = new: REM 7,2; imag -> obj = unk: INS 2,ab)
+//         // i: 01234567
+//         // o: 01ab234567 INS(2,d_o=ab)
+//         // n: 012347     REM(p_n=5,l_n=2)
+//         // r: 01ab2347   n:(o->r) = REM 7,2; o:(n->r) = INS 2,ab)
 //         p_n += d_o.size();
 //     } else if ( p_o >= p_n + l_n ) {
-//         // orig 01234567
-//         // real 01234ab567 INS(p_o=5,d_o=ab)
-//         // imag 014567     REM(p_n=2,l_n=2)
-//         // obj  014ab567   (real -> obj = new: REM 2,2; imag -> obj = unk: INS 3,ab)
+//         // i: 01234567
+//         // o: 01234ab567 INS(5,d_o=ab)
+//         // n: 014567     REM(p_n=2,l_n=2)
+//         // r: 014ab567   n:(o->r) = REM 2,2; o:(n->r) = INS 3,ab)
 //         p_o -= l_n;
 //     } else {
-//         // orig 01234567
-//         // real 0123ab4567 INS(p_o=4,d_o=ab)
-//         // imag 0167       REM(p_n=2,l_n=4)
-//         // obj  01ab67     (real -> obj = new: REM 2,2 + REM 4,2; imag -> obj = unk: INS 2,ab)
+//         // i: 01234567
+//         // o: 0123ab4567 INS(4,d_o=ab)
+//         // n: 0167       REM(p_n=2,l_n=4)
+//         // r: 01ab67     n:(o->r) = REM 2,2 + REM 4,2; o:(n->r) = INS 2,ab)
 //         _substring( p_n, p_o - p_n, [&]( DaSi d ) { reg_op_in( bq_n, op_remove_und{}, p_n, d ); } ); // 2, 2
 //         OtWrapperString::Aod aod_n; aod_n.as_usr = asu_n;
 //         apply_op( op_remove{}, aod_n, p_n, p_o - p_n );
@@ -182,49 +334,49 @@ go.write( "ts" );
 // void OtWrapperString::unk_new_or_new_unk( op_remove, op_remove, UsrId asu_n, BBQ bq_n, BBQ bq_o, PT &p_n, PT &l_n, PT &p_o, PT &l_o ) {
 //     if ( p_o <= p_n ) {
 //         if ( p_o + l_o <= p_n ) {
-//             // orig 0123456789
-//             // real 0456789    REM(p_o=1,l_o=3)
-//             // imag 01234589   REM(p_n=6,l_n=2)
-//             // obj  04589      (real -> obj = new: REM 3,2; imag -> obj = unk: REM 1,3)
+//             // i: 0123456789
+//             // o: 0456789    REM(1,l_o=3)
+//             // n: 01234589   REM(p_n=6,l_n=2)
+//             // r: 04589      n:(o->r) = REM 3,2; o:(n->r) = REM 1,3)
 //             p_n -= l_o; // 3
 //         } else if ( p_o + l_o <= p_n + l_n ) {
-//             // orig 0123456789
-//             // real 06789      REM(p_o=1,l_o=5)
-//             // imag 012389     REM(p_n=4,l_n=4)
-//             // obj  089        (real -> obj = new: REM 1,2; imag -> obj = unk: REM 1,3)
+//             // i: 0123456789
+//             // o: 06789      REM(1,l_o=5)
+//             // n: 012389     REM(p_n=4,l_n=4)
+//             // r: 089        n:(o->r) = REM 1,2; o:(n->r) = REM 1,3)
 //             PT d = p_o + l_o - p_n; // 2
 //             l_n -= d;  // 2
 //             l_o -= d;  // 3
 //             p_n = p_o; // 1
 //         } else {
-//             // orig 0123456789
-//             // real 09         REM(p_o=1,l_o=8)
-//             // imag 01236789   REM(p_n=4,l_n=2)
-//             // obj  09         (real -> obj = new: VOID; imag -> obj = unk: REM 1,6)
+//             // i: 0123456789
+//             // o: 09         REM(1,l_o=8)
+//             // n: 01236789   REM(p_n=4,l_n=2)
+//             // r: 09         n:(o->r) = VOID; o:(n->r) = REM 1,6)
 //             l_o -= l_n;
 //             l_n = 0;
 //         }
 //     } else {
 //         if ( p_n + l_n <= p_o ) {
-//             // orig 0123456789
-//             // real 01234589   REM(p_o=6,l_o=2)
-//             // imag 0456789    REM(p_n=1,l_n=3)
-//             // obj  04589      (real -> obj = new: REM 1,3; imag -> obj = unk: REM 3,2)
+//             // i: 0123456789
+//             // o: 01234589   REM(6,l_o=2)
+//             // n: 0456789    REM(p_n=1,l_n=3)
+//             // r: 04589      n:(o->r) = REM 1,3; o:(n->r) = REM 3,2)
 //             p_o -= l_n; // 3
 //         } else if ( p_n + l_n <= p_o + l_o ) {
-//             // orig 0123456789
-//             // real 012389     REM(p_o=4,l_o=4)
-//             // imag 06789      REM(p_n=1,l_n=5)
-//             // obj  089        (real -> obj = new: REM 1,3; imag -> obj = unk: REM 1,2)
+//             // i: 0123456789
+//             // o: 012389     REM(4,l_o=4)
+//             // n: 06789      REM(p_n=1,l_n=5)
+//             // r: 089        n:(o->r) = REM 1,3; o:(n->r) = REM 1,2)
 //             PT d = p_n + l_n - p_o; // 2
 //             l_o -= d;  // 2
 //             l_n -= d;  // 3
 //             p_o = p_n; // 1
 //         } else {
-//             // orig 0123456789
-//             // real 01236789   REM(p_o=4,l_o=2)
-//             // imag 09         REM(p_n=1,l_n=8)
-//             // obj  09         (real -> obj = new: REM 1,6; imag -> obj = unk: VOID)
+//             // i: 0123456789
+//             // o: 01236789   REM(4,l_o=2)
+//             // n: 09         REM(p_n=1,l_n=8)
+//             // r: 09         n:(o->r) = REM 1,6; o:(n->r) = VOID)
 //             l_n -= l_o;
 //             l_o = 0;
 //         }
@@ -234,25 +386,25 @@ go.write( "ts" );
 // void OtWrapperString::unk_new_or_new_unk( op_remove, op_remove_und, UsrId asu_n, BBQ bq_n, BBQ bq_o, PT &p_n, PT &l_n, PT &p_o, CbString &d_o ) {
 //     if ( p_o <= p_n ) {
 //         if ( p_o + d_o.size() <= p_n ) {
-//             // orig 0123456789
-//             // real 0456789    REM(p_o=1,d_o='123')
-//             // imag 01234589   REM(p_n=6,l_n=2)
-//             // obj  04589      (real -> obj = new: REM 3,2; imag -> obj = unk: REM_UND 1,'123')
+//             // i: 0123456789
+//             // o: 0456789    REM(1,d_o='123')
+//             // n: 01234589   REM(p_n=6,l_n=2)
+//             // r: 04589      n:(o->r) = REM 3,2; o:(n->r) = REM_UND 1,'123')
 //             p_n -= d_o.size(); // 3
 //         } else if ( p_o + d_o.size() <= p_n + l_n ) {
-//             // orig 0123456789
-//             // real 06789      REM_UND(p_o=1,d_o='12345')
-//             // imag 012389     REM(p_n=4,l_n=4)
-//             // obj  089        (real -> obj = new: REM 1,2; imag -> obj = unk: REM_UND 1,'123')
+//             // i: 0123456789
+//             // o: 06789      REM_UND(1,d_o='12345')
+//             // n: 012389     REM(p_n=4,l_n=4)
+//             // r: 089        n:(o->r) = REM 1,2; o:(n->r) = REM_UND 1,'123')
 //             PT d = p_o + d_o.size() - p_n; // 2
 //             d_o = d_o.beg_upto( d_o.size() - d ); // '123'
 //             l_n -= d;  // 2
 //             p_n = p_o; // 1
 //         } else {
-//             // orig 0123456789
-//             // real 09         REM_UND(p_o=1,d_o='12345678')
-//             // imag 01236789   REM(p_n=4,l_n=2)
-//             // obj  09         (real -> obj = new: VOID; imag -> obj = unk: REM_UND 1,'123678')
+//             // i: 0123456789
+//             // o: 09         REM_UND(1,d_o='12345678')
+//             // n: 01236789   REM(p_n=4,l_n=2)
+//             // r: 09         n:(o->r) = VOID; o:(n->r) = REM_UND 1,'123678')
 //             CbQueue t;
 //             t.write_some( d_o.beg_upto( p_n - p_o ) );
 //             t.write_some( d_o.end_from( p_n - p_o + l_n ) );
@@ -261,25 +413,25 @@ go.write( "ts" );
 //         }
 //     } else {
 //         if ( p_n + l_n <= p_o ) {
-//             // orig 0123456789
-//             // real 01234589   REM_UND(p_o=6,d_o='67')
-//             // imag 0456789    REM(p_n=1,l_n=3)
-//             // obj  04589      (real -> obj = new: REM 1,3; imag -> obj = unk: REM_UND 3,'67')
+//             // i: 0123456789
+//             // o: 01234589   REM_UND(6,d_o='67')
+//             // n: 0456789    REM(p_n=1,l_n=3)
+//             // r: 04589      n:(o->r) = REM 1,3; o:(n->r) = REM_UND 3,'67')
 //             p_o -= l_n; // 3
 //         } else if ( p_n + l_n <= p_o + d_o.size() ) {
-//             // orig 0123456789
-//             // real 012389     REM_UND(p_o=4,d_o='4567')
-//             // imag 06789      REM(p_n=1,l_n=5)
-//             // obj  089        (real -> obj = new: REM 1,3; imag -> obj = unk: REM_UND 1,'67')
+//             // i: 0123456789
+//             // o: 012389     REM_UND(4,d_o='4567')
+//             // n: 06789      REM(p_n=1,l_n=5)
+//             // r: 089        n:(o->r) = REM 1,3; o:(n->r) = REM_UND 1,'67')
 //             PT d = p_n + l_n - p_o; // 2
 //             d_o.skip_some( d ); // '67'
 //             l_n -= d;  // 3
 //             p_o = p_n; // 1
 //         } else {
-//             // orig 0123456789
-//             // real 01236789   REM(p_o=4,d_o.size()=2)
-//             // imag 09         REM(p_n=1,l_n=8)
-//             // obj  09         (real -> obj = new: REM 1,6; imag -> obj = unk: VOID)
+//             // i: 0123456789
+//             // o: 01236789   REM(4,d_o.size()=2)
+//             // n: 09         REM(p_n=1,l_n=8)
+//             // r: 09         n:(o->r) = REM 1,6; o:(n->r) = VOID)
 //             l_n -= d_o.size();
 //             d_o.free();
 //         }
@@ -309,22 +461,22 @@ go.write( "ts" );
 
 // void OtWrapperString::unk_new_or_new_unk( op_remove_und, op_insert, UsrId asu_n, BBQ bq_n, BBQ bq_o, PT &p_n, CbString &d_n, PT &p_o, CbString &d_o ) {
 //     if ( p_o <= p_n ) {
-//         // orig 01234567
-//         // real 01ab234567 INS(p_o=2,d_o=ab)
-//         // imag 012347     REM(p_n=5,l_n=2)
-//         // obj  01ab2347   (real -> obj = new: REM 7,2; imag -> obj = unk: INS 2,ab)
+//         // i: 01234567
+//         // o: 01ab234567 INS(2,d_o=ab)
+//         // n: 012347     REM(p_n=5,l_n=2)
+//         // r: 01ab2347   n:(o->r) = REM 7,2; o:(n->r) = INS 2,ab)
 //         p_n += d_o.size();
 //     } else if ( p_o >= p_n + d_n.size() ) {
-//         // orig 01234567
-//         // real 01234ab567 INS(p_o=5,d_o=ab)
-//         // imag 014567     REM(p_n=2,l_n=2)
-//         // obj  014ab567   (real -> obj = new: REM 2,2; imag -> obj = unk: INS 3,ab)
+//         // i: 01234567
+//         // o: 01234ab567 INS(5,d_o=ab)
+//         // n: 014567     REM(p_n=2,l_n=2)
+//         // r: 014ab567   n:(o->r) = REM 2,2; o:(n->r) = INS 3,ab)
 //         p_o -= d_n.size();
 //     } else {
-//         // orig 01234567
-//         // real 0123ab4567 INS(p_1=4,d_1=ab)
-//         // imag 0167       REM_UND(p_0=2,d_0=2345)
-//         // obj  01ab67     (real -> obj = unk: REM_UND 2,23 + REM_UND 4,45; imag -> obj = new: INS 2,ab)
+//         // i: 01234567
+//         // o: 0123ab4567 INS(p_1=4,d_1=ab)
+//         // n: 0167       REM_UND(p_0=2,d_0=2345)
+//         // r: 01ab67     n:(o->r) = unk: REM_UND 2,23 + REM_UND 4,45; imag -> obj = INS 2,ab)
 //         reg_op_in( bq_n, op_remove_und{}, p_n, CbString( d_n, 0, p_o - p_n ) ); // 2, 23
 //         OtWrapperString::Aod aod_n; aod_n.as_usr = asu_n;
 //         apply_op( op_remove(), aod_n, p_n, p_o - p_n );
@@ -337,49 +489,49 @@ go.write( "ts" );
 // void OtWrapperString::unk_new_or_new_unk( op_remove_und, op_remove, UsrId asu_n, BBQ bq_n, BBQ bq_o, PT &p_n, CbString &d_n, PT &p_o, PT &l_o ) {
 //     if ( p_o <= p_n ) {
 //         if ( p_o + l_o <= p_n ) {
-//             // orig 0123456789
-//             // real 0456789    REM(p_o=1,l_o=3)
-//             // imag 01234589   REM_UND(p_n=6,l_n='67')
-//             // obj  04589      (real -> obj = new: REM 3,2; imag -> obj = _n: REM 1,3)
+//             // i: 0123456789
+//             // o: 0456789    REM(1,l_o=3)
+//             // n: 01234589   REM_UND(p_n=6,l_n='67')
+//             // r: 04589      n:(o->r) = REM 3,2; imag -> obj = _n: REM 1,3)
 //             p_n -= l_o; // 3
 //         } else if ( p_o + l_o <= p_n + d_n.size() ) {
-//             // orig 0123456789
-//             // real 06789      REM(p_o=1,l_o=5)
-//             // imag 012389     REM_UND(p_n=4,d_n='4567')
-//             // obj  089        (real -> obj = _n: REM_UND 1,'67'; imag -> obj = _o: REM_UND 1,'123')
+//             // i: 0123456789
+//             // o: 06789      REM(1,l_o=5)
+//             // n: 012389     REM_UND(p_n=4,d_n='4567')
+//             // r: 089        n:(o->r) = _n: REM_UND 1,'67'; imag -> obj = _o: REM_UND 1,'123')
 //             PT d = p_o + l_o - p_n; // 2
 //             l_o -= d; // '123'
 //             d_n.skip_some( d );  // '67'
 //             p_n = p_o; // 1
 //         } else {
-//             // orig 0123456789
-//             // real 09         REM(p_o=1,l_o=8)
-//             // imag 01236789   REM_UND(p_n=4,d_n='45')
-//             // obj  09         (real -> obj = _n: VOID; imag -> obj = _n: REM 1,'123678')
+//             // i: 0123456789
+//             // o: 09         REM(1,l_o=8)
+//             // n: 01236789   REM_UND(p_n=4,d_n='45')
+//             // r: 09         n:(o->r) = _n: VOID; imag -> obj = _n: REM 1,'123678')
 //             l_o -= d_n.size();
 //             d_n.free();
 //         }
 //     } else {
 //         if ( p_n + d_n.size() <= p_o ) {
-//             // orig 0123456789
-//             // real 01234589   REM(p_o=6,l_o=2)
-//             // imag 0456789    REM_UND(p_n=1,d_n='123')
-//             // obj  04589      (real -> obj = _n: REM 1,'123'; imag -> obj = _n: REM 3,2)
+//             // i: 0123456789
+//             // o: 01234589   REM(6,l_o=2)
+//             // n: 0456789    REM_UND(p_n=1,d_n='123')
+//             // r: 04589      n:(o->r) = _n: REM 1,'123'; imag -> obj = _n: REM 3,2)
 //             p_o -= d_n.size(); // 3
 //         } else if ( p_n + d_n.size() <= p_o + l_o ) {
-//             // orig 0123456789
-//             // real 012389     REM(p_o=4,l_o=4)
-//             // imag 06789      REM_UND(p_n=1,d_n='12345')
-//             // obj  089        (real -> obj = _n: REM 1,'123'; imag -> obj = _n: REM 1,2)
+//             // i: 0123456789
+//             // o: 012389     REM(4,l_o=4)
+//             // n: 06789      REM_UND(p_n=1,d_n='12345')
+//             // r: 089        n:(o->r) = _n: REM 1,'123'; imag -> obj = _n: REM 1,2)
 //             PT d = p_n + d_n.size() - p_o; // 2
 //             l_o -= d;  // 2
 //             d_n = d_n.beg_upto( d_n.size() - d );  // '123'
 //             p_o = p_n; // 1
 //         } else {
-//             // orig 0123456789
-//             // real 01236789   REM(p_o=4,l_o=2)
-//             // imag 09         REM_UND(p_n=1,d_n='12345678')
-//             // obj  09         (real -> obj = _n: REM 1,'123678'; imag -> obj = _n: VOID)
+//             // i: 0123456789
+//             // o: 01236789   REM(4,l_o=2)
+//             // n: 09         REM_UND(p_n=1,d_n='12345678')
+//             // r: 09         n:(o->r) = _n: REM 1,'123678'; imag -> obj = _n: VOID)
 //             CbQueue t;
 //             t.write_some( d_n.beg_upto( p_o - p_n ) );
 //             t.write_some( d_n.end_from( p_o - p_n + l_o ) );
@@ -392,25 +544,25 @@ go.write( "ts" );
 // void OtWrapperString::unk_new_or_new_unk( op_remove_und, op_remove_und, UsrId asu_n, BBQ bq_n, BBQ bq_o, PT &p_n, CbString &d_n, PT &p_o, CbString &d_o ) {
 //     if ( p_o <= p_n ) {
 //         if ( p_o + d_o.size() <= p_n ) {
-//             // orig 0123456789
-//             // real 0456789    REM(p_o=1,d_o='123')
-//             // imag 01234589   REM(p_n=6,d_n='67')
-//             // obj  04589      (real -> obj = _n: REM_UND 3,2; imag -> obj = _o: REM_UND 1,'123')
+//             // i: 0123456789
+//             // o: 0456789    REM(1,d_o='123')
+//             // n: 01234589   REM(p_n=6,d_n='67')
+//             // r: 04589      n:(o->r) = _n: REM_UND 3,2; imag -> obj = _o: REM_UND 1,'123')
 //             p_n -= d_o.size(); // 3
 //         } else if ( p_o + d_o.size() <= p_n + d_n.size() ) {
-//             // orig 0123456789
-//             // real 06789      REM_UND(p_o=1,d_o='12345')
-//             // imag 012389     REM(p_n=4,d_n='4567')
-//             // obj  089        (real -> obj = _n: REM_UND 1,'67'; imag -> obj = _o: REM_UND 1,'123')
+//             // i: 0123456789
+//             // o: 06789      REM_UND(1,d_o='12345')
+//             // n: 012389     REM(p_n=4,d_n='4567')
+//             // r: 089        n:(o->r) = _n: REM_UND 1,'67'; imag -> obj = _o: REM_UND 1,'123')
 //             PT d = p_o + d_o.size() - p_n; // 2
 //             d_o = d_o.beg_upto( d_o.size() - d ); // '123'
 //             d_n.skip_some( d );  // '67'
 //             p_n = p_o; // 1
 //         } else {
-//             // orig 0123456789
-//             // real 09         REM_UND(p_o=1,d_o='12345678')
-//             // imag 01236789   REM(p_n=4,d_n.size()=2)
-//             // obj  09         (real -> obj = _n: VOID; imag -> obj = _o: REM_UND 1,'123678')
+//             // i: 0123456789
+//             // o: 09         REM_UND(1,d_o='12345678')
+//             // n: 01236789   REM(p_n=4,d_n.size()=2)
+//             // r: 09         n:(o->r) = _n: VOID; imag -> obj = _o: REM_UND 1,'123678')
 //             CbQueue t;
 //             t.write_some( d_o.beg_upto( p_n - p_o ) );
 //             t.write_some( d_o.end_from( p_n - p_o + d_n.size() ) );
@@ -419,25 +571,25 @@ go.write( "ts" );
 //         }
 //     } else {
 //         if ( p_n + d_n.size() <= p_o ) {
-//             // orig 0123456789
-//             // real 01234589   REM_UND(p_o=6,d_o='67')
-//             // imag 0456789    REM(p_n=1,d_n.size()='123')
-//             // obj  04589      (real -> obj = _n: REM_UND 1,'123'; imag -> obj = _o: REM_UND 3,'67')
+//             // i: 0123456789
+//             // o: 01234589   REM_UND(6,d_o='67')
+//             // n: 0456789    REM(p_n=1,d_n.size()='123')
+//             // r: 04589      n:(o->r) = _n: REM_UND 1,'123'; imag -> obj = _o: REM_UND 3,'67')
 //             p_o -= d_n.size(); // 3
 //         } else if ( p_n + d_n.size() <= p_o + d_o.size() ) {
-//             // orig 0123456789
-//             // real 012389     REM_UND(p_o=4,d_o='4567')
-//             // imag 06789      REM(p_n=1,d_n='12345')
-//             // obj  089        (real -> obj = _n: REM_UND 1,'123'; imag -> obj = _o: REM_UND 1,'67')
+//             // i: 0123456789
+//             // o: 012389     REM_UND(4,d_o='4567')
+//             // n: 06789      REM(p_n=1,d_n='12345')
+//             // r: 089        n:(o->r) = _n: REM_UND 1,'123'; imag -> obj = _o: REM_UND 1,'67')
 //             PT d = p_n + d_n.size() - p_o; // 2
 //             d_o.skip_some( d ); // '67'
 //             d_n = d_n.beg_upto( d_n.size() - d ); // '123'
 //             p_o = p_n; // 1
 //         } else {
-//             // orig 0123456789
-//             // real 01236789   REM(p_o=4,d_o='45')
-//             // imag 09         REM(p_n=1,d_n='12345678')
-//             // obj  09         (real -> obj = _n: REM_UND 1,'123678'; imag -> obj = _o: VOID)
+//             // i: 0123456789
+//             // o: 01236789   REM(4,d_o='45')
+//             // n: 09         REM(p_n=1,d_n='12345678')
+//             // r: 09         n:(o->r) = _n: REM_UND 1,'123678'; imag -> obj = _o: VOID)
 //             CbQueue t;
 //             t.write_some( d_n.beg_upto( p_o - p_n ) );
 //             t.write_some( d_n.end_from( p_o - p_n + d_o.size() ) );

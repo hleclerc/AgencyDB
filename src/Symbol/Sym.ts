@@ -115,22 +115,33 @@ function _dfs_repl_unique_rec( v: Sym, cb: ( x: Sym ) => Array<Link>, go_into_su
         return v.op_mp as Array<Link>;
     v.op_id = Sym.cur_op_id;
 
-    // call
+    // call and register the result
     let res = cb( v );
     if ( ! res ) {
         res = [];
         for( let nout = 0; nout < v.nb_outputs(); ++nout )
             res.push( { item: v, nout } );
     }
+    v.op_mp = res;
 
-    // rec
-    if ( res instanceof Sym ) {
-        for( let i = 0; i < v.children.length; ++i ) {
-            const arr = _dfs_repl_unique_rec( v.children[ i ].item, cb, go_into_subblocks );
-            v.children[ i ] = arr[ v.children[ i ].nout ];
+    // recursion
+    for( let i = 0; i < res.length; ++i ) {
+        for( let j = 0; ; ++j ) {
+            if ( j == i ) {
+                let n = res[ i ].item;
+                if ( n instanceof Sym ) {
+                    for( let i = 0; i < n.children.length; ++i ) {
+                        const arr = _dfs_repl_unique_rec( n.children[ i ].item, cb, go_into_subblocks );
+                        n.children[ i ] = arr[ n.children[ i ].nout ];
+                    }
+                    if ( go_into_subblocks )
+                        n.for_each_sub_block( sb => _dfs_repl_unique_rec( sb, cb, go_into_subblocks ) );
+                }
+                break;
+            }
+            if ( res[ i ].item == res[ j ].item )
+                break;
         }
-        if ( go_into_subblocks )
-            v.for_each_sub_block( sb => _dfs_repl_unique_rec( sb, cb, go_into_subblocks ) );
     }
 
     return res;

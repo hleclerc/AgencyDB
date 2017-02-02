@@ -33,8 +33,8 @@ function test_ot<type>( type: typeof VarAnc, nb_dbs: number, operations: ( vars:
     for( let i = 0; i < nb_dbs; ++i )
         dbs[ i ].send_changes();
 
-    // for( let i = 0; i < nb_dbs; ++i )
-    //     console.log( vars[ i ].toString() );
+    for( let i = 0; i < nb_dbs; ++i )
+        console.log( vars[ i ].toString() );
     for( let i = 0; i < nb_dbs; ++i )
         sequ( vars[ i ], expected, `value of var ${ i }, ${ explanation }` );
 }

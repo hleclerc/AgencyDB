@@ -63,25 +63,57 @@ class LvString extends Variable<LvString> {
     substr( from: number | LvNumber, length: number | LvNumber ): LvString {
         return new LvString( typeof from == 'number' ? (
             typeof length == 'number' ?
-                methods["slice__boo"].call_3s( this, new BN_PT( from ), new BN_PT( from + length )                                ) :
-                methods["slice__bob"].call_3s( this, new BN_PT( from ), methods["add__ob"].call_2( new BN_PT( from ), length.rp ) )
+                methods["slice__boo"].call_3( this.rp, new BN_PT( from ), new BN_PT( from + length )                                ) :
+                methods["slice__boo"].call_3( this.rp, new BN_PT( from ), methods["add__ob"].call_2( new BN_PT( from ), length.rp ) )
         ) : (
             typeof length == 'number' ?
-                methods["slice__boo"].call_3s( this, from.rp          , methods["add__ob"].call_2( from.rp, new BN_PT( length ) ) ) :
-                methods["slice__bob"].call_3s( this, from.rp          , methods["add__ob"].call_2( from.rp, length.rp )           )
+                methods["slice__bbo"].call_3( this.rp, from.rp          , methods["add__bo"].call_2( from.rp, new BN_PT( length ) ) ) :
+                methods["slice__bbo"].call_3( this.rp, from.rp          , methods["add__bb"].call_2( from.rp, length.rp )           )
         ) );
+    }
+
+    /** */
+    beginning( length: number | LvNumber ): LvString {
+        return new LvString( typeof length == 'number' ?
+            methods["beginning__bo"].call_2( this.rp, new BN_PT( length ) ) :
+            methods["beginning__bb"].call_2( this.rp, length.rp           )
+        );
+    }
+
+    /** */
+    selfBeginning( from: number | LvNumber ): LvString {
+        this.rp = typeof from == 'number' ?
+            methods["beginning__so"].call_2s( this, new BN_PT( from ) ) :
+            methods["beginning__sb"].call_2s( this, from.rp           );
+        return this;
+    }
+
+    /** */
+    ending( from: number | LvNumber ): LvString {
+        return new LvString( typeof from == 'number' ?
+            methods["ending__bo"].call_2( this.rp, new BN_PT( from ) ) :
+            methods["ending__bb"].call_2( this.rp, from.rp           )
+        );
+    }
+
+    /** */
+    selfEnding( from: number | LvNumber ): LvString {
+        this.rp = typeof from == 'number' ?
+            methods["ending__so"].call_2s( this, new BN_PT( from ) ) :
+            methods["ending__sb"].call_2s( this, from.rp           );
+        return this;
     }
 
     /** */
     substring( beg: number | LvNumber, end: number | LvNumber ): LvString {
         return new LvString( typeof beg == 'number' ? (
             typeof end == 'number' ?
-                methods["slice__boo"].call_3s( this, new BN_PT( beg ), new BN_PT( end ) ) :
-                methods["slice__bob"].call_3s( this, new BN_PT( beg ), end.rp           )
+                methods["slice__boo"].call_3( this.rp, new BN_PT( beg ), new BN_PT( end ) ) :
+                methods["slice__bob"].call_3( this.rp, new BN_PT( beg ), end.rp           )
         ) : (
             typeof end == 'number' ?
-                methods["slice__boo"].call_3s( this, beg.rp          , new BN_PT( end ) ) :
-                methods["slice__bob"].call_3s( this, beg.rp          , end.rp           )
+                methods["slice__bbo"].call_3( this.rp, beg.rp          , new BN_PT( end ) ) :
+                methods["slice__bbb"].call_3( this.rp, beg.rp          , end.rp           )
         ) );
     }
 
@@ -94,7 +126,7 @@ class LvString extends Variable<LvString> {
         );
     }
 
-    append( val: LvString | string ): LvString {
+    selfConcat( val: LvString | string ): LvString {
         this.rp = typeof val == 'string' ? methods[ "add__so" ].call_2s( this, new GenString( val ) ) : methods[ "add__sb" ].call_2s( this, val.rp );
         return this;
     }

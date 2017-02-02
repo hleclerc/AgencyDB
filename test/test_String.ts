@@ -13,10 +13,10 @@ function sequ( a, b, msg?: string ) {
 }
 
 /** helper */
-function test_ot_str( init: string, operations: ( vars: Array<LvString>, dbs: Array<Db> ) => void, expected: string, explanation: string, nb_dbs = 2 ) {
+function test_ot_str( init: string, operations: ( vars: Array<LvString>, dbs: Array<Db> ) => void, expected: string, explanation = operations.toString(), nb_dbs = 2 ) {
     test_ot<LvString>( LvString, nb_dbs, ( vls, dbs ) => {
         if ( init ) {
-            vls[ 0 ].append( init );
+            vls[ 0 ].selfConcat( init );
             dbs[ 0 ].send_changes();
         }
         operations( vls, dbs );
@@ -31,137 +31,146 @@ function test_ot_str( init: string, operations: ( vars: Array<LvString>, dbs: Ar
  * Autre approche: 
  */
 describe( 'String', () => {
-    it( 'basic operations', () => {
-        let s = new LvString( "test" );
-        sequ( s                   , "test"        );
-        sequ( s.length            , 4             );
-        sequ( s.append( "ouille" ), "testouille"  );
-        sequ( s.insert( 9, "s" )  , "testouillse" );
-        sequ( s.substr( 2, 4 )    , "stou"        );
-        sequ( s.substring( 2, 4 ) , "st"          );
-        sequ( s.remove( 2, 8 )    , "tee"         );
-    });
+    // it( 'basic operations', () => {
+    //     let s = new LvString( "test" );
+    //     sequ( s                   , "test"        );
+    //     sequ( s.length            , 4             );
+    //     sequ( s.selfConcat( "ouille" ), "testouille"  );
+    //     sequ( s.insert( 9, "s" )  , "testouillse" );
+    //     sequ( s.substr( 2, 4 )    , "stou"        );
+    //     sequ( s.substring( 2, 4 ) , "st"          );
+    //     sequ( s.remove( 2, 8 )    , "tee"         );
+    // });
 
-    it( 'on change', ( done ) => {
-        let s = new LvString( "test" );
+    // it( 'on change', ( done ) => {
+    //     let s = new LvString( "test" );
 
-        let cpt = 0;
-        s.onChange( () => ++cpt );
-        s.append( "_" );
-        s.append( "_" );
-        setTimeout( () => {
-            sequ( s, "test__" );
-            sequ( cpt, 1 );
-            done();
-        }, 20 );
-    });
+    //     let cpt = 0;
+    //     s.onChange( () => ++cpt );
+    //     s.selfConcat( "_" );
+    //     s.selfConcat( "_" );
+    //     setTimeout( () => {
+    //         sequ( s, "test__" );
+    //         sequ( cpt, 1 );
+    //         done();
+    //     }, 20 );
+    // });
 
-    it( 'select', () => {
-        let a = new LvString( "test" );
-        sequ( a.charAt( 2 ), "s" );
+    // it( 'select', () => {
+    //     let a = new LvString( "test" );
+    //     sequ( a.charAt( 2 ), "s" );
 
-        let intercept = [];
-        Method.int_call_s = ( a ) => intercept.push( a );   
+    //     let intercept = [];
+    //     Method.int_call_s = ( a ) => intercept.push( a );   
 
-        let s = a.select( 1 );
-        sequ( a, "test", "basic test of RefProxy" );
-        sequ( s, "e", "read sub value" );
-        s.set( '3' );
-        sequ( a, "t3st", "string with modified sub value" );
+    //     let s = a.select( 1 );
+    //     sequ( a, "test", "basic test of RefProxy" );
+    //     sequ( s, "e", "read sub value" );
+    //     s.set( '3' );
+    //     sequ( a, "t3st", "string with modified sub value" );
 
-        assert.equal( intercept.length, 2, "nb interceptions ('s' is considered as modified even if it's not really the case)" ); 
-        assert.equal( intercept[ 0 ], s, "interception of the right variable" );
-        assert.equal( intercept[ 1 ], a, "interception of the right variable" );
-    });
+    //     assert.equal( intercept.length, 2, "nb interceptions ('s' is considered as modified even if it's not really the case)" ); 
+    //     assert.equal( intercept[ 0 ], s, "interception of the right variable" );
+    //     assert.equal( intercept[ 1 ], a, "interception of the right variable" );
+    // });
 
-    it( 'intercept + creation date', () => {
-        let a = new LvString( "a" );
+    // it( 'intercept + creation date', () => {
+    //     let a = new LvString( "a" );
 
-        let intercept = [];
-        const date = ++VarAnc.date;
-        Method.int_call_s = ( a ) => { if ( a.date < date ) intercept.push( a ); };   
+    //     let intercept = [];
+    //     const date = ++VarAnc.date;
+    //     Method.int_call_s = ( a ) => { if ( a.date < date ) intercept.push( a ); };   
 
-        let b = new LvString( "b" );
-        a.append( '+' );
-        b.append( '+' );
-        sequ( a, "a+" );
-        sequ( b, "b+" );
+    //     let b = new LvString( "b" );
+    //     a.selfConcat( '+' );
+    //     b.selfConcat( '+' );
+    //     sequ( a, "a+" );
+    //     sequ( b, "b+" );
 
-        assert.equal( intercept.length, 1, "modification of b should be counted: it is created after" ); 
-        assert.equal( intercept[ 0 ], a, "interception of the right variable" );
-    });
+    //     assert.equal( intercept.length, 1, "modification of b should be counted: it is created after" ); 
+    //     assert.equal( intercept[ 0 ], a, "interception of the right variable" );
+    // });
 
-    it( 'operationnal tranform, basic sending', () => {
-        test_ot<LvString>( LvString, 2, ( vls, dbs ) => {
-            vls[ 0 ].append( "a" );
-        }, "a", "send from 0" );
+    // it( 'operationnal tranform, basic sending', () => {
+    //     test_ot<LvString>( LvString, 2, ( vls, dbs ) => {
+    //         vls[ 0 ].selfConcat( "a" );
+    //     }, "a", "send from 0" );
 
-        test_ot<LvString>( LvString, 2, ( vls, dbs ) => {
-            vls[ 1 ].append( "a" );
-        }, "a", "send from 1" );
-    });
+    //     test_ot<LvString>( LvString, 2, ( vls, dbs ) => {
+    //         vls[ 1 ].selfConcat( "a" );
+    //     }, "a", "send from 1" );
+    // });
 
-    it( 'operationnal tranform, successive remove or insertion', () => {
-        test_ot_str( "a", ( vls, dbs ) => {
-            vls[ 1 ].append( "b" );
-        }, "ab", "succession of insertions" );
+    // it( 'operationnal tranform, successive remove or insertion', () => {
+    //     test_ot_str( "a", ( vls, dbs ) => {
+    //         vls[ 1 ].selfConcat( "b" );
+    //     }, "ab", "succession of insertions" );
 
-        test_ot_str( "abcd", ( vls, dbs ) => {
-            vls[ 1 ].remove( 1, 2 );
-        }, "ad", "succession insertion + removal" );
-    });
+    //     test_ot_str( "abcd", ( vls, dbs ) => {
+    //         vls[ 1 ].remove( 1, 2 );
+    //     }, "ad", "succession insertion + removal" );
+    // });
 
     it( 'operationnal tranform, parallel remove / insertions', () => {
-        test_ot_str( "abcd", ( vls, dbs ) => {
-            vls[ 0 ].insert( 1, "X" );
-            vls[ 1 ].insert( 3, "Y" );
-        }, "aXbcYd", "concurrent insertions" );
+        // test_ot_str( "abcd", ( vls, dbs ) => {
+        //     vls[ 0 ].insert( 1, "X" );
+        //     vls[ 1 ].insert( 3, "Y" );
+        // }, "aXbcYd", "concurrent insertions" );
 
-        test_ot_str( "abcd", ( vls, dbs ) => {
-            vls[ 1 ].insert( 3, "Y" );
-            vls[ 0 ].insert( 1, "X" );
-        }, "aXbcYd", "concurrent insertions" );
+        // test_ot_str( "abcd", ( vls, dbs ) => {
+        //     vls[ 1 ].insert( 3, "Y" );
+        //     vls[ 0 ].insert( 1, "X" );
+        // }, "aXbcYd", "concurrent insertions" );
+
+        // test_ot_str( "012345", ( vls, dbs ) => {
+        //     vls[ 0 ].insert( 3, "ab" );
+        //     vls[ 1 ].remove( 1, 1 );
+        // }, "02ab345", "concurrent insertion and removal" );
 
         test_ot_str( "012345", ( vls, dbs ) => {
+            vls[ 1 ].remove( 1, 4 );
             vls[ 0 ].insert( 3, "ab" );
-            vls[ 1 ].remove( 1, 1 );
-        }, "02ab345", "concurrent insertion and removal" );
+        }, "0ab5" );
+
+        // test_ot_str( "012345", ( vls, dbs ) => {
+        //     vls[ 1 ].remove( 4, 1 );
+        //     vls[ 0 ].insert( 3, "ab" );
+        // }, "012ab35" );
+
+
+        // test_ot_str( "0123456789", ( vls, dbs ) => {
+        //     vls[ 1 ].remove( 1, 2 );
+        //     vls[ 0 ].remove( 7, 2 );
+        // }, "034569" );
+
+        // test_ot_str( "0123456789", ( vls, dbs ) => {
+        //     vls[ 0 ].remove( 1, 4 );
+        //     vls[ 1 ].remove( 3, 4 );
+        // }, "0789" );
+
+        // test_ot_str( "0123456789", ( vls, dbs ) => {
+        //     vls[ 0 ].remove( 1, 8 );
+        //     vls[ 1 ].remove( 3, 4 );
+        // }, "09" );
+
+        // test_ot_str( "0123456789", ( vls, dbs ) => {
+        //     vls[ 0 ].remove( 7, 2 );
+        //     vls[ 1 ].remove( 1, 2 );
+        // }, "034569" );
+
+        // test_ot_str( "0123456789", ( vls, dbs ) => {
+        //     vls[ 1 ].remove( 3, 4 );
+        //     vls[ 0 ].remove( 1, 4 );
+        // }, "0789" );
+
+        // test_ot_str( "0123456789", ( vls, dbs ) => {
+        //     vls[ 1 ].remove( 3, 4 );
+        //     vls[ 0 ].remove( 1, 8 );
+        // }, "09" );
+
     });
 
-    it( 'basic rights', () => {
-        const pr = [ 'add_usr_right', 'rem_usr_right', 'read', 'insert', 'remove', 'append' ];
-        // basic string
-        let s = new LvString( "s" );
-        sequ( s.getPossibleRights(), pr );
-        sequ( s.getUsersInAccessConstrolList(), [ new UsrId ] );
-        sequ( s.getUsrRights( new UsrId ), pr );
-        sequ( s.getUsrRights( new UsrId( new DevId, 2 ) ), [] );
-
-        // OtWrapper
-        s.onChange( val => console.log( "changed:", val.toString() ) );
-        sequ( s.getPossibleRights(), pr );
-        sequ( s.getUsersInAccessConstrolList(), [ new UsrId ] );
-        sequ( s.getUsrRights( new UsrId ), pr );
-        sequ( s.getUsrRights( new UsrId( new DevId, 2 ) ), [] );
-
-        s.remUsrRight( new UsrId, "insert" );
-        sequ( s.getUsrRights( new UsrId ), pr.filter( x => x != "insert" ) );
-        s.insert( 0, "m" );
-        sequ( s, "s" );
-        s.insert( 1, "murf" ); // we still have to right to append
-        sequ( s, "smurf" );
-
-        s.addUsrRight( new UsrId, "insert" );
-        sequ( s.getUsrRights( new UsrId ), pr );
-        s.remUsrRight( new UsrId, "insert" );
-
-        s.remUsrRight( new UsrId, "add_usr_right" );
-        sequ( s.getUsrRights( new UsrId ), pr.filter( x => x != "insert" && x != "add_usr_right" ) );
-        s.addUsrRight( new UsrId, "insert" ); // should fail
-        sequ( s.getUsrRights( new UsrId ), pr.filter( x => x != "insert" && x != "add_usr_right" ) );
-    });
-
-    // it( 'operationnal tranform, rights', () => {
+    // it( 'basic rights', () => {
     //     const pr = [ 'add_usr_right', 'rem_usr_right', 'read', 'insert', 'remove', 'append' ];
     //     // basic string
     //     let s = new LvString( "s" );
@@ -177,9 +186,42 @@ describe( 'String', () => {
     //     sequ( s.getUsrRights( new UsrId ), pr );
     //     sequ( s.getUsrRights( new UsrId( new DevId, 2 ) ), [] );
 
-    //     s.remUsrRight( new UsrId, [ "insert" ] );
+    //     s.remUsrRight( new UsrId, "insert" );
     //     sequ( s.getUsrRights( new UsrId ), pr.filter( x => x != "insert" ) );
+    //     s.insert( 0, "m" );
+    //     sequ( s, "s" );
+    //     s.insert( 1, "murf" ); // we still have to right to append
+    //     sequ( s, "smurf" );
+
+    //     s.addUsrRight( new UsrId, "insert" );
+    //     sequ( s.getUsrRights( new UsrId ), pr );
+    //     s.remUsrRight( new UsrId, "insert" );
+
+    //     s.remUsrRight( new UsrId, "add_usr_right" );
+    //     sequ( s.getUsrRights( new UsrId ), pr.filter( x => x != "insert" && x != "add_usr_right" ) );
+    //     s.addUsrRight( new UsrId, "insert" ); // should fail
+    //     sequ( s.getUsrRights( new UsrId ), pr.filter( x => x != "insert" && x != "add_usr_right" ) );
     // });
+
+    // // it( 'operationnal tranform, rights', () => {
+    // //     const pr = [ 'add_usr_right', 'rem_usr_right', 'read', 'insert', 'remove', 'append' ];
+    // //     // basic string
+    // //     let s = new LvString( "s" );
+    // //     sequ( s.getPossibleRights(), pr );
+    // //     sequ( s.getUsersInAccessConstrolList(), [ new UsrId ] );
+    // //     sequ( s.getUsrRights( new UsrId ), pr );
+    // //     sequ( s.getUsrRights( new UsrId( new DevId, 2 ) ), [] );
+
+    // //     // OtWrapper
+    // //     s.onChange( val => console.log( "changed:", val.toString() ) );
+    // //     sequ( s.getPossibleRights(), pr );
+    // //     sequ( s.getUsersInAccessConstrolList(), [ new UsrId ] );
+    // //     sequ( s.getUsrRights( new UsrId ), pr );
+    // //     sequ( s.getUsrRights( new UsrId( new DevId, 2 ) ), [] );
+
+    // //     s.remUsrRight( new UsrId, [ "insert" ] );
+    // //     sequ( s.getUsrRights( new UsrId ), pr.filter( x => x != "insert" ) );
+    // // });
 });
  
 

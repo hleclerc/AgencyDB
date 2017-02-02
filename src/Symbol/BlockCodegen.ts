@@ -121,7 +121,7 @@ class BlockCodegen {
                 r.lst[ r.ind ] = r.val;
         }
         if ( this.declarations.length )
-            this.code = `var ${ this.declarations.map( x => x.var_name + ( x.code ? "=" + x.code : "" ) ).join(',') };${ this.code }`;
+            this.code = `let ${ this.declarations.map( x => x.var_name + ( x.code ? "=" + x.code : "" ) ).join(',') };${ this.code }`;
         return this.code;
     }
 

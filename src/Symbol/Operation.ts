@@ -199,8 +199,8 @@ class Operation extends Sym {
                 }
                 console.error( this.children[ 1 ].item );
                 throw new Error( "TODO" );
-            case "heads"             : return par( Operation.prec.MEMBER, `${ cg.inline_code( this.children[ 0 ], Operation.prec.MEMBER ) }.substr(0,${ cg.inline_code( this.children[ 1 ], Operation.prec.COMMA ) })` );
-            case "tails"             : return par( Operation.prec.MEMBER, `${ cg.inline_code( this.children[ 0 ], Operation.prec.MEMBER ) }.substr(${ cg.inline_code( this.children[ 1 ], Operation.prec.MAX_PREC ) })` );
+            case "beginning"             : return par( Operation.prec.MEMBER, `${ cg.inline_code( this.children[ 0 ], Operation.prec.MEMBER ) }.substr(0,${ cg.inline_code( this.children[ 1 ], Operation.prec.COMMA ) })` );
+            case "ending"             : return par( Operation.prec.MEMBER, `${ cg.inline_code( this.children[ 0 ], Operation.prec.MEMBER ) }.substr(${ cg.inline_code( this.children[ 1 ], Operation.prec.MAX_PREC ) })` );
             // ternary
             case "slice"             : return par( Operation.prec.MEMBER, `${ cg.inline_code( this.children[ 0 ], Operation.prec.MEMBER ) }.substring(${ cg.inline_code( this.children[ 1 ], Operation.prec.COMMA ) },${ cg.inline_code( this.children[ 2 ], Operation.prec.COMMA ) })` );
             // default

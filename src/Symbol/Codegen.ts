@@ -117,15 +117,19 @@ function base_instruction_selection( targets: Array<Sym>, lang: string ) {
                 // a.substring( 0, children[ 1 ] ) + a.substring( children[ 1 + 2 ] )
                 case "remove_s":
                     return [ make_op( "set__sb", op.children[ 0 ], make_op( "add__bb",
-                        make_op( "heads__bb", op.children[ 0 ], op.children[ 1 ] ),
-                        make_op( "tails__bb", op.children[ 0 ], make_op( "add__bb", op.children[ 1 ], op.children[ 2 ] ) )
+                        make_op( "beginning__bb", op.children[ 0 ], op.children[ 1 ] ),
+                        make_op( "ending__bb", op.children[ 0 ], make_op( "add__bb", op.children[ 1 ], op.children[ 2 ] ) )
                     ) ) ];
                 // ( a.substring( 0, children[ 1 ] ) + children[ 2 ] ) + a.substring( children[ 1 ] )
                 case "insert_s":
                     return [ make_op( "set__sb", op.children[ 0 ], make_op( "add__bb", 
-                        make_op( "add__bb", make_op( "heads__bb", op.children[ 0 ], op.children[ 1 ] ), op.children[ 2 ] ),
-                        make_op( "tails__bb", op.children[ 0 ], op.children[ 1 ] )
+                        make_op( "add__bb", make_op( "beginning__bb", op.children[ 0 ], op.children[ 1 ] ), op.children[ 2 ] ),
+                        make_op( "ending__bb", op.children[ 0 ], op.children[ 1 ] )
                     ) ) ];
+                // 
+                case "beginning_s":
+                case "ending_s":
+                    return [ make_op( "set__sb", op.children[ 0 ], make_op( op.method.base_name + "__bb", op.children[ 0 ], op.children[ 1 ] ) ) ];
             }
 
             // ex: add__sbb( map, key, val ) => set__sbb( map, key, add__bb( select__bb( map, key ), val ) ) 
