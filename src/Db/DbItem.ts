@@ -308,7 +308,6 @@ class DbItem extends PatchManager {
             merger.finalize();
         }
         // console.log( "this.patches: ", this.patches.map( x => "\n  " + x.data.toString() ).join( "" ) );
-        
 
         // //
         // if ( unk_patches.length && when_unk ) {

@@ -247,12 +247,12 @@ dstd( "to_BooleanVariable"     , 1        ); // conversion to Boolean variable (
 
 dstd( "copy"                   , 1        );
 
-[ "not_log", "not_bin", "neg"                          ].forEach( x => dslf( x, 1 ) );   
+[ "not_log", "not_bin", "neg"                          ].forEach( x => dslf( x, 1 ) );
 [ "set", "add", "sub", "mul", "div",
   "or_log", "and_log", "xor_log",
   "or_bin", "and_bin", "xor_bin",
   "signed_shift_left", "signed_shift_right", 
-  "zfill_shift_left"                                   ].forEach( x => dslf( x, 2 ) );   
+  "zfill_shift_left"                                   ].forEach( x => dslf( x, 2 ) );
 [ "is_pos", "is_neg", "is_eqz"                         ].forEach( x => dstd( x, 1 ) );
 [ "is_equ", "is_inf", "is_infeq", "is_sup", "is_supeq" ].forEach( x => dstd( x, 2 ) );
 

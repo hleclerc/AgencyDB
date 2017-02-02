@@ -48,8 +48,9 @@ class OtWrapperString extends OtWrapperWithRightFlags {
 
     _self_remove( pos: number, len: number, usr_id = new UsrId() ): Rp {
         if ( len && OtWrapperStringOperations.right_to.Remove( this, usr_id, pos, len ) ) {
+            const str = this.val.data.slice( pos, pos + len );
             this.val.data = this.val.data.slice( 0, pos ) + this.val.data.slice( pos + len );
-            this.sig_change( bw => OtWrapperStringOperations.bin_repr.Remove( bw, pos, len ) );
+            this.sig_change( bw => OtWrapperStringOperations.bin_repr.RemUnd( bw, pos, str ) );
         }
         return this;
     }
