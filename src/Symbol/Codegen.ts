@@ -173,7 +173,10 @@ class Codegen {
 
         //
         let bc = new BlockCodegen( this );
-        return bc.exec( targets );        
+        let res = bc.exec( targets );        
+        if ( res.indexOf( "crout" ) >= 0 )
+            Graphviz.display( targets );
+        return res; 
     }
 
     free() {

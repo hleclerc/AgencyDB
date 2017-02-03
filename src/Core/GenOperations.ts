@@ -1,5 +1,6 @@
 import Codegen         from "../Symbol/Codegen"
 import { _if }         from "../Symbol/If"
+import { VarAnc }      from "../Core/Variable"
 import Graphviz        from "../Core/Graphviz"
 import methods         from "../Core/methods" 
 import Rp              from "../Core/Rp"
@@ -28,12 +29,19 @@ class OpInfo<UT> {
 };
 
 class BwRepr {
-    constructor( go, name = "bw" ) {
+    constructor( go, name = "bw", off = null, br_off = "br.off" ) {
         this.sym      = LvString.symbol( name );
+        this.console  = LvString.symbol( "console" );
+        this.off      = off ? LvString.symbol( off ) : null;
+        this.br_off   = br_off;
         this.orig_sym = this.sym.rp;
         this.go       = go;
     }
+
     push( op_type, data ) {
+        if ( this.off )
+            this.off.applyMethod( "push", LvNumber.symbol( this.br_off ) );
+
         const op_info = this.go.operations.find( x => x.inst.constructor == op_type );
         this.sym.applyMethod( "write_PI8", new LvNumber( op_info.num ) );
         Object.keys( op_info.inst ).forEach( name => {
@@ -41,7 +49,15 @@ class BwRepr {
             this.sym.applyMethod( "write_" + ( gt || "obj" ), data[ name ] );
         } );
     }
+
+    log( data: VarAnc ) {
+        this.console.applyMethod( "log", data );
+    }
+
     sym     : LvString;
+    console : LvString;
+    off     : LvString;
+    br_off  : string;
     go      : any; /** GenOperation<...> */
     orig_sym: Rp;
 }
@@ -216,24 +232,7 @@ class GenOperation<UT> {
         wl();
 
         // new_patch
-        wl( `function new_patch( val: ${ this.cl_inst.constructor.name }, bw_new: BinaryWriter, br_new: BinaryReader, as_usr: UsrId, cq_unk: BinaryWriter, src_dev?: DevId, src_usr?: UsrId, cur_dev?: DevId, cur_usr?: UsrId ) {` );
-        wl( `    while ( br_new.size ) {` );
-        wl( `        let br_unk = new BinaryReader( cq_unk.to_Uint8Array() );` );
-        wl( `        let bw_unk = new BinaryWriter;` );
-        wl( `        switch ( br_new.read_PI8() ) {` );
-        for( const op_new of this.operations ) {
-            wl( `        case ${ op_new.num }: { // ${ op_new.inst.constructor.name }` );
-            nb_sp += 12;
-            this._write_new_patch( lang, op_new );
-            nb_sp -= 12;
-            wl( `            break;` );
-            wl( `        }` );
-        }
-        wl( `        }` );
-        wl( `    }` );
-        wl( `    return val;` );
-        wl( `}` );
-        wl();
+        this._write_new_patch( lang );
 
         // get_possible_rights__b
         wl( `function get_possible_rights__b(): Array<string> {` );
@@ -317,91 +316,116 @@ class GenOperation<UT> {
         return res;
     }
 
-    _write_new_patch( lang: string, op_new: OpInfo<UT> ) {
-        // read data
-        wl( this.br_read_var( lang, op_new, "br_new", "_new" ) );
-
-        // read unk data
-        wl( `while ( br_unk.size ) {` );
-        wl( `    const num_unk = br_unk.read_PI8();` );
-        wl( `    switch ( num_unk ) {` );
-        for( const op_unk of this.operations ) {
-            wl( `        case ${ op_unk.num }: { // ${ op_unk.inst.constructor.name }` );
+    _write_new_patch( lang: string ) {
+        wl( `function new_patch( val: ${ this.cl_inst.constructor.name }, bw_new: BinaryWriter, br_new: BinaryReader, as_usr: UsrId, cq_unk: BinaryWriter, off_unk: Array<number>, src_dev?: DevId, src_usr?: UsrId, cur_dev?: DevId, cur_usr?: UsrId ) {` );
+        wl( `    for( let nbr_unk = 0; br_new.size; ++nbr_unk ) {` );
+        wl( `        let br_unk = new BinaryReader( cq_unk.to_Uint8Array(), off_unk ? off_unk[ nbr_unk ] : 0 );` );
+        wl( `        let bw_unk = new BinaryWriter, new_bw_new = new BinaryWriter, new_off_unk = new Array<number>();` );
+        wl( `        switch ( br_new.read_PI8() ) {` );
+        for( const op_new of this.operations ) {
+            wl( `        case ${ op_new.num }: { // ${ op_new.inst.constructor.name }` );
             nb_sp += 12;
-            wl( `console.log( '${ op_unk.inst.constructor.name }', '${ op_new.inst.constructor.name }' );` );
-            wl( this.br_read_var( lang, op_unk, "br_unk", "_unk", false ) );
-            
-            let cb = this.trans_rules.get( `${ op_unk.inst.constructor.name } ${ op_new.inst.constructor.name }` ), inv = false;
-            if ( ! cb )
-                cb = this.trans_rules.get( `${ op_new.inst.constructor.name } ${ op_unk.inst.constructor.name }` ), inv = true;
-            if ( cb ) {
-                let data_unk = this.make_symbolic_data( op_unk.inst, "_unk" );
-                let data_new = this.make_symbolic_data( op_new.inst, "_new" );
-                let lo = new BwRepr( this, "bw_unk" );
-                let ln = new BwRepr( this, "bw_new" );
-                if ( inv )
-                    cb( data_new, data_unk, ln, lo );
-                else
-                    cb( data_unk, data_new, lo, ln );
 
-                // if ( lo.sym.rp != lo.orig_sym ) {
-                //     Graphviz.display( [
-                //         ...Object.keys( data_unk ).map( k => data_unk[ k ].rp ),
-                //         ...Object.keys( data_new ).map( k => data_new[ k ].rp ),
-                //         lo.sym.rp,
-                //         ln.sym.rp,
-                //     ] );
-                // }
+            // read data
+            wl( this.br_read_var( lang, op_new, "br_new", "_new" ) );
 
-                wl( Codegen.make_code( [
-                    ...Object.keys( data_unk ).map( k => data_unk[ k ] ),
-                    ...Object.keys( data_new ).map( k => data_new[ k ] ),
-                    lo.sym,
-                    ln.sym,
-                ], lang ) );
+            // read unk data
+            wl( `while ( br_unk.size ) {` );
+            wl( `    const num_unk = br_unk.read_PI8();` );
+            wl( `    switch ( num_unk ) {` );
+            for( const op_unk of this.operations ) {
+                wl( `        case ${ op_unk.num }: { // ${ op_unk.inst.constructor.name }` );
+                nb_sp += 12;
+                wl( `console.log( '${ op_unk.inst.constructor.name }', '${ op_new.inst.constructor.name }' );` );
+                wl( this.br_read_var( lang, op_unk, "br_unk", "_unk", false ) );
+                
+                let cb = this.trans_rules.get( `${ op_unk.inst.constructor.name } ${ op_new.inst.constructor.name }` ), inv = false;
+                if ( ! cb )
+                    cb = this.trans_rules.get( `${ op_new.inst.constructor.name } ${ op_unk.inst.constructor.name }` ), inv = true;
+                if ( cb ) {
+                    let data_unk = this.make_symbolic_data( op_unk.inst, "_unk" );
+                    let data_new = this.make_symbolic_data( op_new.inst, "_new" );
+                    let lo = new BwRepr( this, "bw_unk" );
+                    let ln = new BwRepr( this, "new_bw_new", "new_off_unk", "br_unk.offset" );
+                    if ( inv )
+                        cb( data_new, data_unk, ln, lo );
+                    else
+                        cb( data_unk, data_new, lo, ln );
+
+                    // if ( lo.sym.rp != lo.orig_sym ) {
+                    //     Graphviz.display( [
+                    //         ...Object.keys( data_unk ).map( k => data_unk[ k ].rp ),
+                    //         ...Object.keys( data_new ).map( k => data_new[ k ].rp ),
+                    //         lo.sym.rp,
+                    //         ln.sym.rp,
+                    //     ] );
+                    // }
+
+                    wl( Codegen.make_code( [
+                        ...Object.keys( data_unk ).map( k => data_unk[ k ] ),
+                        ...Object.keys( data_new ).map( k => data_new[ k ] ),
+                        lo.console, ln.console,
+                        lo.sym, ln.sym,
+                        ln.br_off,
+                    ], lang ) );
+                }
+                wl( `bw_unk.write_PI8( ${ op_unk.num } ); ${ this.bw_write_obj( lang, op_unk, "bw_unk", "_unk" ) }` );
+                nb_sp -= 12;
+                wl( `            break;` );
+                wl( `        }` );
             }
-            wl( `bw_unk.write_PI8( ${ op_unk.num } ); ${ this.bw_write_obj( lang, op_unk, "bw_unk", "_unk" ) }` );
-            nb_sp -= 12;
-            wl( `            break;` );
-            wl( `        }` );
-        }
-        wl( `    }` );
-        wl( `}` );
-        
-        // test rights
-        wl( `if ( right_to.${ op_new.inst.constructor.name }( val, as_usr, ${ this.func_args_op( lang, op_new, false, "_new" ) } ) ) {` );
-        nb_sp += 4;
+            wl( `    }` );
+            wl( `}` );
+            
+            // test rights
+            wl( `console.log( ${ this.func_args_op( lang, op_new, false, "_new" ) } );` );
 
-        // write back the new data
-        if ( op_new.store ) {
+            wl( `if ( right_to.${ op_new.inst.constructor.name }( val, as_usr, ${ this.func_args_op( lang, op_new, false, "_new" ) } ) ) {` );
+            nb_sp += 4;
+
+            // write back the new data
+            if ( op_new.store ) {
+                let d = this.make_symbolic_data( this.cl_inst, "", "val.", this.sym_corr );
+                let o = this.make_symbolic_data( op_new.inst, "_new" );
+                for( const new_op of op_new.store( d, o ) ) {
+                    const op = this.reg_op( new_op.type );
+                    const li = Object.keys( new_op.data ).map( x => op.inst[ x ].constructor.symbol( x + "_tmp" ).set( new_op.data[ x ] ) );
+                    wl( `{` ); 
+                    nb_sp += 4;
+                    wl( `let ${ Object.keys( op.inst ).map( x => x + "_tmp" ).join( ', ' ) };` );
+                    wl( Codegen.make_code( li, lang ) );
+                    wl( `bw_new.write_PI8( ${ op.num } );` + this.bw_write_obj( lang, op, "bw_new", "_tmp" ) );
+                    nb_sp -= 4;
+                    wl( `}` ); 
+                }
+            } else {
+                wl( `bw_new.write_PI8( ${ op_new.num } ); ${ this.bw_write_obj( lang, op_new, "bw_new", "_new" ) }` );
+            }
+
+            // register new unk data
+            wl( `bw_unk.transfer_to( cq_unk );` );
+
+            // apply operation
             let d = this.make_symbolic_data( this.cl_inst, "", "val.", this.sym_corr );
             let o = this.make_symbolic_data( op_new.inst, "_new" );
-            for( const new_op of op_new.store( d, o ) ) {
-                const op = this.reg_op( new_op.type );
-                const li = Object.keys( new_op.data ).map( x => op.inst[ x ].constructor.symbol( x + "_tmp" ).set( new_op.data[ x ] ) );
-                wl( `{` ); 
-                nb_sp += 4;
-                wl( `let ${ Object.keys( op.inst ).map( x => x + "_tmp" ).join( ', ' ) };` );
-                wl( Codegen.make_code( li, lang ) );
-                wl( `bw_new.write_PI8( ${ op.num } );` + this.bw_write_obj( lang, op, "bw_new", "_tmp" ) );
-                nb_sp -= 4;
-                wl( `}` ); 
-            }
-        } else {
-            wl( `bw_new.write_PI8( ${ op_new.num } ); ${ this.bw_write_obj( lang, op_new, "bw_new", "_new" ) }` );
+            op_new.apply( d, o );
+            wl( Codegen.make_code( Object.keys( d ).map( n => d[ n ] ), lang ) );
+
+            // read newly created operations
+            wl( `if ( new_bw_new.size )` );
+            wl( `    new_patch( val, bw_new, new BinaryReader( new_bw_new.to_Uint8Array() ), as_usr, cq_unk, new_off_unk, src_dev, src_usr, cur_dev, cur_usr );` );
+
+            nb_sp -= 4;
+            wl( `}` );
+            wl( `break;` );
+            nb_sp -= 12;
+            wl( `        }` );
         }
-
-        // register new unk data
-        wl( `bw_unk.transfer_to( cq_unk );` );
-
-        // apply operation
-        let d = this.make_symbolic_data( this.cl_inst, "", "val.", this.sym_corr );
-        let o = this.make_symbolic_data( op_new.inst, "_new" );
-        op_new.apply( d, o );
-        wl( Codegen.make_code( Object.keys( d ).map( n => d[ n ] ), lang ) );
-
-        nb_sp -= 4;
+        wl( `        }` );
+        wl( `    }` );
+        wl( `    return val;` );
         wl( `}` );
+        wl();
     }
 
     _write_undo_patch( lang: string, op: OpInfo<UT> ) {

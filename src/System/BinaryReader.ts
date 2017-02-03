@@ -1,21 +1,11 @@
-// import VectorClock from "./VectorClock";
-// import PatchId     from "./PatchId";
-// import Base64o     from "./Base64o";
 import crc32c      from "./Crc32c";
-// import Inode       from "./Inode";
-// import DevId       from "./DevId";
-// import UsrId       from "./UsrId";
-// import GrpId       from "./GrpId";
-
 declare var TextDecoder: any;
-// declare var Buffer     : any;
-// declare function require( s: string );
 
 export default
 class BinaryReader {
     constructor( data : Uint8Array, cursor : number = 0, len : number = data.byteLength - cursor ) {
         this.cursor = cursor;
-        this.data   = data.slice( cursor, cursor + len );
+        this.data   = data; // .slice( cursor, cursor + len );
     }
 
     get size() : number {

@@ -69,10 +69,9 @@ go.fwd_trans( Remove, Insert, ( o: Remove, n: Insert, l_old ) => {
         // o: 05        REM(1,4)
         // n: 012new345 INS(3,new)
         // r: 0new5     n:(o->r) = INS(1,new); o:(n->r) = REM(1,2) + REM(4,2)
-        l_old.push( Remove, { pos: o.pos, len: n.pos.sub( o.pos ) } as Remove ); // 1, 2
-        o.len.selfSub( n.pos.sub( o.pos ) ); // 2
-        n.pos.set( o.pos );                  // 1
-        o.pos.selfAdd( n.str.length );       // 4
+        l_old.push( Remove, { pos: o.pos.add( n.str.length ), len: o.len.sub( n.pos.sub( o.pos ) ) } as Remove ); // 4, 2
+        o.len.set( n.pos.sub( o.pos ) ); // 2
+        n.pos.set( o.pos );              // 1
     } );
 } );
 
@@ -91,42 +90,14 @@ go.fwd_trans( RemUnd, Insert, ( o: RemUnd, n: Insert, l_old ) => {
         o.pos.selfAdd( n.str.length );
     }, () => {
         // i: 012345
-        // o: 05        REM(1,4)
+        // o: 05        REM(1,'1234')
         // n: 012new345 INS(3,new)
-        // r: 0new5     n:(o->r) = INS(1,new); o:(n->r) = REM(1,'01') + REM(4,'34')
-        l_old.push( RemUnd, { pos: o.pos, str: o.str.beginning( n.pos.sub( o.pos ) ) } as RemUnd ); // 1, '12'
-        o.str.selfEnding( n.pos.sub( o.pos ) ); // '34'
-        n.pos.set( o.pos );                     // 1
-        o.pos.selfAdd( n.str.length );          // 4
+        // r: 0new5     n:(o->r) = INS(1,new); o:(n->r) = REM(1,'12') + REM(4,'34') (in another phase)
+        l_old.push( RemUnd, { pos: o.pos.add( n.str.length ), str: o.str.ending( n.pos.sub( o.pos ) ) } as RemUnd ); // 4, '34'
+        o.str.selfBeginning( n.pos.sub( o.pos ) ); // '12'
+        n.pos.set( o.pos );                        // 1
     } );
 } );
-
-// ---------------------<
-go.fwd_trans( Insert, RemUnd, ( o: Insert, n: RemUnd, l_old, l_new ) => {
-    _if( o.pos.isSupEq( n.pos.add( n.str.length ) ), () => {
-        // i: 012345
-        // o: 01234new5 INS(5,new)
-        // n: 0345      REM(1,2)
-        // r: 034new5   n:(o->r) = INS(3,new); o:(n->r) = REM(1,2)
-        o.pos.selfSub( n.str.length ); // 3
-    }, o.pos.isInfEq( n.pos ), () => {
-        // i: 012345
-        // o: 0new12345 INS(1,new)
-        // n: 0125      REM(3,2)
-        // r: 0new125   n:(o->r) = INS(1,new); o:(n->r) = REM(6,2)
-        n.pos.selfAdd( o.str.length );
-    }, () => {
-        // i: 012345
-        // o: 012new345 INS(3,new)
-        // n: 05        REM(1,4)
-        // r: 0new5     n:(o->r) = INS(1,new); o:(n->r) = REM(1,'01') + REM(4,'34')
-        l_new.push( RemUnd, { pos: n.pos, str: n.str.beginning( o.pos.sub( n.pos ) ) } as RemUnd ); // 1, '12'
-        n.str.selfEnding( o.pos.sub( n.pos ) ); // '34'
-        o.pos.set( n.pos );                     // 1
-        n.pos.selfAdd( o.str.length );          // 4
-    } );
-} );
-
 
 go.fwd_trans( Remove, Remove, ( o: Remove, n: Remove, l_old ) => {
     _if ( o.pos.isInfEq( n.pos ), () => {
@@ -264,6 +235,8 @@ go.fwd_trans( RemUnd, RemUnd, ( o: RemUnd, n: RemUnd, l_old, l_new ) => {
             // n: 0456789    REM_UND(1,'123')
             // r: 04589      n:(o->r) = REM_UND(1,'123'); o:(n->r) = REM_UND(3,'67')
             o.pos.selfSub( n.str.length ); // 3
+            l_old.log( new LvString( "crout" ) );
+            
         }, n.pos.add( n.str.length ).isInfEq( o.pos.add( o.str.length ) ), () => {
             // i: 0123456789
             // o: 012389     REM_UND(4,'4567')

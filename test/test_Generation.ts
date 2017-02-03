@@ -22,9 +22,9 @@ describe( 'Generation', () => {
         const b = LvString.symbol( "B" );
         const t = b.concat( a ); // ba
         const o = b.copy(); // b
-        b.append( "c" ); // => bc
-        b.append( t ); // bcba
-        b.append( o ); // bcbab
+        b.selfConcat( "c" ); // => bc
+        b.selfConcat( t ); // bcba
+        b.selfConcat( o ); // bcbab
 
         // Graphviz.display( [ b.rp ] );
         const code = Codegen.make_code( [ b ] );
@@ -50,7 +50,7 @@ describe( 'Generation', () => {
         const a = LvString.symbol( "a" );
         const b = LvString.symbol( "b" );
         let c = a.concat( b );
-        c.append( "c" );
+        c.selfConcat( "c" );
 
         const code = Codegen.make_code( [ c ] );
         //Graphviz.display( [ c.rp ] );
@@ -59,8 +59,8 @@ describe( 'Generation', () => {
 
     it( 'if basic', () => {
         const str = LvString.symbol( "str" ), cond = LvString.symbol( "cond" );
-        _if( cond, () => { str.append( 'c' ); } );
-        str.append( 'd' );
+        _if( cond, () => { str.selfConcat( 'c' ); } );
+        str.selfConcat( 'd' );
 
         // Graphviz.display( [ str.rp ] );
         sequ( Codegen.make_code( [ str ] ), 'if(cond){str+="c";}str+="d";' );
@@ -68,7 +68,7 @@ describe( 'Generation', () => {
 
     it( 'if else', () => {
         const str = LvString.symbol( "str" ), c0 = LvString.symbol( "c0" ), c1 = LvString.symbol( "c1" );
-        _if( c0, () => str.append( 's0' ), c1, () => str.append( 's1' ), () => str.append( 's2' ) );
+        _if( c0, () => str.selfConcat( 's0' ), c1, () => str.selfConcat( 's1' ), () => str.selfConcat( 's2' ) );
 
         // Graphviz.display( [ str.rp ] );
         sequ( Codegen.make_code( [ str ] ), 'if(c0){str+="s0";}else{if(c1){str+="s1";}else{str+="s2";}}' );
@@ -102,8 +102,8 @@ describe( 'Generation', () => {
     it( 'variable selfed twice, via a copy', () => {
         const a = LvString.symbol( "a" );
         const b = a.copy();
-        a.append('.');
-        b.append('.');
+        a.selfConcat('.');
+        b.selfConcat('.');
 
         const code = Codegen.make_code( [ a, b ] )
         // Graphviz.display( [ a.rp, b.rp ] );
@@ -112,11 +112,11 @@ describe( 'Generation', () => {
 
     it( 'while with symbols', () => {
         // const n = symbol<Number>( Number, "n" ), c = new Number( 5 );
-        // _while( () => n.is_inf( 10 ),
-        //         () => { c.self_add( n ); n.self_add( 1 ); } );
+        // _while( () => n.isInf( 10 ),
+        //         () => { c.selfAdd( n ); n.selfAdd( 1 ); } );
         const n = LvNumber.symbol( "n" );
-        _while( () => n.is_inf( 10 ),
-                () => n.self_add( 1 ) );
+        _while( () => n.isInf( 10 ),
+                () => n.selfAdd( 1 ) );
 
         // Graphviz.display( [ n.rp ] );
         sequ( Codegen.make_code( [ n ] ), 'while(n<10){n+=1;}' );
@@ -124,8 +124,8 @@ describe( 'Generation', () => {
 
     it( 'while with variable created during the loop', () => {
         const n = LvNumber.symbol( "n" );
-        _while( () => n.is_inf( 10 ),
-                () => { let i = new LvNumber( 2 ); i.set( 1 ); n.self_add( i ); } );
+        _while( () => n.isInf( 10 ),
+                () => { let i = new LvNumber( 2 ); i.set( 1 ); n.selfAdd( i ); } );
 
         // Graphviz.display( [ n.rp ] );
         sequ( Codegen.make_code( [ n ] ), 'while(n<10){n+=1;}' );
@@ -181,20 +181,20 @@ describe( 'Generation', () => {
             let shift = new LvNumber( 0 );
             res.val = 0; 
             _while( () => {
-                let cont = cursor.is_inf( data.byteLength );
+                let cont = cursor.isInf( data.byteLength );
                 _if( cont, () => {
                     let val = data.at( cursor );
-                    cursor.self_add( 1 );
-                    _if( val.is_supeq( 128 ), () => {
-                        res.self_add( val.sub( 128 ).signed_shift_left( shift ) );
+                    cursor.selfAdd( 1 );
+                    _if( val.isSupEq( 128 ), () => {
+                        res.selfAdd( val.sub( 128 ).signedShiftLeft( shift ) );
                     }, () => {
-                        res.self_add( val.signed_shift_left( shift ) );
+                        res.selfAdd( val.signedShiftLeft( shift ) );
                         cont.set( 0 )
                     } );
                 } );
                 return cont;
             }, () => {
-                shift.self_add( 7 );
+                shift.selfAdd( 7 );
             } );
             return res;
         }

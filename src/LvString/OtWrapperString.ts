@@ -56,7 +56,7 @@ class OtWrapperString extends OtWrapperWithRightFlags {
     }
 
     new_patch( res: BinaryWriter, msg: BinaryReader, as_usr: UsrId, cq_unk: BinaryWriter, src_dev?: DevId, src_usr?: UsrId, cur_dev?: DevId, cur_usr?: UsrId ) {
-        OtWrapperStringOperations.new_patch( this, res, msg, as_usr, cq_unk, src_dev, src_usr, cur_dev, cur_usr );
+        OtWrapperStringOperations.new_patch( this, res, msg, as_usr, cq_unk, null, src_dev, src_usr, cur_dev, cur_usr );
     }
 
     undo_patch( data: BinaryReader, as_usr: UsrId ) {

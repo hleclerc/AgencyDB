@@ -112,36 +112,36 @@ describe( 'String', () => {
     // });
 
     it( 'operationnal tranform, parallel remove / insertions', () => {
-        // test_ot_str( "abcd", ( vls, dbs ) => {
-        //     vls[ 0 ].insert( 1, "X" );
-        //     vls[ 1 ].insert( 3, "Y" );
-        // }, "aXbcYd", "concurrent insertions" );
+        test_ot_str( "abcd", ( vls, dbs ) => {
+            vls[ 0 ].insert( 1, "X" );
+            vls[ 1 ].insert( 3, "Y" );
+        }, "aXbcYd", "concurrent insertions" );
 
-        // test_ot_str( "abcd", ( vls, dbs ) => {
-        //     vls[ 1 ].insert( 3, "Y" );
-        //     vls[ 0 ].insert( 1, "X" );
-        // }, "aXbcYd", "concurrent insertions" );
+        test_ot_str( "abcd", ( vls, dbs ) => {
+            vls[ 1 ].insert( 3, "Y" );
+            vls[ 0 ].insert( 1, "X" );
+        }, "aXbcYd", "concurrent insertions" );
 
-        // test_ot_str( "012345", ( vls, dbs ) => {
-        //     vls[ 0 ].insert( 3, "ab" );
-        //     vls[ 1 ].remove( 1, 1 );
-        // }, "02ab345", "concurrent insertion and removal" );
+        test_ot_str( "012345", ( vls, dbs ) => {
+            vls[ 0 ].insert( 3, "ab" );
+            vls[ 1 ].remove( 1, 1 );
+        }, "02ab345", "concurrent insertion and removal" );
 
         test_ot_str( "012345", ( vls, dbs ) => {
             vls[ 1 ].remove( 1, 4 );
             vls[ 0 ].insert( 3, "ab" );
         }, "0ab5" );
 
-        // test_ot_str( "012345", ( vls, dbs ) => {
-        //     vls[ 1 ].remove( 4, 1 );
-        //     vls[ 0 ].insert( 3, "ab" );
-        // }, "012ab35" );
+        test_ot_str( "012345", ( vls, dbs ) => {
+            vls[ 1 ].remove( 4, 1 );
+            vls[ 0 ].insert( 3, "ab" );
+        }, "012ab35" );
 
 
-        // test_ot_str( "0123456789", ( vls, dbs ) => {
-        //     vls[ 1 ].remove( 1, 2 );
-        //     vls[ 0 ].remove( 7, 2 );
-        // }, "034569" );
+        test_ot_str( "0123456789", ( vls, dbs ) => {
+            vls[ 1 ].remove( 1, 2 );
+            vls[ 0 ].remove( 5, 2 );
+        }, "034789" );
 
         // test_ot_str( "0123456789", ( vls, dbs ) => {
         //     vls[ 0 ].remove( 1, 4 );

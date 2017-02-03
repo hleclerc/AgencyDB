@@ -24,7 +24,7 @@ class IfInp extends Sym {
     }
 
     to_String__b(): string {
-        return `IfInp:${ Object.keys( this.op_mp ) }`;
+        return `IfInp`;
     }
 
     block_code( cg: BlockCodegen, options ): void {
