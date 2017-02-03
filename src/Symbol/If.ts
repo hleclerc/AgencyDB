@@ -193,6 +193,7 @@ function _if( cond: any, ok: () => any, ...rem ) { // ko?: () => any
         // modify variables to take if outputs
         let rp_if = new If( [ ...inp_if, b_cond.rp ].map( skv_link_o ), inp_ok, new IfOut( out_ok ), inp_ko, new IfOut( out_ko ) );
         mod_xx.forEach( ( num, val ) => val.rp = get_nout( rp_if, num ) );
+            
         return;
     }
     //

@@ -352,13 +352,14 @@ class GenOperation<UT> {
                     else
                         cb( data_unk, data_new, lo, ln );
 
-                    // if ( lo.sym.rp != lo.orig_sym ) {
+                    // if ( op_unk.inst.constructor.name == "RemUnd" && op_new.inst.constructor.name == "RemUnd" ) {
                     //     Graphviz.display( [
                     //         ...Object.keys( data_unk ).map( k => data_unk[ k ].rp ),
                     //         ...Object.keys( data_new ).map( k => data_new[ k ].rp ),
-                    //         lo.sym.rp,
-                    //         ln.sym.rp,
-                    //     ] );
+                    //         ln.console.rp, lo.console.rp,
+                    //         lo.sym.rp, ln.sym.rp,
+                    //         ln.off.rp,
+                    //     ] ); 
                     // }
 
                     wl( Codegen.make_code( [
@@ -366,7 +367,7 @@ class GenOperation<UT> {
                         ...Object.keys( data_new ).map( k => data_new[ k ] ),
                         lo.console, ln.console,
                         lo.sym, ln.sym,
-                        ln.br_off,
+                        ln.off,
                     ], lang ) );
                 }
                 wl( `bw_unk.write_PI8( ${ op_unk.num } ); ${ this.bw_write_obj( lang, op_unk, "bw_unk", "_unk" ) }` );

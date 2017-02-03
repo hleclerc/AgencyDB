@@ -1,3 +1,4 @@
+import Sym                from "../Symbol/Sym";
 import methods            from "./methods";
 import Rp                 from "./Rp"
 import * as child_process from "child_process";
@@ -51,6 +52,9 @@ class Graphviz {
                 }
             } 
         }
+        if ( val instanceof Sym && val.op_mp.codegen_data )
+            label += val.op_mp.codegen_data.in_ext_blk.toString();
+
         const lst_attr = [ `label="${ grepr( label ) }"`, ...Object.keys( info || {} ).map( k => `${ k }="${ grepr( info[ k ] ) }"` ) ];
         if ( this.use_ports )
             lst_attr.push( "shape=record" );

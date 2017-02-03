@@ -32,10 +32,14 @@ class Target {
     name    : string;
 }
 
+function init_codegen_data_of_sym( pos_codegen_data: Array<Sym>, v: Sym ) {
+    v.op_mp.codegen_data = new CodegenData;
+    pos_codegen_data.push( v );
+}
+
 function init_codegen_data( pos_codegen_data: Array<Sym>, targets: Array<Sym> ) {
     Sym.dfs_unique( targets, function( v: Sym ) {
-        v.op_mp.codegen_data = new CodegenData;
-        pos_codegen_data.push( v );
+        init_codegen_data_of_sym( pos_codegen_data, v );
     }, true );
 }
 
@@ -86,14 +90,14 @@ function sep_sub_blocks( pos_codegen_data: Array<Sym>, targets: Array<Sym>, num_
 
     // for each out_var, look if there is a sub var with a in_ext_blk
     for( let out_var of if_out_vars ) {
-        init_codegen_data( pos_codegen_data, [ out_var.inp_ok ] ); // inp_xx may have been ignored (because not used before)
-        init_codegen_data( pos_codegen_data, [ out_var.inp_ko ] );
+        if ( ! out_var.inp_ok.op_mp.codegen_data ) init_codegen_data_of_sym( pos_codegen_data, out_var.inp_ok ); // inp_xx may have been ignored (because not used before)
+        if ( ! out_var.inp_ko.op_mp.codegen_data ) init_codegen_data_of_sym( pos_codegen_data, out_var.inp_ko );
         externalize_ext_vars( pos_codegen_data, out_var, out_var.inp_ok, out_var.out_ok, true , num_sub_block );
         externalize_ext_vars( pos_codegen_data, out_var, out_var.inp_ko, out_var.out_ko, true , num_sub_block );
     }
     for( let out_var of wh_out_vars ) {
-        init_codegen_data( pos_codegen_data, [ out_var.inp_co ] ); // inp_xx may have been ignored (because not used before)
-        init_codegen_data( pos_codegen_data, [ out_var.inp_bk ] );
+        if ( ! out_var.inp_co.op_mp.codegen_data ) init_codegen_data_of_sym( pos_codegen_data, out_var.inp_co ); // inp_xx may have been ignored (because not used before)
+        if ( ! out_var.inp_bk.op_mp.codegen_data ) init_codegen_data_of_sym( pos_codegen_data, out_var.inp_bk );
         externalize_ext_vars( pos_codegen_data, out_var, out_var.inp_co, out_var.out_co, true , num_sub_block );
         externalize_ext_vars( pos_codegen_data, out_var, out_var.inp_bk, out_var.out_bk, false, num_sub_block );
     }
@@ -141,6 +145,8 @@ function base_instruction_selection( targets: Array<Sym>, lang: string ) {
     }, true ) );
 }
 
+let cpr = 0, _targets;
+
 /** */
 export default
 class Codegen {
@@ -159,9 +165,13 @@ class Codegen {
     exec_wo_free( rp_targets: Array<Rp>, lang: string, prec = 0 ): string {
         const targets = rp_targets.filter( op => op instanceof Sym ) as Array<Sym>;
 
+        ++cpr;
+        _targets = targets;
+    if ( cpr ==  27 ) Graphviz.display( _targets );
+    
         // change instructions that can't be written in $lang (may change targets)
         base_instruction_selection( targets, lang );
-
+    
         // assign CodegenData in op_mp.codegen_data
         init_codegen_data( this.pos_codegen_data, targets );
 
@@ -173,10 +183,7 @@ class Codegen {
 
         //
         let bc = new BlockCodegen( this );
-        let res = bc.exec( targets );        
-        if ( res.indexOf( "crout" ) >= 0 )
-            Graphviz.display( targets );
-        return res; 
+        return bc.exec( targets ); 
     }
 
     free() {
