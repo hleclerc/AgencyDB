@@ -158,19 +158,18 @@ class LvString extends Variable<LvString> {
         this.rp = typeof pos == 'number' ? (
             typeof len == 'number' ?
                 methods["remove__soo"].call_3s( this, new BN_PT( pos ), new BN_PT( len ) ) :
-                methods["remove__sob"].call_3s( this, new BN_PT( pos ), len.rp             )
+                methods["remove__sob"].call_3s( this, new BN_PT( pos ), len.rp           )
         ) : (
             typeof len == 'number' ?
                 methods["remove__soo"].call_3s( this, pos.rp            , new BN_PT( len ) ) :
-                methods["remove__sob"].call_3s( this, pos.rp            , len.rp             )
+                methods["remove__sob"].call_3s( this, pos.rp            , len.rp           )
         );
         return this;
     }
 
     /** set lenth to 0 */
     clear(): LvString {
-        this.remove( 0, this.length.toNumber() );
-        return this;
+        return this.remove( 0, this.length.toNumber() );
     }
 
     // new_cursor( carets = new Array<Caret>() ) : number {

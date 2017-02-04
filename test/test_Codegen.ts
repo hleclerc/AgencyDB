@@ -15,37 +15,50 @@ function sequ( a, b, msg?: string ) {
 describe( 'Codegen', () => {
     it( 'mixed self/not self', () => {
         const a = LvString.symbol( "A" );
-        _if( LvString.symbol( "c0" ), () => {
 
-            _if( LvString.symbol( "d0" ), () => {
-                a.selfConcat( "c0,d0" );
-            }, LvString.symbol( "d1" ), () => {
-                a.selfConcat( "c0,!d0,d1" );
-            }, () => {
-                a.selfConcat( "c0,!d0,!d1" );
-            } );
+        _if( LvString.symbol( "d0" ), () => {
+            _if( LvString.symbol( "d1" ), () => {}, () => {
+                        a.selfConcat( "c" );
+                _if( LvString.symbol( "d2" ), () => {}, () => {
+                        a.selfConcat( "c" );
+                    _if( LvString.symbol( "d3" ), () => {}, () => {
+                        a.selfConcat( "c" );
+                    } )
+                } )
+            } )
+        } )
 
-        }, LvString.symbol( "c1" ), () => {
+        // _if( LvString.symbol( "c0" ), () => {
 
-            _if( LvString.symbol( "d0" ), () => {
-                a.selfConcat( "!c0,c1,d0" );
-            }, LvString.symbol( "d1" ), () => {
-                a.selfConcat( "!c0,c1,!d0,d1" );
-            }, () => {
-                a.selfConcat( "!c0,c1,!d0,!d1" );
-            } );
+        //     _if( LvString.symbol( "d0" ), () => {
+        //         a.selfConcat( "c0,d0" );
+        //     }, LvString.symbol( "d1" ), () => {
+        //         a.selfConcat( "c0,!d0,d1" );
+        //     }, () => {
+        //         a.selfConcat( "c0,!d0,!d1" );
+        //     } );
 
-        }, () => {
+        // }, LvString.symbol( "c1" ), () => {
 
-            _if( LvString.symbol( "d0" ), () => {
-                a.selfConcat( "!c0,!c1,d0" );
-            }, LvString.symbol( "d1" ), () => {
-                a.selfConcat( "!c0,!c1,!d0,d1" );
-            }, () => {
-                a.selfConcat( "!c0,!c1,!d0,!d1" );
-            } );
+        //     _if( LvString.symbol( "d0" ), () => {
+        //         a.selfConcat( "!c0,c1,d0" );
+        //     }, LvString.symbol( "d1" ), () => {
+        //         a.selfConcat( "!c0,c1,!d0,d1" );
+        //     }, () => {
+        //         a.selfConcat( "!c0,c1,!d0,!d1" );
+        //     } );
 
-        } );
+        // }, () => {
+
+        //     _if( LvString.symbol( "d0" ), () => {
+        //         a.selfConcat( "!c0,!c1,d0" );
+        //     }, LvString.symbol( "d1" ), () => {
+        //         a.selfConcat( "!c0,!c1,!d0,d1" );
+        //     }, () => {
+        //         a.selfConcat( "!c0,!c1,!d0,!d1" );
+        //     } );
+
+        // } );
 
         const code = Codegen.make_code( [ a ] );
         console.log( code );

@@ -352,7 +352,7 @@ class GenOperation<UT> {
                     else
                         cb( data_unk, data_new, lo, ln );
 
-                    // if ( op_unk.inst.constructor.name == "RemUnd" && op_new.inst.constructor.name == "RemUnd" ) {
+                    // if ( op_unk.inst.constructor.name == "Insert" && op_new.inst.constructor.name == "RemUnd" ) {
                     //     Graphviz.display( [
                     //         ...Object.keys( data_unk ).map( k => data_unk[ k ].rp ),
                     //         ...Object.keys( data_new ).map( k => data_new[ k ].rp ),

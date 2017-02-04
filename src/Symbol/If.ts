@@ -152,12 +152,15 @@ function _if( cond: any, ok: () => any, ...rem ) { // ko?: () => any
         // intercept calls to get modified variables
         let inp_ok = new IfInp();
         let inp_if = new Array<Rp>(); // If inputs
+        let inp_iv = new Array<VarAnc>(); // If inputs
         let mod_xx = new Map<VarAnc,number>();
         let mod_ok = new Map<VarAnc,{ o: Rp, b: Rp, n: Rp }>();
         Interceptor.run( mod_ok, ok, function( v: VarAnc ) {
             let ind = inp_if.indexOf( v.rp );
-            if ( ind < 0 )
+            if ( ind < 0 ) {
                 ind = inp_if.push( v.rp ) - 1;
+                inp_iv.push( v );
+            }
             mod_xx.set( v, ind );
             return get_nout( inp_ok, ind );
         } );
@@ -166,8 +169,10 @@ function _if( cond: any, ok: () => any, ...rem ) { // ko?: () => any
         let mod_ko = new Map<VarAnc,{ o: Rp, b: Rp, n: Rp }>();
         Interceptor.run( mod_ko, ko, function( v: VarAnc ) {
             let ind = inp_if.indexOf( v.rp );
-            if ( ind < 0 )
+            if ( ind < 0 ) {
                 ind = inp_if.push( v.rp ) - 1;
+                inp_iv.push( v );
+            }
             mod_xx.set( v, ind );
             return get_nout( inp_ko, ind );
         } );        
@@ -190,8 +195,8 @@ function _if( cond: any, ok: () => any, ...rem ) { // ko?: () => any
         if ( Method.int_call_s )
             mod_xx.forEach( ( num, val ) => Method.int_call_s( val ) );
 
-        // modify variables to take if outputs
-        let rp_if = new If( [ ...inp_if, b_cond.rp ].map( skv_link_o ), inp_ok, new IfOut( out_ok ), inp_ko, new IfOut( out_ko ) );
+        // modify variables to take if outputs (we take inp_iv because int_call_s may have modified the variables)
+        let rp_if = new If( [ ...inp_iv, b_cond ].map( v => skv_link_o( v.rp ) ), inp_ok, new IfOut( out_ok ), inp_ko, new IfOut( out_ko ) );
         mod_xx.forEach( ( num, val ) => val.rp = get_nout( rp_if, num ) );
             
         return;

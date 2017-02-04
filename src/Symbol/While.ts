@@ -153,6 +153,7 @@ function _while( cond_cb: () => any, block_cb?: () => void ) {
     let inp_co = new WhileInp();
     let inp_bk = new WhileInp();
     let inp_wh = new Array<Rp>(); // variable modified during the while (cond or block)
+    let inp_wv = new Array<VarAnc>(); // variable modified during the while (cond or block)
     let mod_xx = new Map<VarAnc,number>();
     let out_co = null as Array<Link>; // [ ...mod_co.entries() ].map( ( [ v, oan ] ) => skv_link( oan.n ) ).concat( cond );
     let out_bk = null as Array<Link>; // [ ...mod_co.entries() ].map( ( [ v, oan ] ) => skv_link( oan.n ) ).concat( cond );
@@ -165,8 +166,10 @@ function _while( cond_cb: () => any, block_cb?: () => void ) {
             cond = slo( var_cond.rp );
         }, function( val: VarAnc ) {
             let ind = inp_wh.indexOf( val.rp );
-            if ( ind < 0 )
+            if ( ind < 0 ) {
                 ind = inp_wh.push( val.rp ) - 1;
+                inp_wv.push( val );
+            }
             mod_xx.set( val, ind );
             return get_nout( inp_co, ind );
         } );
@@ -184,8 +187,10 @@ function _while( cond_cb: () => any, block_cb?: () => void ) {
         // block (with mod_bk initialized by mod_co)
         Interceptor.run( mod_bk, block_cb, function( val: VarAnc ) {
             let ind = inp_wh.indexOf( val.rp );
-            if ( ind < 0 )
+            if ( ind < 0 ) {
                 ind = inp_wh.push( val.rp ) - 1;
+                inp_wv.push( val );
+            }
             mod_xx.set( val, ind );
             return get_nout( inp_bk, ind );
         } );
@@ -212,7 +217,7 @@ function _while( cond_cb: () => any, block_cb?: () => void ) {
         mod_xx.forEach( ( num, val ) => Method.int_call_s( val ) );
 
     // modify variables to take while outputs
-    let rp_wh = new While( inp_wh.map( skv_link_o ), inp_co, new WhileOutCond( out_co ), inp_bk, new WhileOut( out_bk ) );
+    let rp_wh = new While( inp_wv.map( v => skv_link_o( v.rp ) ), inp_co, new WhileOutCond( out_co ), inp_bk, new WhileOut( out_bk ) );
     mod_xx.forEach( ( num, val ) => val.rp = get_nout( rp_wh, num ) );
 }
 
