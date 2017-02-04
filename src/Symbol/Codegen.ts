@@ -44,9 +44,6 @@ function init_codegen_data( pos_codegen_data: Array<Sym>, targets: Array<Sym> ) 
 }
 
 function externalize_ext_vars( pos_codegen_data: Array<Sym>, inst: If | While, inp: IfInp | WhileInp, target: Sym, cond_var: boolean, num_sub_block: number ) {
-    // we need sub block to be already "externalized"
-    sep_sub_blocks( pos_codegen_data, [ target ], num_sub_block + 1 );
-
     //
     Sym.dfs_unique( [ target ], ( pa: Sym ) => {
         if ( cd( pa ).in_ext_blk <= num_sub_block )
@@ -57,7 +54,7 @@ function externalize_ext_vars( pos_codegen_data: Array<Sym>, inst: If | While, i
                 if ( nout < 0 ) {
                     if ( cond_var ) {
                         nout = inst.children.length - 1;
-                        inst.children.push( inst.children[ nout ] ); // move condition
+                        inst.children.push( inst.children[ nout ] ); // move condition variable at the end
                         inst.children[ nout ] = ch; // replace by externalized variable
                     } else
                         nout = inst.children.push( ch ) - 1;
@@ -65,7 +62,10 @@ function externalize_ext_vars( pos_codegen_data: Array<Sym>, inst: If | While, i
                 pa.replace_child( ch, { item: inp, nout } );
             }
         }
-    } );
+    }, true );
+
+    //
+    sep_sub_blocks( pos_codegen_data, [ target ], num_sub_block + 1 );
 } 
 
 /**
@@ -165,23 +165,23 @@ class Codegen {
     exec_wo_free( rp_targets: Array<Rp>, lang: string, prec = 0 ): string {
         const targets = rp_targets.filter( op => op instanceof Sym ) as Array<Sym>;
 
-++cpr;
-_targets = targets;
+// ++cpr;
+// _targets = targets;
 //console.log( cpr );
 
 
-if ( cpr ==  25 ) Graphviz.display( _targets );
+// if ( cpr ==  25 ) Graphviz.display( _targets );
     
         // change instructions that can't be written in $lang (may change targets)
         base_instruction_selection( targets, lang );
-if ( cpr ==  25 ) Graphviz.display( _targets );
+// if ( cpr ==  25 ) Graphviz.display( _targets );
     
         // assign CodegenData in op_mp.codegen_data
         init_codegen_data( this.pos_codegen_data, targets );
 
         // ensure that sub blocks (like the ones with IfOut above) are totally independant 
         sep_sub_blocks( this.pos_codegen_data, targets, 0 );
-if ( cpr ==  25 ) Graphviz.display( _targets );
+// if ( cpr ==  25 ) Graphviz.display( _targets );
         
         // set up parents, in current and sub blocks recursively
         set_up_parents( targets );

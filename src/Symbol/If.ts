@@ -64,16 +64,18 @@ export default
 class If extends Sym {
     constructor( expr: Array<Link>, inp_ok: IfInp, out_ok: IfOut, inp_ko: IfInp, out_ko: IfOut ) {
         super( If );
-        this.children = expr;
-        this.inp_ok   = inp_ok;
-        this.out_ok   = out_ok;
-        this.inp_ko   = inp_ko;
-        this.out_ko   = out_ko;
 
-        inp_ok.if_inst = this;
-        out_ok.if_inst = this;
-        inp_ko.if_inst = this;
-        out_ko.if_inst = this;
+        expr.forEach( ch => this.add_child( ch ) );
+        this.nb_self_ops = out_ok.children.length;
+        this.inp_ok      = inp_ok;
+        this.out_ok      = out_ok;
+        this.inp_ko      = inp_ko;
+        this.out_ko      = out_ko;
+
+        inp_ok.if_inst   = this;
+        out_ok.if_inst   = this;
+        inp_ko.if_inst   = this;
+        out_ko.if_inst   = this;
     }
 
     to_String__b(): string {
@@ -110,7 +112,7 @@ class If extends Sym {
 
     self_ops(): Array<number> {
         let res = new Array<number>();
-        for( let n = 0; n < this.out_ok.children.length; ++n )
+        for( let n = 0; n < this.nb_self_ops; ++n )
             res.push( n );
         return res;
     }
@@ -128,10 +130,11 @@ class If extends Sym {
         }
     }
 
-    inp_ok: IfInp;
-    out_ok: IfOut;
-    inp_ko: IfInp;
-    out_ko: IfOut;
+    inp_ok      : IfInp;
+    out_ok      : IfOut;
+    inp_ko      : IfInp;
+    out_ko      : IfOut;
+    nb_self_ops : number;
 } 
 Sym.make_templ( If );
 
