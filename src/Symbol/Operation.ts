@@ -7,7 +7,7 @@ import SymbolicKnownValue, { skv_link_o } from "./SymbolicKnownValue"
 import RpListSymbolic                     from "./RpListSymbolic"
 import BlockCodegen                       from "./BlockCodegen"
 import { cd }                             from "./Codegen"
-import { unget_nout, get_nout }           from "./GetNout"
+import { unget_nout, get_nout, gnfl }     from "./GetNout"
 import Sym, { Link }                      from "./Sym"
   
 import LvBuffer                           from "../LvBuffer"
@@ -91,6 +91,7 @@ class Operation extends Sym {
         // self op
         if ( this.self_args.length ) {
             const name = cg.checked_var_name( this.children[ 0 ] );
+            cd( this ).var_names[ 0 ] = name;
 
             if ( this.method.select ) {
                 // where smurf.get(x).self_op(y) works
@@ -165,7 +166,7 @@ class Operation extends Sym {
             // unary
             case "to_BooleanVariable": return par( Operation.prec.CALL, options.conv_to_boolean ? cg.inline_code( this.children[ 0 ], prec, options ) : `Boolean(${ cg.inline_code( this.children[ 0 ], 1e6 ) })` );
             case "copy"              : return cg.inline_code( this.children[ 0 ], prec );
-            case "get_size"          : return par( Operation.prec.MEMBER, `${ cg.inline_code( this.children[ 0 ], Operation.prec.MEMBER ) }.${ this.children[ 0 ].item.variable_type__b() == LvBuffer ? "byteLength" : "length" }` );
+            case "get_size"          : return par( Operation.prec.MEMBER, `${ cg.inline_code( this.children[ 0 ], Operation.prec.MEMBER ) }.${ this.children[ 0 ].item.variable_type__b( this.children[ 0 ].nout ) == LvBuffer ? "byteLength" : "length" }` );
             case "not_log"           : return una( Operation.prec.NOT     , "!"   );
             case "not_bin"           : return una( Operation.prec.NOT     , "~"   );
             // binary
@@ -190,7 +191,7 @@ class Operation extends Sym {
             case "select"            :
                 if ( this.children[ 1 ].item instanceof RpListSymbolic ) {
                     const lst = this.children[ 1 ].item.children;
-                    if ( this.children[ 0 ].item.variable_type__b().use_get_for_select )
+                    if ( this.children[ 0 ].item.variable_type__b( this.children[ 0 ].nout ).use_get_for_select )
                         return par( Operation.prec.MEMBER, cg.inline_code( this.children[ 0 ], Operation.prec.MEMBER ) + 
                             lst.map( ch => ".get(" + cg.inline_code( ch, Operation.prec.MAX_PREC ) + ")" ).join( "" ) );
                     return par( Operation.prec.CALL, cg.inline_code( this.children[ 0 ], Operation.prec.CALL ) + 
@@ -249,6 +250,15 @@ export function make_op( method: string | Method, ...args ): Link {
         ) );
     }
 
+    // if a child is a set_s, but the modified variable is not used by this
+    for( let num_ch = 0; num_ch < method.nb_rp_args; ++num_ch ) {
+        if ( method.pattern[ num_ch ] == "s" )
+            continue;
+        const ch = args[ num_ch ] as Link;
+        if ( ch.item instanceof Operation && ch.item.base_name == "set_s" )
+            return make_op( method, ...args.slice( 0, num_ch ), ch.item.children[ 1 ], ...args.slice( num_ch + 1 ) );
+    }
+
     return { item: new Operation( method, ...args ), nout: 0 };
 }
 
@@ -270,41 +280,41 @@ Method.plugins.push( function( test_pf, for_a_test, method, type_0, type_1, type
     case 1:
         if ( type_0.prototype instanceof Sym ) {
             switch ( method.pattern ) {
-                case 'b': test_pf( new Surdef( 1, null, ( a: Rp, ...args ) => new Operation( method, slb( a ), ...args ) ) ); break;
-                case 'o': test_pf( new Surdef( 1, null, ( a: Rp, ...args ) => new Operation( method, slo( a ), ...args ) ) ); break;
-                case 's': test_pf( new Surdef( 1, null, ( a: Rp, ...args ) => new Operation( method, sls( a ), ...args ) ) ); break;
+                case 'b': test_pf( new Surdef( 1, null, ( a: Rp, ...args ) => gnfl( make_op( method, slb( a ), ...args ) ) ) ); break;
+                case 'o': test_pf( new Surdef( 1, null, ( a: Rp, ...args ) => gnfl( make_op( method, slo( a ), ...args ) ) ) ); break;
+                case 's': test_pf( new Surdef( 1, null, ( a: Rp, ...args ) => gnfl( make_op( method, sls( a ), ...args ) ) ) ); break;
             }
         }
         break;
     case 2:
         if ( type_0.prototype instanceof Sym || type_1.prototype instanceof Sym ) {
             switch ( method.pattern ) {
-                case 'bb': test_pf( new Surdef( 1, null, ( a: Rp, b: Rp, ...args ) => new Operation( method, slb( a ), slb( b ), ...args ) ) ); break;
-                case 'bo': test_pf( new Surdef( 1, null, ( a: Rp, b: Rp, ...args ) => new Operation( method, slb( a ), slo( b ), ...args ) ) ); break;
-                case 'ob': test_pf( new Surdef( 1, null, ( a: Rp, b: Rp, ...args ) => new Operation( method, slo( a ), slb( b ), ...args ) ) ); break;
-                case 'oo': test_pf( new Surdef( 1, null, ( a: Rp, b: Rp, ...args ) => new Operation( method, slo( a ), slo( b ), ...args ) ) ); break;
-                case 'sb': test_pf( new Surdef( 1, null, ( a: Rp, b: Rp, ...args ) => new Operation( method, sls( a ), slb( b ), ...args ) ) ); break;
-                case 'so': test_pf( new Surdef( 1, null, ( a: Rp, b: Rp, ...args ) => new Operation( method, sls( a ), slo( b ), ...args ) ) ); break;
+                case 'bb': test_pf( new Surdef( 1, null, ( a: Rp, b: Rp, ...args ) => gnfl( make_op( method, slb( a ), slb( b ), ...args ) ) ) ); break;
+                case 'bo': test_pf( new Surdef( 1, null, ( a: Rp, b: Rp, ...args ) => gnfl( make_op( method, slb( a ), slo( b ), ...args ) ) ) ); break;
+                case 'ob': test_pf( new Surdef( 1, null, ( a: Rp, b: Rp, ...args ) => gnfl( make_op( method, slo( a ), slb( b ), ...args ) ) ) ); break;
+                case 'oo': test_pf( new Surdef( 1, null, ( a: Rp, b: Rp, ...args ) => gnfl( make_op( method, slo( a ), slo( b ), ...args ) ) ) ); break;
+                case 'sb': test_pf( new Surdef( 1, null, ( a: Rp, b: Rp, ...args ) => gnfl( make_op( method, sls( a ), slb( b ), ...args ) ) ) ); break;
+                case 'so': test_pf( new Surdef( 1, null, ( a: Rp, b: Rp, ...args ) => gnfl( make_op( method, sls( a ), slo( b ), ...args ) ) ) ); break;
             }
         }
         break;
     case 3:
         if ( type_0.prototype instanceof Sym || type_1.prototype instanceof Sym || type_2.prototype instanceof Sym ) {
             switch ( method.pattern ) {
-                case 'bbb': test_pf( new Surdef( 1, null, ( a: Rp, b: Rp, c: Rp, ...args ) => new Operation( method, slb( a ), slb( b ), slb( c ), ...args ) ) ); break;
-                case 'bbo': test_pf( new Surdef( 1, null, ( a: Rp, b: Rp, c: Rp, ...args ) => new Operation( method, slb( a ), slb( b ), slo( c ), ...args ) ) ); break;
-                case 'bob': test_pf( new Surdef( 1, null, ( a: Rp, b: Rp, c: Rp, ...args ) => new Operation( method, slb( a ), slo( b ), slb( c ), ...args ) ) ); break;
-                case 'boo': test_pf( new Surdef( 1, null, ( a: Rp, b: Rp, c: Rp, ...args ) => new Operation( method, slb( a ), slo( b ), slo( c ), ...args ) ) ); break;
+                case 'bbb': test_pf( new Surdef( 1, null, ( a: Rp, b: Rp, c: Rp, ...args ) => gnfl( make_op( method, slb( a ), slb( b ), slb( c ), ...args ) ) ) ); break;
+                case 'bbo': test_pf( new Surdef( 1, null, ( a: Rp, b: Rp, c: Rp, ...args ) => gnfl( make_op( method, slb( a ), slb( b ), slo( c ), ...args ) ) ) ); break;
+                case 'bob': test_pf( new Surdef( 1, null, ( a: Rp, b: Rp, c: Rp, ...args ) => gnfl( make_op( method, slb( a ), slo( b ), slb( c ), ...args ) ) ) ); break;
+                case 'boo': test_pf( new Surdef( 1, null, ( a: Rp, b: Rp, c: Rp, ...args ) => gnfl( make_op( method, slb( a ), slo( b ), slo( c ), ...args ) ) ) ); break;
 
-                case 'obb': test_pf( new Surdef( 1, null, ( a: Rp, b: Rp, c: Rp, ...args ) => new Operation( method, slo( a ), slb( b ), slb( c ), ...args ) ) ); break;
-                case 'obo': test_pf( new Surdef( 1, null, ( a: Rp, b: Rp, c: Rp, ...args ) => new Operation( method, slo( a ), slb( b ), slo( c ), ...args ) ) ); break;
-                case 'oob': test_pf( new Surdef( 1, null, ( a: Rp, b: Rp, c: Rp, ...args ) => new Operation( method, slo( a ), slo( b ), slb( c ), ...args ) ) ); break;
-                case 'ooo': test_pf( new Surdef( 1, null, ( a: Rp, b: Rp, c: Rp, ...args ) => new Operation( method, slo( a ), slo( b ), slo( c ), ...args ) ) ); break;
+                case 'obb': test_pf( new Surdef( 1, null, ( a: Rp, b: Rp, c: Rp, ...args ) => gnfl( make_op( method, slo( a ), slb( b ), slb( c ), ...args ) ) ) ); break;
+                case 'obo': test_pf( new Surdef( 1, null, ( a: Rp, b: Rp, c: Rp, ...args ) => gnfl( make_op( method, slo( a ), slb( b ), slo( c ), ...args ) ) ) ); break;
+                case 'oob': test_pf( new Surdef( 1, null, ( a: Rp, b: Rp, c: Rp, ...args ) => gnfl( make_op( method, slo( a ), slo( b ), slb( c ), ...args ) ) ) ); break;
+                case 'ooo': test_pf( new Surdef( 1, null, ( a: Rp, b: Rp, c: Rp, ...args ) => gnfl( make_op( method, slo( a ), slo( b ), slo( c ), ...args ) ) ) ); break;
 
-                case 'sbb': test_pf( new Surdef( 1, null, ( a: Rp, b: Rp, c: Rp, ...args ) => new Operation( method, sls( a ), slb( b ), slb( c ), ...args ) ) ); break;
-                case 'sbo': test_pf( new Surdef( 1, null, ( a: Rp, b: Rp, c: Rp, ...args ) => new Operation( method, sls( a ), slb( b ), slo( c ), ...args ) ) ); break;
-                case 'sob': test_pf( new Surdef( 1, null, ( a: Rp, b: Rp, c: Rp, ...args ) => new Operation( method, sls( a ), slo( b ), slb( c ), ...args ) ) ); break;
-                case 'soo': test_pf( new Surdef( 1, null, ( a: Rp, b: Rp, c: Rp, ...args ) => new Operation( method, sls( a ), slo( b ), slo( c ), ...args ) ) ); break;
+                case 'sbb': test_pf( new Surdef( 1, null, ( a: Rp, b: Rp, c: Rp, ...args ) => gnfl( make_op( method, sls( a ), slb( b ), slb( c ), ...args ) ) ) ); break;
+                case 'sbo': test_pf( new Surdef( 1, null, ( a: Rp, b: Rp, c: Rp, ...args ) => gnfl( make_op( method, sls( a ), slb( b ), slo( c ), ...args ) ) ) ); break;
+                case 'sob': test_pf( new Surdef( 1, null, ( a: Rp, b: Rp, c: Rp, ...args ) => gnfl( make_op( method, sls( a ), slo( b ), slb( c ), ...args ) ) ) ); break;
+                case 'soo': test_pf( new Surdef( 1, null, ( a: Rp, b: Rp, c: Rp, ...args ) => gnfl( make_op( method, sls( a ), slo( b ), slo( c ), ...args ) ) ) ); break;
             }
         }
         break;
@@ -329,5 +339,5 @@ Operation.add_variable_type_finder( 0, function( method, args ) {
     // if ( method.pattern[ 0 ] == "s" || method.base_name == "set" )
     //     return args[ 0 ].variable_type__b();
     // by default, we return the first argument 
-    return args.length && args[ 0 ].variable_type__b ? args[ 0 ].variable_type__b() : null;
+    return args.length && args[ 0 ].variable_type__b ? args[ 0 ].variable_type__b( 0 ) : null;
 } );

@@ -126,7 +126,7 @@ class BlockCodegen {
     }
 
     inline_code( op: Link, prec, options = {} as any ): string {
-        const n = cd( op.item ).var_names[ op.nout ]; 
+        const n = cd( op.item ).var_names[ op.nout ];
         return n ? n : op.item.inline_code( this, op.nout, prec, options );
     }
 

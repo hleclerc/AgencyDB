@@ -145,6 +145,7 @@ function base_instruction_selection( targets: Array<Sym>, lang: string ) {
     }, true ) );
 }
 
+
 // let cpr = 0, _targets;
 
 /** */
@@ -169,9 +170,9 @@ class Codegen {
 // _targets = targets;
 //console.log( cpr );
 
-
 // if ( cpr ==  25 ) Graphviz.display( _targets );
-    
+        // TODO: change _sxx ops to _xxx ops when possible (when the result is not in the targets)
+
         // change instructions that can't be written in $lang (may change targets)
         base_instruction_selection( targets, lang );
 // if ( cpr ==  25 ) Graphviz.display( _targets );
@@ -188,7 +189,10 @@ class Codegen {
 
         //
         let bc = new BlockCodegen( this );
-        return bc.exec( targets ); // `/*cpr=${ cpr }*/` + 
+        const res = bc.exec( targets ); // `/*cpr=${ cpr }*/` + 
+        if ( res.indexOf("17") >= 0 )
+            Graphviz.display( targets );
+        return res; 
     }
 
     free() {

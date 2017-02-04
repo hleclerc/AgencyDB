@@ -24,7 +24,8 @@ class OpInfo<UT> {
     num      : number;
     apply   ?: ( d: UT, o: Op ) => any;
     undo    ?: ( d: UT, o: Op ) => any;
-    store   ?: ( d: UT, o: Op ) => Array<{type:any,data:any}>;
+    stcond  ?: ( o: Op, r: LvNumber ) => void;
+    store   ?: ( d: UT, o: Op, b: BwRepr ) => void;
     right_to?: ( d: UT, o, f: LvNumber, r: LvNumber ) => void;
 };
 
@@ -42,11 +43,17 @@ class BwRepr {
         if ( this.off )
             this.off.applyMethod( "push", LvNumber.symbol( this.br_off ) );
 
-        const op_info = this.go.operations.find( x => x.inst.constructor == op_type );
-        this.sym.applyMethod( "write_PI8", new LvNumber( op_info.num ) );
-        Object.keys( op_info.inst ).forEach( name => {
-            const gt = this.go.gen_type( data[ name ] );
-            this.sym.applyMethod( "write_" + ( gt || "obj" ), data[ name ] );
+        const op_info = this.go.operations.find( x => x.inst.constructor == op_type ) as OpInfo<any>;
+
+        let stcond = new LvNumber( 17 );
+        if ( op_info.stcond )
+            op_info.stcond( data, stcond );
+        _if( stcond, () => {
+            this.sym.applyMethod( "write_PI8", new LvNumber( op_info.num ) );
+            Object.keys( op_info.inst ).forEach( name => {
+                const gt = this.go.gen_type( data[ name ] );
+                this.sym.applyMethod( "write_" + ( gt || "obj" ), data[ name ] );
+            } );
         } );
     }
 
@@ -95,8 +102,11 @@ class GenOperation<UT> {
         this.right( AddUsrRight, ( d, o: AddUsrRight, f: LvNumber, r: LvNumber ) => r.set( f.andBin( this.flag( "add_usr_right" ) ) ) );
         this.right( RemUsrRight, ( d, o: RemUsrRight, f: LvNumber, r: LvNumber ) => r.set( f.andBin( this.flag( "rem_usr_right" ) ) ) );
 
-        this.store( AddUsrRight, ( d, o: AddUsrRight ) => [ { type: AddUsrRight, data: { usr: o.usr, flags: o.flags.andBin( ( d as any as OtWrapperWithRightFlags ).right_flags.get( o.usr ).notBin() ) } as AddUsrRight } ] );
-        this.store( RemUsrRight, ( d, o: RemUsrRight ) => [ { type: RemUsrRight, data: { usr: o.usr, flags: o.flags.andBin( ( d as any as OtWrapperWithRightFlags ).right_flags.get( o.usr )          ) } as RemUsrRight } ] );
+        this.stcnd( AddUsrRight, ( o: AddUsrRight, r: LvNumber ) => r.set( o.flags ) );
+        this.stcnd( RemUsrRight, ( o: RemUsrRight, r: LvNumber ) => r.set( o.flags ) );
+
+        this.store( AddUsrRight, ( d, o: AddUsrRight, b: BwRepr ) => b.push( AddUsrRight, { usr: o.usr, flags: o.flags.andBin( ( d as any as OtWrapperWithRightFlags ).right_flags.get( o.usr ).notBin() ) } as AddUsrRight ) );
+        this.store( RemUsrRight, ( d, o: RemUsrRight, b: BwRepr ) => b.push( RemUsrRight, { usr: o.usr, flags: o.flags.andBin( ( d as any as OtWrapperWithRightFlags ).right_flags.get( o.usr )          ) } as RemUsrRight ) );
 
         // i: 010011
         // o: 011111  ADD(001100)
@@ -122,6 +132,11 @@ class GenOperation<UT> {
         this.reg_op( op_type ).right_to = cb;
     }
 
+    /** add store condition */
+    stcnd( op_type, cb: ( o, r: LvNumber ) => void ) {
+        this.reg_op( op_type ).stcond = cb;
+    }
+
     /** flag associated with name */
     flag( name: string ): number {
         return Math.pow( 2, this.right_names.indexOf( name ) );
@@ -135,7 +150,7 @@ class GenOperation<UT> {
         this.reg_op( op_type ).undo = cb;
     }
 
-    store( op_type, cb: ( d: UT, o: Op ) => Array<{type:any,data:any}> ) {
+    store( op_type, cb: ( d: UT, o: Op, b: BwRepr ) => void ) {
         this.reg_op( op_type ).store = cb;
     }
 
@@ -456,28 +471,14 @@ class GenOperation<UT> {
     }
 
     _write_reg( lang: string, op: OpInfo<UT> ): string {
-        let res = "";
-        if ( op.store ) {
-            let d = this.make_symbolic_data( this.cl_inst, "", "val.", this.sym_corr );
-            let o = this.make_symbolic_data( op.inst );
-            let l = op.store( d, o );
-            for( const new_op of l ) {
-                const op = this.reg_op( new_op.type );
-                const li = Object.keys( new_op.data ).map( x => op.inst[ x ].constructor.symbol( x + "_tmp" ).set( new_op.data[ x ] ) );
-                if ( l.length >= 2 )
-                    res += `{`;
-                nb_sp += 4;
-                res += `let ${ Object.keys( op.inst ).map( x => x + "_tmp" ).join( ',' ) };`;
-                res += Codegen.make_code( li, lang );
-                res += `bw.write_PI8( ${ op.num } );` + this.bw_write_obj( lang, op, "bw", "_tmp" );
-                nb_sp -= 4;
-                if ( l.length >= 2 )
-                    res += `}`;
-            }
-        } else {
-            res += `bw.write_PI8( ${ op.num } );${ this.bw_write_obj( lang, op, "bw" ) }`;
-        }
-        return res;
+        let d = this.make_symbolic_data( this.cl_inst, "", "val.", this.sym_corr );
+        let o = this.make_symbolic_data( op.inst );
+        let b = new BwRepr( this );
+        if ( op.store )
+            op.store( d, o, b );
+        else
+            b.push( op.inst.constructor, o );
+        return Codegen.make_code( [ b.sym ], lang );
     }
 
     cl_inst     : any; /** instance of symbolic repr of class */

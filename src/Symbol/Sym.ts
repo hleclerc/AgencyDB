@@ -34,7 +34,7 @@ class Sym extends Rp {
     for_each_sub_block( cb: ( v: Sym ) => void ) {
     }
 
-    variable_type__b() {
+    variable_type__b( nout: number ) {
         console.error( "variable_type__b should be redefined for", this.constructor.name );
         return null;
     }

@@ -21,11 +21,11 @@ var apply = {
 }
 
 var reg = {
-    AddUsrRight: function( bw: BinaryWriter, val: OtWrapperString, usr: UsrId, flags: number ) { let usr_tmp,flags_tmp;usr_tmp=usr;flags_tmp=flags&~val.right_flags.get(usr);bw.write_PI8( 0 );usr_tmp.write_to( bw ); bw.write_PT( flags_tmp ); },
-    RemUsrRight: function( bw: BinaryWriter, val: OtWrapperString, usr: UsrId, flags: number ) { let usr_tmp,flags_tmp;usr_tmp=usr;flags_tmp=flags&val.right_flags.get(usr);bw.write_PI8( 1 );usr_tmp.write_to( bw ); bw.write_PT( flags_tmp ); },
-    Insert: function( bw: BinaryWriter, val: OtWrapperString, pos: number, str: string ) { bw.write_PI8( 2 );bw.write_PT( pos ); bw.write_String( str ); },
-    Remove: function( bw: BinaryWriter, val: OtWrapperString, pos: number, len: number ) { let pos_tmp,str_tmp;pos_tmp=pos;str_tmp=val.val.data.substring(pos,pos+len);bw.write_PI8( 4 );bw.write_PT( pos_tmp ); bw.write_String( str_tmp ); },
-    RemUnd: function( bw: BinaryWriter, val: OtWrapperString, pos: number, str: string ) { bw.write_PI8( 4 );bw.write_PT( pos ); bw.write_String( str ); },
+    AddUsrRight: function( bw: BinaryWriter, val: OtWrapperString, usr: UsrId, flags: number ) { let T0=flags&~val.right_flags.get(usr);if(T0){bw.write_PI8(0);bw.write_obj(usr);bw.write_PT(T0);} },
+    RemUsrRight: function( bw: BinaryWriter, val: OtWrapperString, usr: UsrId, flags: number ) { let T0=flags&val.right_flags.get(usr);if(T0){bw.write_PI8(1);bw.write_obj(usr);bw.write_PT(T0);} },
+    Insert: function( bw: BinaryWriter, val: OtWrapperString, pos: number, str: string ) { if(str.length){bw.write_PI8(2);bw.write_PT(pos);bw.write_String(str);} },
+    Remove: function( bw: BinaryWriter, val: OtWrapperString, pos: number, len: number ) { let T0=val.val.data.substring(pos,pos+len);if(T0.length){bw.write_PI8(4);bw.write_PT(pos);bw.write_String(T0);} },
+    RemUnd: function( bw: BinaryWriter, val: OtWrapperString, pos: number, str: string ) { if(str.length){bw.write_PI8(4);bw.write_PT(pos);bw.write_String(str);} },
 }
 
 /**  test rights, apply and register */
@@ -205,13 +205,13 @@ function new_patch( val: OtWrapperString, bw_new: BinaryWriter, br_new: BinaryRe
                     }
                     case 3: { // Remove
                         let pos_unk = br_unk.read_PT(), len_unk = br_unk.read_PT();
-                        if(pos_new>=pos_unk+len_unk){pos_new-=len_unk;}else{if(pos_new<=pos_unk){pos_unk+=str_new.length;}else{let T0=len_unk-pos_new-pos_unk,T1=pos_new-pos_unk,T2;pos_new=pos_unk;bw_unk.write_PI8(3);T2=T0;len_unk=T1;bw_unk.write_PT(pos_unk+str_new.length);bw_unk.write_PT(T2);}}
+                        if(pos_new>=pos_unk+len_unk){pos_new-=len_unk;}else{if(pos_new<=pos_unk){pos_unk+=str_new.length;}else{let T0=len_unk-pos_new-pos_unk,T1=pos_new-pos_unk;pos_new=pos_unk;len_unk=T1;if(T0){bw_unk.write_PI8(3);bw_unk.write_PT(pos_unk+str_new.length);bw_unk.write_PT(T0);}}}
                         bw_unk.write_PI8( 3 ); bw_unk.write_PT( pos_unk ); bw_unk.write_PT( len_unk );
                         break;
                     }
                     case 4: { // RemUnd
                         let pos_unk = br_unk.read_PT(), str_unk = br_unk.read_String();
-                        if(pos_new>=pos_unk+str_unk.length){pos_new-=str_unk.length;}else{if(pos_new<=pos_unk){pos_unk+=str_new.length;}else{let T0=str_unk.substr(pos_new-pos_unk),T1=str_unk.substr(0,pos_new-pos_unk),T2;pos_new=pos_unk;bw_unk.write_PI8(4);T2=T0;str_unk=T1;bw_unk.write_PT(pos_unk+str_new.length);bw_unk.write_String(T2);}}
+                        if(pos_new>=pos_unk+str_unk.length){pos_new-=str_unk.length;}else{if(pos_new<=pos_unk){pos_unk+=str_new.length;}else{let T0=str_unk.substr(pos_new-pos_unk),T1=str_unk.substr(0,pos_new-pos_unk);pos_new=pos_unk;str_unk=T1;if(T0.length){bw_unk.write_PI8(4);bw_unk.write_PT(pos_unk+str_new.length);bw_unk.write_String(T0);}}}
                         bw_unk.write_PI8( 4 ); bw_unk.write_PT( pos_unk ); bw_unk.write_String( str_unk );
                         break;
                     }
@@ -243,7 +243,7 @@ function new_patch( val: OtWrapperString, bw_new: BinaryWriter, br_new: BinaryRe
                     }
                     case 2: { // Insert
                         let pos_unk = br_unk.read_PT(), str_unk = br_unk.read_String();
-                        if(pos_unk>=pos_new+len_new){pos_unk-=len_new;}else{if(pos_unk<=pos_new){pos_new+=str_unk.length;}else{let T0=len_new-pos_unk-pos_new,T1=pos_unk-pos_new,T2;pos_unk=pos_new;new_off_unk.push(br_unk.offset);new_bw_new.write_PI8(3);T2=T0;len_new=T1;new_bw_new.write_PT(pos_new+str_unk.length);new_bw_new.write_PT(T2);}}
+                        if(pos_unk>=pos_new+len_new){pos_unk-=len_new;}else{if(pos_unk<=pos_new){pos_new+=str_unk.length;}else{let T0=len_new-pos_unk-pos_new,T1=pos_unk-pos_new;pos_unk=pos_new;new_off_unk.push(br_unk.offset);len_new=T1;if(T0){new_bw_new.write_PI8(3);new_bw_new.write_PT(pos_new+str_unk.length);new_bw_new.write_PT(T0);}}}
                         bw_unk.write_PI8( 2 ); bw_unk.write_PT( pos_unk ); bw_unk.write_String( str_unk );
                         break;
                     }
@@ -287,7 +287,7 @@ function new_patch( val: OtWrapperString, bw_new: BinaryWriter, br_new: BinaryRe
                     }
                     case 2: { // Insert
                         let pos_unk = br_unk.read_PT(), str_unk = br_unk.read_String();
-                        if(pos_unk>=pos_new+str_new.length){pos_unk-=str_new.length;}else{if(pos_unk<=pos_new){pos_new+=str_unk.length;}else{let T0=str_new.substr(pos_unk-pos_new),T1=str_new.substr(0,pos_unk-pos_new),T2;pos_unk=pos_new;new_off_unk.push(br_unk.offset);new_bw_new.write_PI8(4);T2=T0;str_new=T1;new_bw_new.write_PT(pos_new+str_unk.length);new_bw_new.write_String(T2);}}
+                        if(pos_unk>=pos_new+str_new.length){pos_unk-=str_new.length;}else{if(pos_unk<=pos_new){pos_new+=str_unk.length;}else{let T0=str_new.substr(pos_unk-pos_new),T1=str_new.substr(0,pos_unk-pos_new);pos_unk=pos_new;new_off_unk.push(br_unk.offset);str_new=T1;if(T0.length){new_bw_new.write_PI8(4);new_bw_new.write_PT(pos_new+str_unk.length);new_bw_new.write_String(T0);}}}
                         bw_unk.write_PI8( 2 ); bw_unk.write_PT( pos_unk ); bw_unk.write_String( str_unk );
                         break;
                     }

@@ -212,10 +212,37 @@ describe( 'String', () => {
         }, " add_usr_right rem_usr_right insert remove append", undefined, true );
 
         test_ot<LvString>( LvString, 2, ( vls, dbs ) => {
-            vls[ 0 ].remUsrRight( "read" );
-            vls[ 1 ].remUsrRight( "read" );
-        }, " add_usr_right rem_usr_right insert remove append", undefined, true );
+            vls[ 0 ].remUsrRight( "rem_usr_right" );
+            vls[ 1 ].remUsrRight( "read" ); // will be canceled
+        }, " add_usr_right read insert remove append", undefined, true );
     });
+
+    // it( 'operationnal tranform, cursor', () => {
+    //     // cursor
+    //     tpc( String, function( s ) {
+    //         s.m[ 1 ].d.new_cursor( [ Caret.New( 2 ) ] );
+    //     }, "0123", "0123 C({beg:2,end:2,foc:1})" );
+    
+    //     tpc( String, function( s ) {
+    //         s.m[ 0 ].d.insert( 1, "a" );
+    //         s.m[ 1 ].d.new_cursor( [ Caret.New( 2 ) ] );
+    //     }, "0123", "0a123 C({beg:3,end:3,foc:1})" );
+    
+    //     tpc( String, function( s ) {
+    //         s.m[ 0 ].d.new_cursor( [ Caret.New( 2 ) ] );
+    //         s.m[ 1 ].d.insert( 1, "a" );
+    //     }, "0123", "0a123 C({beg:3,end:3,foc:1})" );
+    
+    //     tpc( String, function( s ) {
+    //         s.m[ 0 ].d.remove( 1, 2 );
+    //         s.m[ 1 ].d.new_cursor( [ Caret.New( 2 ) ] );
+    //     }, "0123", "03 C({beg:1,end:1,foc:1})" );
+    
+    //     tpc( String, function( s ) {
+    //         s.m[ 0 ].d.new_cursor( [ Caret.New( 2 ) ] );
+    //         s.m[ 1 ].d.remove( 1, 2 );
+    //     }, "0123", "03 C({beg:1,end:1,foc:1})" );
+    // });
 });
  
 

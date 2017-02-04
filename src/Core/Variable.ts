@@ -33,8 +33,8 @@ class VarAnc {
         return methods[ "rp_structure__b" ].call_1( this.rp );
     }
 
-    variable_type(): any {
-        return methods[ "variable_type__b" ].call_1( this.rp );
+    variable_type( nout = 0 ): any {
+        return methods[ "variable_type__b" ].call_1( this.rp, nout );
     }
 
     infImmediate( val: VarAnc ): boolean {

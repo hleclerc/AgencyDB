@@ -27,6 +27,10 @@ class IfInp extends Sym {
         return `IfInp`;
     }
 
+    variable_type__b( nout: number ) {
+        return this.if_inst.variable_type__b( nout );
+    }
+
     block_code( cg: BlockCodegen, options ): void {
     }
 
@@ -80,6 +84,10 @@ class If extends Sym {
 
     to_String__b(): string {
         return `If`;
+    }
+
+    variable_type__b( nout: number ) {
+        return this.children[ nout ].item.variable_type__b( this.children[ nout ].nout );
     }
 
     nb_outputs() {

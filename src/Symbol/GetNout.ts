@@ -1,6 +1,6 @@
-import methods      from "../Core/methods"
-import BlockCodegen from "./BlockCodegen"
-import Sym, { Link} from "./Sym"
+import methods       from "../Core/methods"
+import BlockCodegen  from "./BlockCodegen"
+import Sym, { Link } from "./Sym"
 
 /** 
  * Goal: make a single Rp from a Link 
@@ -38,6 +38,12 @@ function get_nout( item: Sym, nout: number ) {
         return item.get_nouts[ nout - 1 ];
     }
     return item;
+}
+
+/** get GetNout from link */
+export
+function gnfl( link: Link ) {
+    return get_nout( link.item, link.nout );
 }
  
 export
