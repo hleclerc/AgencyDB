@@ -171,16 +171,38 @@ class GenOperation<UT> {
         wl();
 
         // bin_repr
-        wl( `var bin_repr = {` );
-        for( const op of this.operations )
-            wl( `    ${ op.inst.constructor.name }: function( bw: BinaryWriter, ${ this.func_args_op( lang, op ) } ): void { bw.write_PI8( ${ op.num } ); ${ this.bw_write_obj( lang, op ) } },` );
-        wl( `}` );
-        wl();
+        // wl( `var bin_repr = {` );
+        // for( const op of this.operations )
+        //     wl( `    ${ op.inst.constructor.name }: function( bw: BinaryWriter, ${ this.func_args_op( lang, op ) } ): void { bw.write_PI8( ${ op.num } ); ${ this.bw_write_obj( lang, op ) } },` );
+        // wl( `}` );
+        // wl();
 
         // right to
         wl( `var right_to = {` );
         for( const op of this.operations )
             wl( `    ${ op.inst.constructor.name }: function( val: ${ this.cl_inst.constructor.name }, _as_usr: UsrId, ${ this.func_args_op( lang, op ) } ): boolean { ${ this._write_right_to( lang, op ) } },` );
+        wl( `}` );
+        wl();
+
+        // apply
+        wl( `var apply = {` );
+        for( const op of this.operations )
+            wl( `    ${ op.inst.constructor.name }: function( val: ${ this.cl_inst.constructor.name }, ${ this.func_args_op( lang, op ) } ) { ${ this._write_apply( lang, op ) } },` );
+        wl( `}` );
+        wl();
+
+        // reg
+        wl( `var reg = {` );
+        for( const op of this.operations )
+            wl( `    ${ op.inst.constructor.name }: function( bw: BinaryWriter, val: ${ this.cl_inst.constructor.name }, ${ this.func_args_op( lang, op ) } ) { ${ this._write_reg( lang, op ) } },` );
+        wl( `}` );
+        wl();
+
+        // tar
+        wl( `/**  test rights, apply and register */` );
+        wl( `var tar = {` );
+        for( const op of this.operations )
+            wl( `    ${ op.inst.constructor.name }: function( val: ${ this.cl_inst.constructor.name }, _as_usr: UsrId, ${ this.func_args_op( lang, op ) } ): Uint8Array { if ( ! right_to.${ op.inst.constructor.name }(val,_as_usr,${ this.func_args_op( lang, op, false ) }) )return null;let bw=new BinaryWriter;reg.${ op.inst.constructor.name }(bw,val,${ this.func_args_op( lang, op, false ) });apply.${ op.inst.constructor.name }(val,${ this.func_args_op( lang, op, false ) });return bw.to_Uint8Array(); },` );
         wl( `}` );
         wl();
 
@@ -242,7 +264,7 @@ class GenOperation<UT> {
 
 
         // exports
-        wl( `export default { read, right_to, bin_repr, new_patch, undo_patch, get_possible_rights__b };` );
+        wl( `export default { read, right_to, apply, reg, tar, new_patch, undo_patch, get_possible_rights__b };` );
     }
 
     func_args_op( lang: string, op: OpInfo<UT>, types = true, suffix = "" ): string {
@@ -384,33 +406,12 @@ class GenOperation<UT> {
             wl( `if ( right_to.${ op_new.inst.constructor.name }( val, as_usr, ${ this.func_args_op( lang, op_new, false, "_new" ) } ) ) {` );
             nb_sp += 4;
 
-            // write back the new data
-            if ( op_new.store ) {
-                let d = this.make_symbolic_data( this.cl_inst, "", "val.", this.sym_corr );
-                let o = this.make_symbolic_data( op_new.inst, "_new" );
-                for( const new_op of op_new.store( d, o ) ) {
-                    const op = this.reg_op( new_op.type );
-                    const li = Object.keys( new_op.data ).map( x => op.inst[ x ].constructor.symbol( x + "_tmp" ).set( new_op.data[ x ] ) );
-                    wl( `{` ); 
-                    nb_sp += 4;
-                    wl( `let ${ Object.keys( op.inst ).map( x => x + "_tmp" ).join( ', ' ) };` );
-                    wl( Codegen.make_code( li, lang ) );
-                    wl( `bw_new.write_PI8( ${ op.num } );` + this.bw_write_obj( lang, op, "bw_new", "_tmp" ) );
-                    nb_sp -= 4;
-                    wl( `}` ); 
-                }
-            } else {
-                wl( `bw_new.write_PI8( ${ op_new.num } ); ${ this.bw_write_obj( lang, op_new, "bw_new", "_new" ) }` );
-            }
-
+            // write back the new data, apply to val
+            wl( `reg.${ op_new.inst.constructor.name }( bw_new, val, ${ this.func_args_op( lang, op_new, false, "_new" ) } );` );
+            wl( `apply.${ op_new.inst.constructor.name }( val, ${ this.func_args_op( lang, op_new, false, "_new" ) } );` );
+            
             // register new unk data
             wl( `bw_unk.transfer_to( cq_unk );` );
-
-            // apply operation
-            let d = this.make_symbolic_data( this.cl_inst, "", "val.", this.sym_corr );
-            let o = this.make_symbolic_data( op_new.inst, "_new" );
-            op_new.apply( d, o );
-            wl( Codegen.make_code( Object.keys( d ).map( n => d[ n ] ), lang ) );
 
             // read newly created operations
             wl( `if ( new_bw_new.size )` );
@@ -444,6 +445,39 @@ class GenOperation<UT> {
         let r = LvNumber.symbol( "_r" );
         op.right_to( d, o, f, r );
         return "var _r,_f=val.right_flags.get(_as_usr);" + Codegen.make_code( [ r ], lang ) + "return _r;";
+    }
+
+    _write_apply( lang: string, op: OpInfo<UT> ): string {
+        // apply operation
+        let d = this.make_symbolic_data( this.cl_inst, "", "val.", this.sym_corr );
+        let o = this.make_symbolic_data( op.inst );
+        op.apply( d, o );
+        return Codegen.make_code( Object.keys( d ).map( n => d[ n ] ), lang );
+    }
+
+    _write_reg( lang: string, op: OpInfo<UT> ): string {
+        let res = "";
+        if ( op.store ) {
+            let d = this.make_symbolic_data( this.cl_inst, "", "val.", this.sym_corr );
+            let o = this.make_symbolic_data( op.inst );
+            let l = op.store( d, o );
+            for( const new_op of l ) {
+                const op = this.reg_op( new_op.type );
+                const li = Object.keys( new_op.data ).map( x => op.inst[ x ].constructor.symbol( x + "_tmp" ).set( new_op.data[ x ] ) );
+                if ( l.length >= 2 )
+                    res += `{`;
+                nb_sp += 4;
+                res += `let ${ Object.keys( op.inst ).map( x => x + "_tmp" ).join( ',' ) };`;
+                res += Codegen.make_code( li, lang );
+                res += `bw.write_PI8( ${ op.num } );` + this.bw_write_obj( lang, op, "bw", "_tmp" );
+                nb_sp -= 4;
+                if ( l.length >= 2 )
+                    res += `}`;
+            }
+        } else {
+            res += `bw.write_PI8( ${ op.num } );${ this.bw_write_obj( lang, op, "bw" ) }`;
+        }
+        return res;
     }
 
     cl_inst     : any; /** instance of symbolic repr of class */

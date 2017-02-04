@@ -8,7 +8,7 @@ function sequ( a, b, msg?: string ) {
 }
 
 export default
-function test_ot<type>( type: typeof VarAnc, nb_dbs: number, operations: ( vars: Array<type>, dbs: Array<Db> ) => void, expected: string, explanation: string ) {
+function test_ot<type extends VarAnc>( type: typeof VarAnc, nb_dbs: number, operations: ( vars: Array<type>, dbs: Array<Db> ) => void, expected: string, explanation = operations.toString(), disp_rights = false ) {
     const dev_ids = [ "0MWDnGjZfxZ~", "15HeHcHU1Io~", "28u858_RnDF~", "3jtameVI3fN~", "4mWRNBUMN7o~" ];
     let dbs = new Array<Db>();
     for( let i = 0; i < nb_dbs; ++i ) {
@@ -33,8 +33,12 @@ function test_ot<type>( type: typeof VarAnc, nb_dbs: number, operations: ( vars:
     for( let i = 0; i < nb_dbs; ++i )
         dbs[ i ].send_changes();
 
-    for( let i = 0; i < nb_dbs; ++i )
-        console.log( vars[ i ].toString() );
-    for( let i = 0; i < nb_dbs; ++i )
-        sequ( vars[ i ], expected, `value of var ${ i }, ${ explanation }` );
+    // for( let i = 0; i < nb_dbs; ++i )
+    //     console.log( vars[ i ].toString() );
+    for( let i = 0; i < nb_dbs; ++i ) {
+        let str = vars[ i ].toString();
+        if ( disp_rights )
+            str += " " + vars[ i ].getUsrRights().join( " " );
+        sequ( str, expected, `var n°${ i }: ${ explanation }` );
+    }
 }

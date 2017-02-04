@@ -64,10 +64,10 @@ class DbItem extends PatchManager {
     }
 
     /** called by OtWrappers to register a modification */
-    new_modification( wr: ( bw: BinaryWriter ) => void ) {
+    new_modification( data: Uint8Array ) {
         if ( this.modifications.size == 0 )
             this.db.add_modified_items( this );
-        wr( this.modifications );
+        this.modifications.write_some( data );
     }
 
     /** return a patch list */

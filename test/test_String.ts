@@ -94,38 +94,38 @@ describe( 'String', () => {
     it( 'operationnal tranform, basic sending', () => {
         test_ot<LvString>( LvString, 2, ( vls, dbs ) => {
             vls[ 0 ].selfConcat( "a" );
-        }, "a", "send from 0" );
+        }, "a" );
 
         test_ot<LvString>( LvString, 2, ( vls, dbs ) => {
             vls[ 1 ].selfConcat( "a" );
-        }, "a", "send from 1" );
+        }, "a" );
     });
 
     it( 'operationnal tranform, successive remove or insertion', () => {
         test_ot_str( "a", ( vls, dbs ) => {
             vls[ 1 ].selfConcat( "b" );
-        }, "ab", "succession of insertions" );
+        }, "ab" );
 
         test_ot_str( "abcd", ( vls, dbs ) => {
             vls[ 1 ].remove( 1, 2 );
-        }, "ad", "succession insertion + removal" );
+        }, "ad" );
     });
 
     it( 'operationnal tranform, parallel remove / insertions', () => {
         test_ot_str( "abcd", ( vls, dbs ) => {
             vls[ 0 ].insert( 1, "X" );
             vls[ 1 ].insert( 3, "Y" );
-        }, "aXbcYd", "concurrent insertions" );
+        }, "aXbcYd" );
 
         test_ot_str( "abcd", ( vls, dbs ) => {
             vls[ 1 ].insert( 3, "Y" );
             vls[ 0 ].insert( 1, "X" );
-        }, "aXbcYd", "concurrent insertions" );
+        }, "aXbcYd" );
 
         test_ot_str( "012345", ( vls, dbs ) => {
             vls[ 0 ].insert( 3, "ab" );
             vls[ 1 ].remove( 1, 1 );
-        }, "02ab345", "concurrent insertion and removal" );
+        }, "02ab345" );
 
         test_ot_str( "012345", ( vls, dbs ) => {
             vls[ 1 ].remove( 1, 4 );
@@ -170,58 +170,52 @@ describe( 'String', () => {
 
     });
 
-    // it( 'basic rights', () => {
-    //     const pr = [ 'add_usr_right', 'rem_usr_right', 'read', 'insert', 'remove', 'append' ];
-    //     // basic string
-    //     let s = new LvString( "s" );
-    //     sequ( s.getPossibleRights(), pr );
-    //     sequ( s.getUsersInAccessConstrolList(), [ new UsrId ] );
-    //     sequ( s.getUsrRights( new UsrId ), pr );
-    //     sequ( s.getUsrRights( new UsrId( new DevId, 2 ) ), [] );
+    it( 'basic rights', () => {
+        const pr = [ 'add_usr_right', 'rem_usr_right', 'read', 'insert', 'remove', 'append' ];
+        // basic string
+        let s = new LvString( "s" );
+        sequ( s.getPossibleRights(), pr );
+        sequ( s.getUsersInAccessConstrolList(), [ new UsrId ] );
+        sequ( s.getUsrRights( new UsrId ), pr );
+        sequ( s.getUsrRights( new UsrId( new DevId, 2 ) ), [] );
 
-    //     // OtWrapper
-    //     s.onChange( val => console.log( "changed:", val.toString() ) );
-    //     sequ( s.getPossibleRights(), pr );
-    //     sequ( s.getUsersInAccessConstrolList(), [ new UsrId ] );
-    //     sequ( s.getUsrRights( new UsrId ), pr );
-    //     sequ( s.getUsrRights( new UsrId( new DevId, 2 ) ), [] );
+        // OtWrapper
+        s.onChange( val => console.log( "changed:", val.toString() ) );
+        sequ( s.getPossibleRights(), pr );
+        sequ( s.getUsersInAccessConstrolList(), [ new UsrId ] );
+        sequ( s.getUsrRights( new UsrId ), pr );
+        sequ( s.getUsrRights( new UsrId( new DevId, 2 ) ), [] );
 
-    //     s.remUsrRight( new UsrId, "insert" );
-    //     sequ( s.getUsrRights( new UsrId ), pr.filter( x => x != "insert" ) );
-    //     s.insert( 0, "m" );
-    //     sequ( s, "s" );
-    //     s.insert( 1, "murf" ); // we still have to right to append
-    //     sequ( s, "smurf" );
+        s.remUsrRight( "insert" );
+        sequ( s.getUsrRights( new UsrId ), pr.filter( x => x != "insert" ) );
+        s.insert( 0, "m" );
+        sequ( s, "s" );
+        s.insert( 1, "murf" ); // we still have to right to append
+        sequ( s, "smurf" );
 
-    //     s.addUsrRight( new UsrId, "insert" );
-    //     sequ( s.getUsrRights( new UsrId ), pr );
-    //     s.remUsrRight( new UsrId, "insert" );
+        s.addUsrRight( "insert" );
+        sequ( s.getUsrRights( new UsrId ), pr );
+        s.remUsrRight( "insert" );
 
-    //     s.remUsrRight( new UsrId, "add_usr_right" );
-    //     sequ( s.getUsrRights( new UsrId ), pr.filter( x => x != "insert" && x != "add_usr_right" ) );
-    //     s.addUsrRight( new UsrId, "insert" ); // should fail
-    //     sequ( s.getUsrRights( new UsrId ), pr.filter( x => x != "insert" && x != "add_usr_right" ) );
-    // });
+        s.remUsrRight( "add_usr_right" );
+        sequ( s.getUsrRights( new UsrId ), pr.filter( x => x != "insert" && x != "add_usr_right" ) );
+        s.addUsrRight( "insert" ); // should fail
+        sequ( s.getUsrRights( new UsrId ), pr.filter( x => x != "insert" && x != "add_usr_right" ) );
+    });
 
-    // // it( 'operationnal tranform, rights', () => {
-    // //     const pr = [ 'add_usr_right', 'rem_usr_right', 'read', 'insert', 'remove', 'append' ];
-    // //     // basic string
-    // //     let s = new LvString( "s" );
-    // //     sequ( s.getPossibleRights(), pr );
-    // //     sequ( s.getUsersInAccessConstrolList(), [ new UsrId ] );
-    // //     sequ( s.getUsrRights( new UsrId ), pr );
-    // //     sequ( s.getUsrRights( new UsrId( new DevId, 2 ) ), [] );
+    it( 'operationnal tranform, rights', () => {
+        test_ot<LvString>( LvString, 2, ( vls, dbs ) => {
+        }, " add_usr_right rem_usr_right read insert remove append", undefined, true );
 
-    // //     // OtWrapper
-    // //     s.onChange( val => console.log( "changed:", val.toString() ) );
-    // //     sequ( s.getPossibleRights(), pr );
-    // //     sequ( s.getUsersInAccessConstrolList(), [ new UsrId ] );
-    // //     sequ( s.getUsrRights( new UsrId ), pr );
-    // //     sequ( s.getUsrRights( new UsrId( new DevId, 2 ) ), [] );
+        test_ot<LvString>( LvString, 2, ( vls, dbs ) => {
+            vls[ 0 ].remUsrRight( "read" );
+        }, " add_usr_right rem_usr_right insert remove append", undefined, true );
 
-    // //     s.remUsrRight( new UsrId, [ "insert" ] );
-    // //     sequ( s.getUsrRights( new UsrId ), pr.filter( x => x != "insert" ) );
-    // // });
+        test_ot<LvString>( LvString, 2, ( vls, dbs ) => {
+            vls[ 0 ].remUsrRight( "read" );
+            vls[ 1 ].remUsrRight( "read" );
+        }, " add_usr_right rem_usr_right insert remove append", undefined, true );
+    });
 });
  
 

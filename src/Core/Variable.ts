@@ -106,16 +106,16 @@ class VarAnc {
         return methods["get_users_in_acl__b"].call_1( this.rp );
     }
 
-    getUsrRights( usr: UsrId ) : Array<string> {
+    getUsrRights( usr = new UsrId ) : Array<string> {
         return methods["get_usr_rights__b"].call_1( this.rp, usr );
     }
 
-    addUsrRight( usr: UsrId, right_types: string | Array<string>, as_usr = new UsrId ): VarAnc {
+    addUsrRight( right_types: string | Array<string>, usr = new UsrId, as_usr = new UsrId ): VarAnc {
         this.rp = methods["add_usr_right__s"].call_1s( this, usr, typeof right_types == "string" ? [ right_types ] : right_types, as_usr );
         return this;
     }
 
-    remUsrRight( usr: UsrId, right_types: string | Array<string>, as_usr = new UsrId ): VarAnc {
+    remUsrRight( right_types: string | Array<string>, usr = new UsrId, as_usr = new UsrId ): VarAnc {
         this.rp = methods["rem_usr_right__s"].call_1s( this, usr, typeof right_types == "string" ? [ right_types ] : right_types, as_usr );
         return this;
     }

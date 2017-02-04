@@ -39,19 +39,12 @@ class OtWrapperString extends OtWrapperWithRightFlags {
     }
 
     _self_insert( pos: number, sup: string, usr_id = new UsrId() ): Rp {
-        if ( sup.length && OtWrapperStringOperations.right_to.Insert( this, usr_id, pos, sup ) ) {
-            this.val.data = this.val.data.slice( 0, pos ) + sup + this.val.data.slice( pos );
-            this.sig_change( bw => OtWrapperStringOperations.bin_repr.Insert( bw, pos, sup ) );
-        }
+        this.sig_change( OtWrapperStringOperations.tar.Insert( this, usr_id, pos, sup ) );
         return this;
     }
 
     _self_remove( pos: number, len: number, usr_id = new UsrId() ): Rp {
-        if ( len && OtWrapperStringOperations.right_to.Remove( this, usr_id, pos, len ) ) {
-            const str = this.val.data.slice( pos, pos + len );
-            this.val.data = this.val.data.slice( 0, pos ) + this.val.data.slice( pos + len );
-            this.sig_change( bw => OtWrapperStringOperations.bin_repr.RemUnd( bw, pos, str ) );
-        }
+        this.sig_change( OtWrapperStringOperations.tar.Remove( this, usr_id, pos, len ) );
         return this;
     }
 
@@ -67,6 +60,15 @@ class OtWrapperString extends OtWrapperWithRightFlags {
         return OtWrapperStringOperations.get_possible_rights__b();
     }
 
+    add_usr_right__s( usr: UsrId, right_types: Array<string>, as_usr = new UsrId ) {
+        this.sig_change( OtWrapperStringOperations.tar.AddUsrRight( this, as_usr, usr, this._right_flags_from_right_type( right_types ) ) );
+        return this;
+    }
+
+    rem_usr_right__s( usr: UsrId, right_types: Array<string>, as_usr = new UsrId ) {
+        this.sig_change( OtWrapperStringOperations.tar.RemUsrRight( this, as_usr, usr, this._right_flags_from_right_type( right_types ) ) );
+        return this;
+    }
 
     // _self_remove( pos : number, len : number, usr_id = new UsrId() ) : boolean {
     //     let str = this.val.val.substr( pos, len );

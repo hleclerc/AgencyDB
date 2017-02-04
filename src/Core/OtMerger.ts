@@ -192,7 +192,7 @@ class OtMerger {
     // }
 
     finalize() {
-        this.ot_wrapper.sig_change( bw => bw.write_some( this.cq_new.to_Uint8Array() ), this.patch_manager );
+        this.ot_wrapper.sig_change( this.cq_new.to_Uint8Array(), this.patch_manager );
     }
 
     ot_wrapper   : OtWrapper;

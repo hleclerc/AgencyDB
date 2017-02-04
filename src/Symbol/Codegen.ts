@@ -145,7 +145,7 @@ function base_instruction_selection( targets: Array<Sym>, lang: string ) {
     }, true ) );
 }
 
-let cpr = 0, _targets;
+// let cpr = 0, _targets;
 
 /** */
 export default
@@ -188,7 +188,7 @@ class Codegen {
 
         //
         let bc = new BlockCodegen( this );
-        return `/*cpr=${ cpr }*/` + bc.exec( targets ); 
+        return bc.exec( targets ); // `/*cpr=${ cpr }*/` + 
     }
 
     free() {
