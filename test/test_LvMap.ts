@@ -1,5 +1,6 @@
 /// <reference path="../node_modules/@types/mocha/index.d.ts"/>
 import Codegen    from "../src/Symbol/Codegen" 
+import test_ot    from "../src/Test/test_ot";
 import LvString   from "../src/LvString"
 import LvNumber   from "../src/LvNumber"
 import LvMap      from "../src/LvMap"
@@ -70,12 +71,21 @@ describe( 'LvMap', () => {
         let s = S.symbol( "s" );
         // let t = T.symbol( "t" );
         
-        s.get( "b" ).append( "B" );
+        s.get( "b" ).selfConcat( "B" );
         sequ( Codegen.make_code( [ s ] ), 's.set("b",s.get("b")+"B");' );
 
         // t.get( "b" ).get( "c" ).append( "BC" );
         // console.log( t.toString() );
         // console.log( Codegen.make_code( [ t ] ) );
+    });
+
+    it( 'operationnal tranform, basic ops', () => {
+        const S = LvMap( LvString, LvString );
+        let s = new S;
+
+        test_ot<typeof s>( S, 2, ( vls, dbs ) => {
+            vls[ 1 ].set( "a", "A" );
+        }, "{a:A}" );
     });
 });
 

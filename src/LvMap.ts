@@ -21,6 +21,7 @@ interface LvMap_type<K,V> {
     new( val?: Rp ): LvMap<K,V>;
     makeRp( any ): Rp;
     symbol( name: string ): LvMap<K,V>;
+    date: number;
 }
 
 /** k, v => _LvMap<k,v> */
