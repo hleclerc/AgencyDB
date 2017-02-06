@@ -6,6 +6,7 @@ import RpSymbol                 from "./Symbol/RpSymbol"
 import Inode                    from "./System/Inode"
 import LvString                 from "./LvString"
 import LvNumber                 from "./LvNumber"
+import LvInode                  from "./LvInode"
 
 //
 export default
