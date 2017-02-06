@@ -1,22 +1,22 @@
-// import DeclTypesForRW from "../Core/DeclTypesForRW";
-// import PatchTypes     from "../Ot/PatchTypes";
+// import DeclTypesForRW from "../Core/DeclTypesForRW"
+// import PatchTypes     from "../Ot/PatchTypes"
 //// nsmake global alias ./OtWrapperStringOperations.ts ./(GenOtWrapperStringOperations.ts).ts
-import BinaryWriter              from "../System/BinaryWriter";
-import BinaryReader              from "../System/BinaryReader";
-import UsrId                     from "../System/UsrId";
-import DevId                     from "../System/DevId";
-import PatchTypes                from "../Core/PatchTypes";
-import OtWrapperWithRightFlags   from "../Core/OtWrapperWithRightFlags";
-import methods                   from "../Core/methods";
-import Rp                        from "../Core/Rp";
-import OtWrapperStringOperations from "./OtWrapperStringOperations";
-import GenString                 from "./GenString";
-import Caret                     from "./Caret";
+import BinaryWriter              from "../System/BinaryWriter"
+import BinaryReader              from "../System/BinaryReader"
+import UsrId                     from "../System/UsrId"
+import DevId                     from "../System/DevId"
+import PatchTypes                from "../Core/PatchTypes"
+import OtWrapperWithRightFlags   from "../Core/OtWrapperWithRightFlags"
+import methods                   from "../Core/methods"
+import Rp                        from "../Core/Rp"
+import OtWrapperStringOperations from "./OtWrapperStringOperations"
+import RpString                 from "./RpString"
+import Caret                     from "./Caret"
 
 //
 export default
 class OtWrapperString extends OtWrapperWithRightFlags {
-    constructor( val: GenString, usr = new UsrId ) {
+    constructor( val: RpString, usr = new UsrId ) {
         super( OtWrapperString, usr );
         this.val = val;
 
@@ -84,7 +84,7 @@ class OtWrapperString extends OtWrapperWithRightFlags {
     //     return this.val.toString().substr( pos, len );
     // }
 
-    val         : GenString;
+    val         : RpString;
     // cursors    = new Array<Cursor>();
     // new_cursors= new Array<Cursor>();
     // mod_cursors= new Array<Cursor>();
@@ -545,8 +545,8 @@ methods[ "remove__sbb" ].add_surdef( 2, [ OtWrapperString, "to_Number__b", "to_N
 
 // DeclTypesForRW.readers[ DeclTypesForRW.num.OtWrapperString ] = OtWrapperString._read_OtWrapperString_data_from;
 
-// PatchTypes.readers[ PatchTypes.num.OtWrapperString_GenString ] = function( br : BinaryReader ) : String {
-//     return new String( new OtWrapperString( new GenString( "" ) ) );
+// PatchTypes.readers[ PatchTypes.num.OtWrapperString_RpString ] = function( br : BinaryReader ) : String {
+//     return new String( new OtWrapperString( new RpString( "" ) ) );
 // }
 
 // // unk_new_or_new_unk
@@ -1667,6 +1667,6 @@ methods[ "remove__sbb" ].add_surdef( 2, [ OtWrapperString, "to_Number__b", "to_N
 // import DevId        from "../../System/DevId";
 // import UsrId        from "../../System/UsrId";
 // import Variable     from "../Core/Variable";
-// import GenString    from "./GenString";
+// import RpString    from "./RpString";
 // import String       from "../LvString";
 // import Number       from "../LvNumber";

@@ -2,13 +2,13 @@ import Variable, { toLv_array } from "./Core/Variable"
 import methods                  from "./Core/methods"
 import Rp                       from "./Core/Rp"
                
-import GenString                from "./LvString/GenString"
-import GenSymbol                from "./Symbol/GenSymbol"
+import RpString                from "./LvString/RpString"
+import RpSymbol                from "./Symbol/RpSymbol"
 import { BN_PT }                from "./LvNumber/Bn"
 import LvNumber                 from "./LvNumber"
              
 // import Caret                    from "./String/Caret";
-// import DevId                     from "../System/DevId"
+// import DevId                    from "../System/DevId"
 
 //
 export default
@@ -22,11 +22,11 @@ class LvString extends Variable<LvString> {
     }
 
     static makeRp( val: string ): Rp {
-        return new GenString( val );
+        return new RpString( val );
     }
 
     static symbol( name: string ): LvString {
-        return new LvString( new GenSymbol( LvString, name ) );
+        return new LvString( new RpSymbol( LvString, name ) );
     }
 
     copy(): LvString {
@@ -38,7 +38,7 @@ class LvString extends Variable<LvString> {
     }
 
     set( nv: string | LvString ) {
-        this.rp = typeof nv == 'string' ? methods[ "set__so" ].call_2s( this, new GenString( nv ) ) : methods[ "set__sb" ].call_2s( this, ( nv as LvString ).rp );
+        this.rp = typeof nv == 'string' ? methods[ "set__so" ].call_2s( this, new RpString( nv ) ) : methods[ "set__sb" ].call_2s( this, ( nv as LvString ).rp );
         return this;
     }
 
@@ -127,7 +127,7 @@ class LvString extends Variable<LvString> {
     }
 
     selfConcat( val: LvString | string ): LvString {
-        this.rp = typeof val == 'string' ? methods[ "add__so" ].call_2s( this, new GenString( val ) ) : methods[ "add__sb" ].call_2s( this, val.rp );
+        this.rp = typeof val == 'string' ? methods[ "add__so" ].call_2s( this, new RpString( val ) ) : methods[ "add__sb" ].call_2s( this, val.rp );
         return this;
     }
 
@@ -136,18 +136,18 @@ class LvString extends Variable<LvString> {
         if ( val.length >  1 ) return this.concat( val[ 0 ] ).concat( ...val.slice( 1 ) );
         if ( val.length == 0 ) return this;
         const v = val[ 0 ];
-        return new LvString( typeof v == 'string' ? methods[ "add__bo" ].call_2( this.rp, new GenString( v ) ) : methods[ "add__bb" ].call_2( this.rp, v.rp ) );
+        return new LvString( typeof v == 'string' ? methods[ "add__bo" ].call_2( this.rp, new RpString( v ) ) : methods[ "add__bb" ].call_2( this.rp, v.rp ) );
     }
 
     /** insert `sup` at position `pos` */
     insert( pos: LvNumber | number, sup: LvString | string ): LvString {
         this.rp = typeof pos == 'number' ? (
             typeof sup == 'string' ?
-                methods["insert__soo"].call_3s( this, new BN_PT( pos ), new GenString( sup ) ) :
+                methods["insert__soo"].call_3s( this, new BN_PT( pos ), new RpString( sup ) ) :
                 methods["insert__sob"].call_3s( this, new BN_PT( pos ), sup.rp               )
         ) : (
             typeof sup == 'string' ?
-                methods["insert__soo"].call_3s( this, pos.rp            , new GenString( sup ) ) :
+                methods["insert__soo"].call_3s( this, pos.rp            , new RpString( sup ) ) :
                 methods["insert__sob"].call_3s( this, pos.rp            , sup.rp               )
         );
         return this;

@@ -26,7 +26,7 @@ class LvAny extends Variable<LvAny> {
     // }
 
     // set( nv: UsrId | LvAny ) {
-    //     this.rp = nv instanceof UsrId ? methods[ "set__so" ].call_2s( this, new GenUsrId( nv ) ) : methods[ "set__sb" ].call_2s( this, nv.rp );
+    //     this.rp = nv instanceof UsrId ? methods[ "set__so" ].call_2s( this, new RpUsrId( nv ) ) : methods[ "set__sb" ].call_2s( this, nv.rp );
     //     return this;
     // }
 

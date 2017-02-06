@@ -4,9 +4,9 @@ import { cd }    from "./Codegen"
 import Sym       from "./Sym"
 
 export default 
-class GenSymbol extends Sym {
+class RpSymbol extends Sym {
     constructor( type: typeof Variable, name: string ) {
-        super( GenSymbol );
+        super( RpSymbol );
         this.type     = type;
         this.name     = name;
     }
@@ -36,11 +36,11 @@ class GenSymbol extends Sym {
     // }
 
     // get_patch_type( bw : BinaryWriter ) {
-    //     bw.write_PT( PatchTypes.num.OtWrapperString_GenSymbol );
+    //     bw.write_PT( PatchTypes.num.OtWrapperString_RpSymbol );
     // }
 
     // cmp_patch_type( br : BinaryReader ) : boolean {
-    //     return br.read_PT() == PatchTypes.num.OtWrapperString_GenSymbol;
+    //     return br.read_PT() == PatchTypes.num.OtWrapperString_RpSymbol;
     // }
 
     // copy() {
@@ -48,15 +48,15 @@ class GenSymbol extends Sym {
     // }
 
     // write_to( bw : BinaryWriter, only_for_a_copy : boolean, cur_dev : DevId, cur_usr : UsrId ) {
-    //     bw.write_PT( DeclTypesForRW.num.GenSymbol );
+    //     bw.write_PT( DeclTypesForRW.num.RpSymbol );
     //     bw.write_String( this.data );
     // }
 
-    // static read_GenSymbol_from( br: BinaryReader, dev_id : DevId, usr_id : UsrId ) : String {
+    // static read_RpSymbol_from( br: BinaryReader, dev_id : DevId, usr_id : UsrId ) : String {
     //     return new String( br.read_String() );
     // }
 
     type    : typeof Variable; /**  */
     name    : string;
 } 
-Sym.make_templ( GenSymbol );
+Sym.make_templ( RpSymbol );

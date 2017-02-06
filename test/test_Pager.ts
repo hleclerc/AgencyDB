@@ -45,7 +45,7 @@ class Pager {
 
     _display_all() {
         const nc = ( process.stdout as any ).columns;
-        console.log( "nc", nc );
+        // console.log( "nc", nc );
         
 
         // rewind

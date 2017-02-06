@@ -28,7 +28,7 @@ describe( 'Generation', () => {
 
         // Graphviz.display( [ b.rp ] );
         const code = Codegen.make_code( [ b ] );
-        sequ( code, 'var T0=B+A,T1=B;B+="c";B+=T0;B+=T1;' );
+        sequ( code, 'let T0=B+A,T1=B;B+="c";B+=T0;B+=T1;' );
         {
             let B = "b", A = "a";
             eval( code );
@@ -54,7 +54,7 @@ describe( 'Generation', () => {
 
         const code = Codegen.make_code( [ c ] );
         //Graphviz.display( [ c.rp ] );
-        sequ( code, 'var T0=a+b;T0+="c";' );
+        sequ( code, 'let T0=a+b;T0+="c";' );
     } );
 
     it( 'if basic', () => {
@@ -86,7 +86,7 @@ describe( 'Generation', () => {
 
         const code = Codegen.make_code( [ a, b ] )
         // Graphviz.display( [ a.rp, b.rp ] );
-        sequ( code, 'if(C){var T0=A;A=B;B=T0;}' );
+        sequ( code, 'if(C){let T0=A;A=B;B=T0;}' );
         {
             let A = "a", B = "b", C = null;
             eval( code );
@@ -107,7 +107,7 @@ describe( 'Generation', () => {
 
         const code = Codegen.make_code( [ a, b ] )
         // Graphviz.display( [ a.rp, b.rp ] );
-        sequ( code, 'var T0=a;a+=".";T0+=".";' );
+        sequ( code, 'let T0=a;a+=".";T0+=".";' );
     } );
 
     it( 'while with symbols', () => {
@@ -201,9 +201,10 @@ describe( 'Generation', () => {
 
         const res = LvNumber.symbol( "res" );
         read_val( res, LvBuffer.symbol( "data" ), LvNumber.symbol( "cursor" ) );
+        Graphviz.display( [ res.rp ] );
+        
         const code = Codegen.make_code( [ res ] );
         // console.log( "code:", code );
-        // Graphviz.display( [ res.rp ] );
         {
             let cursor = 0, data = Buffer.from( [ 130, 3 ] ), res;
             eval( code );

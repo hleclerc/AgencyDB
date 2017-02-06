@@ -13,10 +13,9 @@ function sequ( a, b, msg?: string ) {
 describe( 'LvObj', () => {
     it( 'basic operations', () => {
         let o = new LvObj();
-        console.log( o.toString() );
+        // console.log( o.toString() );
         
     });
-
 });
  
 

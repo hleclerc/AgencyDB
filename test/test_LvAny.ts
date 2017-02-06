@@ -12,7 +12,7 @@ function sequ( a, b, msg?: string ) {
 describe( 'LvAny', () => {
     it( 'basic operations', () => {
         let t = new LvAny( new LvString( "a" ) );
-        console.log( t.toString() );
+        // console.log( t.toString() );
         
     });
 });

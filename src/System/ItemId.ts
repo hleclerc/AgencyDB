@@ -2,7 +2,7 @@ import BinaryWriter from "./BinaryWriter";
 import BinaryReader from "./BinaryReader";
 import DevId        from "./DevId";
 
-//
+/** Keys of objects in the wild */
 export default
 class ItemId {
     /** for known ItemIds (val = 1) */

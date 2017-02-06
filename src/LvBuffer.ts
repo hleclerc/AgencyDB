@@ -1,10 +1,10 @@
-import Variable       from "./Core/Variable"
-import methods        from "./Core/methods"
-import Rp             from "./Core/Rp"
-import GenSymbol      from "./Symbol/GenSymbol"
-import GenBuffer      from "./LvBuffer/GenBuffer"
-import { BN_FP64 }    from "./LvNumber/Bn"
-import LvNumber       from "./LvNumber"
+import Variable  from "./Core/Variable"
+import methods   from "./Core/methods"
+import Rp        from "./Core/Rp"
+import RpSymbol  from "./Symbol/RpSymbol"
+import RpBuffer  from "./LvBuffer/RpBuffer"
+import { BN_PT } from "./LvNumber/Bn"
+import LvNumber  from "./LvNumber"
 
 //
 export default
@@ -14,13 +14,13 @@ class LvBuffer extends Variable<LvBuffer> {
     constructor( val ?: Rp | LvBuffer | Buffer | string | Array<number> ) {
         if      ( val instanceof Rp       ) super( val );
         else if ( val instanceof LvBuffer ) super( methods[ "copy__b" ].call_1( this.rp ) );
-        else if ( val instanceof Buffer   ) super( new GenBuffer( val ) );
-        else if ( val == undefined        ) super( new GenBuffer( Buffer.from( [] ) ) );
-        else                                super( new GenBuffer( Buffer.from( val as any ) ) );
+        else if ( val instanceof Buffer   ) super( new RpBuffer( val ) );
+        else if ( val == undefined        ) super( new RpBuffer( Buffer.from( [] ) ) );
+        else                                super( new RpBuffer( Buffer.from( val as any ) ) );
     }
 
     static symbol( name: string ): LvBuffer {
-        return new LvBuffer( new GenSymbol( LvBuffer, name ) );
+        return new LvBuffer( new RpSymbol( LvBuffer, name ) );
     }
 
     copy(): LvBuffer {
@@ -36,7 +36,7 @@ class LvBuffer extends Variable<LvBuffer> {
     }
 
     set( nv: Buffer | LvBuffer ) {
-        this.rp = nv instanceof Buffer ? methods[ "set__so" ].call_2s( this, new GenBuffer( nv ) ) : methods[ "set__sb" ].call_2s( this, ( nv as LvBuffer ).rp );
+        this.rp = nv instanceof Buffer ? methods[ "set__so" ].call_2s( this, new RpBuffer( nv ) ) : methods[ "set__sb" ].call_2s( this, ( nv as LvBuffer ).rp );
         return this;
     }
 
@@ -58,7 +58,7 @@ class LvBuffer extends Variable<LvBuffer> {
 
     /** return value at position `pos` (not to be modified) */
     at( pos: number | LvNumber ): LvNumber {
-        return new LvNumber( typeof pos == 'number' ? methods[ "select__bo" ].call_2( this.rp, new BN_FP64( pos ) ) : methods[ "select__bb" ].call_2( this.rp, ( pos as LvNumber ).rp ) );
+        return new LvNumber( typeof pos == 'number' ? methods[ "select__bo" ].call_2( this.rp, new BN_PT( pos ) ) : methods[ "select__bb" ].call_2( this.rp, ( pos as LvNumber ).rp ) );
     }
 
     /** return a proxy that gives charAt if read, but it also enable writes */
@@ -66,12 +66,12 @@ class LvBuffer extends Variable<LvBuffer> {
         return new LvNumber( 
             index instanceof LvNumber ? 
                 methods["select_ref__ob"].call_2( this.rp, index.rp, this ) :
-                methods["select_ref__oo"].call_2( this.rp, new BN_FP64( index ), this )
+                methods["select_ref__oo"].call_2( this.rp, new BN_PT( index ), this )
         );
     }
 
     // append( val: LvBuffer | LvBuffer ): LvBuffer {
-    //     this.rp = typeof val == 'Buffer' ? methods[ "add__so" ].call_2s( this, new GenBuffer( val ) ) : methods[ "add__sb" ].call_2s( this, val.rp );
+    //     this.rp = typeof val == 'Buffer' ? methods[ "add__so" ].call_2s( this, new RpBuffer( val ) ) : methods[ "add__sb" ].call_2s( this, val.rp );
     //     return this;
     // }
 
@@ -80,7 +80,7 @@ class LvBuffer extends Variable<LvBuffer> {
     //     if ( val.length >  1 ) return this.concat( val[ 0 ] ).concat( ...val.slice( 1 ) );
     //     if ( val.length == 0 ) return this;
     //     const v = val[ 0 ];
-    //     return new LvBuffer( typeof v == 'Buffer' ? methods[ "add__bo" ].call_2( this.rp, new GenBuffer( v ) ) : methods[ "add__bb" ].call_2( this.rp, v.rp ) );
+    //     return new LvBuffer( typeof v == 'Buffer' ? methods[ "add__bo" ].call_2( this.rp, new RpBuffer( v ) ) : methods[ "add__bb" ].call_2( this.rp, v.rp ) );
     // }
 
     // insert( pos, sup ) {

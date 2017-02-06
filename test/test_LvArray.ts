@@ -31,7 +31,7 @@ describe( 'LvArray', () => {
         
         m.push( LvString.symbol( "a" ) );
         sequ( m, "push_s([],a)"  ); 
-        sequ( Codegen.make_code( [ m ] ), 'var T0=[];T0.push(a);' ); 
+        sequ( Codegen.make_code( [ m ] ), 'let T0=[];T0.push(a);' ); 
     });
 });
 

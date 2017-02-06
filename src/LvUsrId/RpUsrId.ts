@@ -3,9 +3,9 @@ import methods         from "../Core/methods"
 import Rp              from "../Core/Rp"
 
 export default 
-class GenUsrId extends Rp {
+class RpUsrId extends Rp {
     constructor( data: UsrId ) {
-        super( GenUsrId );
+        super( RpUsrId );
         this.data = data;
     }
 
@@ -22,7 +22,7 @@ class GenUsrId extends Rp {
     }
 
     copy__b(): Rp {
-        return new GenUsrId( this.data.copy() );
+        return new RpUsrId( this.data.copy() );
     }
 
     to_Boolean__b(): boolean {
@@ -31,9 +31,9 @@ class GenUsrId extends Rp {
 
     data: UsrId;
 } 
-Rp.make_templ( GenUsrId );
+Rp.make_templ( RpUsrId );
 
-methods[ "set__sb" ].add_surdef( 10, [ GenUsrId, GenUsrId ], ( a: GenUsrId, b: GenUsrId ) => { a.data = b.data.copy(); return a; } );
+methods[ "set__sb" ].add_surdef( 10, [ RpUsrId, RpUsrId ], ( a: RpUsrId, b: RpUsrId ) => { a.data = b.data.copy(); return a; } );
 
 
 

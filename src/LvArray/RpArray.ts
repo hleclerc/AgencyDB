@@ -11,9 +11,9 @@ import Rp              from "../Core/Rp"
  * and a list a Node, sorted by id (for patch operations)
  */
 export default 
-class GenArray extends Rp {
+class RpArray extends Rp {
     constructor( val_type: { new( rp?: Rp ): VarAnc; } ) {
-        super( GenArray );
+        super( RpArray );
         this.val_type = val_type;
     }
 
@@ -26,7 +26,7 @@ class GenArray extends Rp {
     }
 
     // copy__b(): Rp {
-    //     let res = new GenArray( this.key_type, this.val_type );
+    //     let res = new RpArray( this.key_type, this.val_type );
     //     res.loc_id_num = this.loc_id_num;
     //     res.kmap       = this.kmap.copy();
     //     res.imap       = this.imap.copy();
@@ -64,23 +64,23 @@ class GenArray extends Rp {
     val_type: { new( rp?: Rp ): VarAnc; };
     data    = new Array<VarAnc>();
 } 
-Rp.make_templ( GenArray );
+Rp.make_templ( RpArray );
 
-methods["push__so"].add_surdef( 1, [ GenArray, type => ! type.symbolic_value ], function( lst: GenArray, val: Rp ) {
+methods["push__so"].add_surdef( 1, [ RpArray, type => ! type.symbolic_value ], function( lst: RpArray, val: Rp ) {
     lst._push( val );
     return lst;
 } );
 
-// methods["select__bb"].add_surdef( 3, [ GenArray, RpList ], function( map: GenArray, keys: RpList ) {
+// methods["select__bb"].add_surdef( 3, [ RpArray, RpList ], function( map: RpArray, keys: RpList ) {
 //     const node = map.kmap.get( keys.cur );
 //     return node ? methods["select__bb"].call_2( node.val.rp, keys.nxt ) : null; // TODO: wrapped null
 // } );
-// methods["select__bb"].add_surdef( 2, [ GenArray, () => true ], function( map: GenArray, key: Rp ) {
+// methods["select__bb"].add_surdef( 2, [ RpArray, () => true ], function( map: RpArray, key: Rp ) {
 //     const node = map.kmap.get( key );
 //     return node ? node.val.rp : null; // TODO: wrapped null
 // } );
 
-// methods["set__sbo"].add_surdef( 3, [ GenArray, RpList, type => ! type.symbolic_value ], function( map: GenArray, keys: RpList, val: Rp ) {
+// methods["set__sbo"].add_surdef( 3, [ RpArray, RpList, type => ! type.symbolic_value ], function( map: RpArray, keys: RpList, val: Rp ) {
 //     let node = map.kmap.get( keys.cur, function() {
 //         if ( map.can_add_key() )
 //             return map._create_node( new map.key_type( methods["copy__b"].call_1( keys.cur ) ), new map.val_type(), false );
@@ -90,7 +90,7 @@ methods["push__so"].add_surdef( 1, [ GenArray, type => ! type.symbolic_value ], 
 //         node.val.rp = methods["set__sbo"].call_3s( node.val, keys.nxt, val );
 //     return map;
 // } );
-// methods["set__sbo"].add_surdef( 2, [ GenArray, type => ! type.symbolic_value, type => ! type.symbolic_value ], function( map: GenArray, key: Rp, val: Rp ) {
+// methods["set__sbo"].add_surdef( 2, [ RpArray, type => ! type.symbolic_value, type => ! type.symbolic_value ], function( map: RpArray, key: Rp, val: Rp ) {
 //     let need_set = true, node = map.kmap.get( key, function() {
 //         if ( map.can_add_key() ) {
 //             need_set = false;

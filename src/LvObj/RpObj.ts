@@ -5,7 +5,7 @@ import methods         from "../Core/methods"
 import Rp              from "../Core/Rp"
 import LvNumber        from "../LvNumber"
 import LvObj           from "../LvObj"
-import GenObjItem      from "./GenObjItem"
+import RpObjItem      from "./RpObjItem"
 
 /**
  * generic object. Stores
@@ -13,11 +13,11 @@ import GenObjItem      from "./GenObjItem"
  * Proposition de format: 
  */
 export default 
-class GenObj extends Rp {
+class RpObj extends Rp {
     static type_map = new Map<any,number>();
 
     constructor() {
-        super( GenObj );
+        super( RpObj );
     }
 
     // to_String__b(): string {
@@ -33,7 +33,7 @@ class GenObj extends Rp {
     }
 
     // copy__b(): Rp {
-    //     return new GenObj( this.data );
+    //     return new RpObj( this.data );
     // }
 
     // to_Boolean__b(): boolean {
@@ -48,8 +48,8 @@ class GenObj extends Rp {
         return Object;
     }
 
-    data : Array<GenObjItem>; /** */
+    data : Array<RpObjItem>; /** */
     entry: number;            /** index of entry point in data */
 } 
-Rp.make_templ( GenObj );
+Rp.make_templ( RpObj );
 

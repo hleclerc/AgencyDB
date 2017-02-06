@@ -2,8 +2,8 @@ import Variable, { VarAnc } from "./Core/Variable"
 import methods              from "./Core/methods"
 import Rp                   from "./Core/Rp"
            
-import GenSymbol            from "./Symbol/GenSymbol"
-import GenArray             from "./LvArray/GenArray"
+import RpSymbol             from "./Symbol/RpSymbol"
+import RpArray              from "./LvArray/RpArray"
 import { BN_PT }            from "./LvNumber/Bn"
 import LvNumber             from "./LvNumber"
 
@@ -46,11 +46,11 @@ function LvArray_fact<V extends VarAnc>( v: { new( rp?: Rp ): V; makeRp: ( any )
 
         constructor( val: Rp ) { //  | LvArray | Map | string | Array<number>
             if ( val instanceof Rp ) super( val );
-            else                     super( new GenArray( v ) );
+            else                     super( new RpArray( v ) );
         }
 
         static symbol( name: string ): _LvArray {
-            return new _LvArray( new GenSymbol( _LvArray, name ) );
+            return new _LvArray( new RpSymbol( _LvArray, name ) );
         }
 
         copy(): _LvArray {

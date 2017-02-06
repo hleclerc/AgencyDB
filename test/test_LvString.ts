@@ -101,6 +101,13 @@ describe( 'String', () => {
         }, "a" );
     });
 
+    // it( 'transformation of a basic string to an OtWrapperString', () => {
+    //     let s = new LvString( "s" );
+    //     // console.log( s. );
+    //     //let db = new Db;
+        
+    // });
+
     it( 'operationnal tranform, successive remove or insertion', () => {
         test_ot_str( "a", ( vls, dbs ) => {
             vls[ 1 ].selfConcat( "b" );

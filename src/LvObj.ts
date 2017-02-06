@@ -2,8 +2,8 @@ import Variable    from "./Core/Variable"
 import methods     from "./Core/methods"
 import Rp          from "./Core/Rp"
 
-import GenSymbol   from "./Symbol/GenSymbol"
-import GenObj      from "./LvObj/GenObj"
+import RpSymbol   from "./Symbol/RpSymbol"
+import RpObj      from "./LvObj/RpObj"
 
 /**
  * To store generic "objects": a kind of json that can store lists, maps, UsrId... with pointers, versionning, ...
@@ -19,11 +19,11 @@ class LvObj extends Variable<LvObj> {
     }
 
     static makeRp( val ) {
-        return new GenObj;
+        return new RpObj;
     }
 
     static symbol( name: string ): LvObj {
-        return new LvObj( new GenSymbol( LvObj, name ) );
+        return new LvObj( new RpSymbol( LvObj, name ) );
     }
 
     copy() : LvObj {

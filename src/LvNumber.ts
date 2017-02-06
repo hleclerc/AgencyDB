@@ -2,7 +2,7 @@ import Variable, { toLv_array } from "./Core/Variable"
 import methods                  from "./Core/methods"
 import Rp                       from "./Core/Rp"
              
-import GenSymbol                from "./Symbol/GenSymbol"
+import RpSymbol                from "./Symbol/RpSymbol"
 import { BN_FP64 }              from "./LvNumber/Bn"
              
 //
@@ -21,7 +21,7 @@ class LvNumber extends Variable<LvNumber> {
     }
 
     static symbol( name: string ): LvNumber {
-        return new LvNumber( new GenSymbol( LvNumber, name ) );
+        return new LvNumber( new RpSymbol( LvNumber, name ) );
     }
 
     copy() : LvNumber {

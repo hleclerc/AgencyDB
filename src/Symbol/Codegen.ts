@@ -190,8 +190,6 @@ class Codegen {
         //
         let bc = new BlockCodegen( this );
         const res = bc.exec( targets ); // `/*cpr=${ cpr }*/` + 
-        if ( res.indexOf("17") >= 0 )
-            Graphviz.display( targets );
         return res; 
     }
 

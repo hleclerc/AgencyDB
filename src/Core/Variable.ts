@@ -163,6 +163,10 @@ class Variable<T> extends VarAnc {
         this.rp = methods[ "rm_on_change__s" ].call_1s( this, callback );
         return this;
     }
+
+    equ( val: T ): LvNumber {
+        return new LvNumber( methods[ "is_equ__bb" ].call_2( this.rp, ( val as any ).rp ) );
+    }
 } 
 
 /** */
@@ -225,7 +229,7 @@ decl( "new_ot_merger__b"       , false    ); // arg: orig patch_manager. returns
 // decl( "get_cursor_ids"         , "c"   );
 // decl( "mod_select"             , "rc"  ); // select for modification
 // decl( "rem_item"               , "rc"  ); // remove item (e.g. using a key)
-// decl( "obj_type"               , "c"   ); // variable type (ex: GenString -> String)
+// decl( "obj_type"               , "c"   ); // variable type (ex: RpString -> String)
 dstd( "key_type"               , 1, false );
 dstd( "val_type"               , 1, false );
    

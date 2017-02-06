@@ -2,8 +2,8 @@ import Variable, { VarAnc } from "./Core/Variable"
 import methods              from "./Core/methods"
 import Rp                   from "./Core/Rp"
            
-import GenSymbol            from "./Symbol/GenSymbol"
-import GenMap               from "./LvMap/GenMap"
+import RpSymbol            from "./Symbol/RpSymbol"
+import RpMap               from "./LvMap/RpMap"
 import { BN_PT }            from "./LvNumber/Bn"
 import LvNumber             from "./LvNumber"
 
@@ -53,11 +53,11 @@ function LvMap_fact<K extends VarAnc,V extends VarAnc>( k: { new(): K; makeRp: (
 
         constructor( val: Rp ) { //  | LvMap | Map | string | Array<number>
             if ( val instanceof Rp ) super( val );
-            else                     super( new GenMap( k, v ) );
+            else                     super( new RpMap( k, v ) );
         }
 
         static symbol( name: string ): _LvMap {
-            return new _LvMap( new GenSymbol( _LvMap, name ) );
+            return new _LvMap( new RpSymbol( _LvMap, name ) );
         }
 
         copy(): _LvMap {

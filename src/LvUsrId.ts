@@ -2,8 +2,8 @@ import Variable, { toLv_array } from "./Core/Variable"
 import methods                  from "./Core/methods"
 import Rp                       from "./Core/Rp"
             
-import GenSymbol                from "./Symbol/GenSymbol"
-import GenUsrId                 from "./LvUsrId/GenUsrId"
+import RpSymbol                from "./Symbol/RpSymbol"
+import RpUsrId                 from "./LvUsrId/RpUsrId"
 import UsrId                    from "./System/UsrId"
 import LvNumber                 from "./LvNumber"
 
@@ -19,15 +19,11 @@ class LvUsrId extends Variable<LvUsrId> {
     }
 
     static makeRp( val: UsrId ) {
-        return new GenUsrId( val );
+        return new RpUsrId( val );
     }
 
     static symbol( name: string ): LvUsrId {
-        return new LvUsrId( new GenSymbol( LvUsrId, name ) );
-    }
-
-    equ( usr: LvUsrId ): LvNumber {
-        return new LvNumber( methods[ "is_equ__bb" ].call_2( this.rp, usr.rp ) );
+        return new LvUsrId( new RpSymbol( LvUsrId, name ) );
     }
 
     copy() : LvUsrId {
@@ -39,7 +35,7 @@ class LvUsrId extends Variable<LvUsrId> {
     }
 
     set( nv: UsrId | LvUsrId ) {
-        this.rp = nv instanceof UsrId ? methods[ "set__so" ].call_2s( this, new GenUsrId( nv ) ) : methods[ "set__sb" ].call_2s( this, nv.rp );
+        this.rp = nv instanceof UsrId ? methods[ "set__so" ].call_2s( this, new RpUsrId( nv ) ) : methods[ "set__sb" ].call_2s( this, nv.rp );
         return this;
     }
 

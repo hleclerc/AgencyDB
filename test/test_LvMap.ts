@@ -59,10 +59,10 @@ describe( 'LvMap', () => {
         let s = new S, t = new S;
         
         s.set( LvString.symbol( "b" ), "B" );
-        sequ( Codegen.make_code( [ s ] ), 'var T0={};T0.set(b,"B");' );
+        sequ( Codegen.make_code( [ s ] ), 'let T0={};T0.set(b,"B");' );
 
         t.set( "b", LvString.symbol( "B" ) );
-        sequ( Codegen.make_code( [ t ] ), 'var T0={};T0.set("b",B);' );
+        sequ( Codegen.make_code( [ t ] ), 'let T0={};T0.set("b",B);' );
     });
 
     it( 'symbolic self ops', () => {
@@ -79,13 +79,13 @@ describe( 'LvMap', () => {
         // console.log( Codegen.make_code( [ t ] ) );
     });
 
-    it( 'operationnal tranform, basic ops', () => {
-        const S = LvMap( LvString, LvString );
-        let s = new S;
+    // it( 'operationnal tranform, basic ops', () => {
+    //     const S = LvMap( LvString, LvString );
+    //     let s = new S;
 
-        test_ot<typeof s>( S, 2, ( vls, dbs ) => {
-            vls[ 1 ].set( "a", "A" );
-        }, "{a:A}" );
-    });
+    //     test_ot<typeof s>( S, 2, ( vls, dbs ) => {
+    //         vls[ 1 ].set( "a", "A" );
+    //     }, "{a:A}" );
+    // });
 });
 

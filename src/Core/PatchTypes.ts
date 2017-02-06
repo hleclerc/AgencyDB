@@ -2,7 +2,7 @@
 export default {
     num: {
         OtWrapperString: 0,
-        GenArray       : 1,
-        GenMap         : 2,
+        RpArray       : 1,
+        RpMap         : 2,
     },
 };
