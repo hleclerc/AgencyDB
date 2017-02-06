@@ -166,31 +166,37 @@ class Codegen {
     exec_wo_free( rp_targets: Array<Rp>, lang: string, prec = 0 ): string {
         const targets = rp_targets.filter( op => op instanceof Sym ) as Array<Sym>;
 
-// ++cpr;
-// _targets = targets;
-//console.log( cpr );
+        // ++cpr;
+        // _targets = targets;
+        //console.log( cpr );
 
-// if ( cpr ==  25 ) Graphviz.display( _targets );
+        // if ( cpr ==  25 ) Graphviz.display( _targets );
         // TODO: change _sxx ops to _xxx ops when possible (when the result is not in the targets)
 
         // change instructions that can't be written in $lang (may change targets)
         base_instruction_selection( targets, lang );
-// if ( cpr ==  25 ) Graphviz.display( _targets );
+        // if ( cpr ==  25 ) Graphviz.display( _targets );
     
         // assign CodegenData in op_mp.codegen_data
         init_codegen_data( this.pos_codegen_data, targets );
 
         // ensure that sub blocks (like the ones with IfOut above) are totally independant 
         sep_sub_blocks( this.pos_codegen_data, targets, 0 );
-// if ( cpr ==  25 ) Graphviz.display( _targets );
+        // if ( cpr ==  25 ) Graphviz.display( _targets );
         
         // set up parents, in current and sub blocks recursively
         set_up_parents( targets );
 
         //
-        let bc = new BlockCodegen( this );
-        const res = bc.exec( targets ); // `/*cpr=${ cpr }*/` + 
-        return res; 
+        try {
+            let bc = new BlockCodegen( this );
+            const res = bc.exec( targets ); // `/*cpr=${ cpr }*/` + 
+            return res; 
+        } catch ( e ) {
+            console.error( e, e.stack );
+            Graphviz.display( targets );
+            return "";
+        }
     }
 
     free() {

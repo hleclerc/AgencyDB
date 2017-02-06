@@ -199,17 +199,17 @@ describe( 'Generation', () => {
             return res;
         }
 
-        const res = LvNumber.symbol( "res" );
+        const res = LvNumber.symbol( "output" );
         read_val( res, LvBuffer.symbol( "data" ), LvNumber.symbol( "cursor" ) );
-        Graphviz.display( [ res.rp ] );
+        // Graphviz.display( [ res.rp ] );
         
         const code = Codegen.make_code( [ res ] );
         // console.log( "code:", code );
         {
-            let cursor = 0, data = Buffer.from( [ 130, 3 ] ), res;
+            var cursor = 0, data = Buffer.from( [ 130, 3 ] ), output;
             eval( code );
             sequ( cursor, 2 );
-            sequ( res, 130 - 128 + ( 3 << 7 ) );
+            sequ( output, 130 - 128 + ( 3 << 7 ) );
         }
     } );
 
