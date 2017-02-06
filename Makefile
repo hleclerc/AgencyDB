@@ -1,5 +1,8 @@
 all: 
-	nsmake mocha test/test_*.ts
+	nsmake mocha test/test_LvDirectory.ts
+
+tst_clean: clean
+	nsmake mocha test/test_*.ts; nsmake clean; nsmake mocha test/test_*.ts
 
 	# nsmake mocha test/test_LvDirectory.ts
 cg:
