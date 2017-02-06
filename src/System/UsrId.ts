@@ -17,6 +17,14 @@ class UsrId {
         return `${this.num}@${this.dev}`
     }
 
+    js_repr( prec: number ): string {
+        return `new UsrId("${ this.dev.toString() },${ this.num })")`;
+    }
+
+    to_Boolean(): boolean {
+        return Boolean( this.num );
+    }
+
     copy(): UsrId {
         return new UsrId( this.dev.copy(), this.num );
     }

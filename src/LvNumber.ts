@@ -2,7 +2,7 @@ import Variable, { toLv_array } from "./Core/Variable"
 import methods                  from "./Core/methods"
 import Rp                       from "./Core/Rp"
              
-import RpSymbol                from "./Symbol/RpSymbol"
+import RpSymbol                 from "./Symbol/RpSymbol"
 import { BN_FP64 }              from "./LvNumber/Bn"
              
 //

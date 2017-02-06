@@ -17,6 +17,18 @@ class Inode {
         return `${this.num}@${this.dev.toString( cur_dev )}`;
     }
 
+    js_repr( prec: number ): string {
+        return `new Inode("${ this.dev.toString() },${ this.num })")`;
+    }
+
+    to_Boolean(): boolean {
+        return Boolean( this.num );
+    }
+
+    copy(): Inode {
+        return new Inode( this.dev.copy(), this.num );
+    }
+
     static fromString( str: string ) : Inode {
         let i = str.indexOf( "@" );
         return new Inode( new DevId( str.substr( i + 1 ) ), parseInt( str.substr( 0, i ) ) );
