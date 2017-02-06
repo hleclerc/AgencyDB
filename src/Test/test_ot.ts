@@ -21,7 +21,7 @@ function test_ot<type extends VarAnc>( type: typeof VarAnc, nb_dbs: number, oper
             if ( i != j )
                 dbs[ i ].connect( dbs[ j ] );
     
-    let id = dbs[ 0 ].new_ItemId();
+    let id = dbs[ 0 ].new_Inode();
     let vars = new Array<type>();
     for( let i = 0; i < nb_dbs; ++i ) {
         let v = dbs[ i ].bind<type>( type, id );

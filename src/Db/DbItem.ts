@@ -4,7 +4,7 @@ import VectorClock  from "../System/VectorClock";
 import ListUtil     from "../System/ListUtil";
 import MapUtil      from "../System/MapUtil";
 import PatchId      from "../System/PatchId";
-import ItemId       from "../System/ItemId";
+import Inode        from "../System/Inode";
 import UsrId        from "../System/UsrId";
 import DevId        from "../System/DevId";
 import PatchManager from "../Core/PatchManager";
@@ -55,7 +55,7 @@ class ExtState {
  */
 export default
 class DbItem extends PatchManager {
-    constructor( db: Db, variable: VarAnc, id: ItemId ) {
+    constructor( db: Db, variable: VarAnc, id: Inode ) {
         super();
 
         this.variable = variable;
@@ -148,7 +148,7 @@ class DbItem extends PatchManager {
             if ( this.vector_clock.val( dev ) < num )
                 throw new Error( 'TODO assumed_to_be_known that actually are not known: store the data and send a request to get the corresponding stuff' );
         } );
-        // assumed_to_be_known.merges.forEach( ( item_id: ItemId ) => {
+        // assumed_to_be_known.merges.forEach( ( item_id: Inode ) => {
         //     if ( ! this.vector_clock.contains_merge( item_id ) )
         //         throw new Error( 'TODO assumed_to_be_known that actually are not known: store the data and send a request to get the corresponding stuff' );
         // } );
@@ -164,7 +164,7 @@ class DbItem extends PatchManager {
                 ++nb_unk;
             }
         } );
-        // this.vector_clock.merges.forEach( ( item_id: ItemId ) => {
+        // this.vector_clock.merges.forEach( ( item_id: Inode ) => {
         //     if ( ! assumed_to_be_known.contains_merge( item_id ) ) {
         //         let index = this.find_merge_index( item_id );
         //         //console.log( index, ""+inode, " ass:"+assumed_to_be_known );
@@ -346,7 +346,7 @@ class DbItem extends PatchManager {
     ext_states    = new Map<String,ExtState>(); /** What is known/sent for each external device */
     patches       = new Array<Patch>();
     variable      : VarAnc;
-    id            : ItemId;
+    id            : Inode;
     db            : Db;
 }
  

@@ -1,9 +1,10 @@
 import Variable, { toLv_array } from "./Core/Variable"
 import methods                  from "./Core/methods"
-import Rp                       from "./Core/Rp"
-            
+import Rp                       from "./Core/Rp"            
 import RpDirectory              from "./LvDirectory/RpDirectory"
-import RpSymbol                from "./Symbol/RpSymbol"
+import RpSymbol                 from "./Symbol/RpSymbol"
+import Inode                    from "./System/Inode"
+import LvString                 from "./LvString"
 import LvNumber                 from "./LvNumber"
 
 //
@@ -25,5 +26,21 @@ class LvDirectory extends Variable<LvDirectory> {
 
     copy(): LvDirectory {
         return new LvDirectory( methods["copy__b"].call_1( this.rp ) );
+    }
+
+    /** return a proxy on the value */
+    get( name: string | LvString ): LvInode {
+        return new LvInode( typeof name == "string" ? 
+            methods["select_ref__oo"].call_2( this.rp, LvString.makeRp( name ), this ) :
+            methods["select_ref__ob"].call_2( this.rp, name.rp, this )
+        );
+    }
+
+    set( name: string | LvString, inode: Inode | LvInode ) {
+        let sup = this.get( name );
+        sup.rp = inode instanceof LvInode ?
+            methods["set__sb"].call_2s( sup, inode.rp           ) :
+            methods["set__so"].call_2s( sup, LvInode.makeRp( inode ) );
+        return this;
     }
 }

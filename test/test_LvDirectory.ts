@@ -1,4 +1,5 @@
 /// <reference path="../node_modules/@types/mocha/index.d.ts"/>
+import Inode       from "../src/System/Inode";
 import LvDirectory from "../src/LvDirectory";
 import { assert } from "chai";
 
@@ -11,8 +12,8 @@ function sequ( a, b, msg?: string ) {
 describe( 'LvDirectory', () => {
     it( 'basic operations', () => {
         let s = new LvDirectory();
-        // console.log( s.toString() );
-        
+        s.set( "home", new Inode() );
+        console.log( s.toString() );
     });
 });
  

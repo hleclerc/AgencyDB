@@ -3,7 +3,7 @@ import BinaryReader from "./BinaryReader";
 import ListUtil     from "./ListUtil";
 import MapUtil      from "./MapUtil";
 import PatchId      from "./PatchId";
-import ItemId       from "./ItemId";
+import Inode        from "./Inode";
 import DevId        from "./DevId";
 
 //
@@ -11,7 +11,7 @@ export default
 class VectorClock {
     constructor() {
         this.map    = new Map<string,number>();
-        this.merges = new Array<ItemId>();
+        this.merges = new Array<Inode>();
     }
 
     toString(): string {
@@ -36,7 +36,7 @@ class VectorClock {
             res.map.set( l[ 0 ], parseInt( l[ 1 ], 10 ) );
         }
         for( let p of d.merges )
-            res.merges.push( ItemId.fromString( p ) );
+            res.merges.push( Inode.fromString( p ) );
         return res;        
     }
 
@@ -60,7 +60,7 @@ class VectorClock {
         }
         // merges
         for( let len = br.read_PT(); len--; )
-            res.merges.push( ItemId.read_from( br, src_dev, cur_dev ) );
+            res.merges.push( Inode.read_from( br, src_dev, cur_dev ) );
         return res;
     }
 
@@ -69,8 +69,8 @@ class VectorClock {
         this.map.forEach( ( num: number, dev: string ) => {
             res.map.set( dev, num );
         } )
-        this.merges.forEach( ( inode: ItemId ) => {
-            res.merges.push( new ItemId( new DevId( inode.dev.val ), inode.num ) );
+        this.merges.forEach( ( inode: Inode ) => {
+            res.merges.push( new Inode( new DevId( inode.dev.val ), inode.num ) );
         } )
         return res;
     }
@@ -79,7 +79,7 @@ class VectorClock {
         return this.contains( patch_id.dev.val, patch_id.num );
     }
 
-    contains_merge( inode: ItemId ): boolean {
+    contains_merge( inode: Inode ): boolean {
         for( let ti of this.merges )
             if ( ti.equ( inode ) )
                 return true;
@@ -116,7 +116,7 @@ class VectorClock {
     }
 
     /**  */
-    update_merge( inode: ItemId ): void {
+    update_merge( inode: Inode ): void {
         let i = this.merges.indexOf( inode );
         if ( i < 0 )
             this.merges.push( inode );
@@ -149,5 +149,5 @@ class VectorClock {
     }
 
     map   : Map<string,number>; /** dev str -> number */
-    merges: Array<ItemId>;      /**  */
+    merges: Array<Inode>;      /**  */
 }

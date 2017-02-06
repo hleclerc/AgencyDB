@@ -1,6 +1,6 @@
 import BinaryWriter from "./System/BinaryWriter";
 import BinaryReader from "./System/BinaryReader";
-import ItemId       from "./System/ItemId";
+import Inode       from "./System/Inode";
 import DevId        from "./System/DevId";
 import UsrId        from "./System/UsrId";
 import methods      from "./Core/methods";
@@ -17,7 +17,7 @@ class Db {
         change_item: 0,
     };
 
-    bind<type>( type, id: ItemId ): type {
+    bind<type>( type, id: Inode ): type {
         let res = new type(), db_item = new DbItem( this, res, id );
         res.rp = methods[ "add_patch_manager__s" ].call_1s( res, db_item );
         this.items.set( id.toString(), db_item );
@@ -28,8 +28,8 @@ class Db {
         this.connections.push( new DbConnToDb( dst_db, this ) );
     }
 
-    new_ItemId(): ItemId {
-        return new ItemId();
+    new_Inode(): Inode {
+        return new Inode();
     }
 
     send_changes() {
@@ -58,7 +58,7 @@ class Db {
             const cmd = br.read_PI8();
             switch ( cmd ) {
                 case Db.CMD.change_item:
-                    const item_id = ItemId.read_from( br, src_dev, this.dev_id );
+                    const item_id = Inode.read_from( br, src_dev, this.dev_id );
                     const data = br.read_Uint8Array();
 
                     let item = this.items.get( item_id.toString() );

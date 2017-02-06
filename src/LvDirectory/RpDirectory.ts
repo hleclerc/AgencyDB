@@ -1,7 +1,7 @@
 import OtWrapperWithRightFlags from "../Core/OtWrapperWithRightFlags"
 import BinaryWriter            from "../System/BinaryWriter"
 import BinaryReader            from "../System/BinaryReader"
-import ItemId                  from "../System/ItemId"
+import Inode                   from "../System/Inode"
 import UsrId                   from "../System/UsrId"
 import DevId                   from "../System/DevId"
 import methods                 from "../Core/methods"
@@ -52,7 +52,7 @@ class RpDirectory extends OtWrapperWithRightFlags {
         return this;
     }
 
-    data = new Array<{name:LvString,item_id:ItemId}>();
+    data = new Array<{name:LvString,item_id:Inode}>();
 } 
 Rp.make_templ( RpDirectory );
 
