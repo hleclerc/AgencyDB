@@ -2,6 +2,7 @@
 import OtWrapperWithRightFlags from "../Core/OtWrapperWithRightFlags"
 import BinaryWriter            from "../System/BinaryWriter"
 import BinaryReader            from "../System/BinaryReader"
+import PatchTypes              from "../Core/PatchTypes"
 import Inode                   from "../System/Inode"
 import UsrId                   from "../System/UsrId"
 import DevId                   from "../System/DevId"
@@ -19,6 +20,14 @@ class RpDirectory extends OtWrapperWithRightFlags {
 
     variable_type__b() {
         return LvDirectory;
+    }
+
+    get_patch_type__b( bw: BinaryWriter ) {
+        bw.write_PT( PatchTypes.num.RpDirectory );
+    }
+
+    cmp_patch_type__b( br : BinaryReader ) : boolean {
+        return br.read_PT() == PatchTypes.num.RpDirectory;
     }
 
     to_String__b(): string {

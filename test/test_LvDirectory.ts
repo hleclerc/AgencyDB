@@ -1,6 +1,7 @@
 /// <reference path="../node_modules/@types/mocha/index.d.ts"/>
 import test_ot     from "../src/Test/test_ot"
 import Inode       from "../src/System/Inode"
+import DevId       from "../src/System/DevId"
 import LvDirectory from "../src/LvDirectory"
 import { assert } from "chai";
 
@@ -19,11 +20,11 @@ describe( 'LvDirectory', () => {
         sequ( s.toString(), "{}" );
     });
 
-    // it( 'ot', () => {
-    //     let s = new LvDirectory();
-    //     s.set( "home", new Inode() );
-    //     sequ( s.toString(), "{home:0@-----------~}" );
-    // });
+    it( 'ot', () => {
+        test_ot<LvDirectory>( LvDirectory, 2, ( vls, dbs ) => {
+            vls[ 0 ].set( "home", new Inode( new DevId( "ujtameVI3fN~" ), 17 ) );
+        }, "{home:17@ujtameVI3fN~}" );
+    });
 });
  
 
