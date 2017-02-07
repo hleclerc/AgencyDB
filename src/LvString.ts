@@ -2,8 +2,8 @@ import Variable, { toLv_array } from "./Core/Variable"
 import methods                  from "./Core/methods"
 import Rp                       from "./Core/Rp"
                
-import RpString                from "./LvString/RpString"
-import RpSymbol                from "./Symbol/RpSymbol"
+import RpString                 from "./LvString/RpString"
+import RpSymbol                 from "./Symbol/RpSymbol"
 import { BN_PT }                from "./LvNumber/Bn"
 import LvNumber                 from "./LvNumber"
              

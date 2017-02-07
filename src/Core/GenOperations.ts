@@ -341,15 +341,8 @@ class GenOperation<UT> {
 
     make_symbolic_data( inst: any, suffix = "", prefix = "", correction = {} as { [ key: string ]: string } ) {
         const res = {} as any;
-        for( const key of Object.keys( inst ) ) {
-            res[ key ] = inst[ key ].constructor.symbol( prefix + ( correction[ key ] || key ) + suffix );
-            // switch ( inst[ key ].constructor.name ) {
-            //     case 'LvNumber': res[ key ] = inst[ key ].constructor.symbol( prefix + ( correction[ key ] || key ) + suffix ); break;
-            //     case 'LvString': res[ key ] = inst[ key ].constructor.symbol( prefix + ( correction[ key ] || key ) + suffix ); break;
-            //     case '_LvMap'  : res[ key ] = inst[ key ].constructor.symbol( prefix + ( correction[ key ] || key ) + suffix ); break;
-            //     default: throw "TODO: make_symbolic_data for " + inst[ key ].constructor.name;
-            // }
-        }
+        for( const key of Object.keys( inst ) )
+            res[ key ] = inst[ key ].constructor.symbol( correction[ key ] == "" ? prefix : prefix + ( prefix ? "." : "" ) + ( correction[ key ] || key ) + suffix );
         return res;
     }
 
@@ -446,7 +439,7 @@ class GenOperation<UT> {
     }
 
     _write_undo_patch( lang: string, op: OpInfo<UT> ) {
-        let d = this.make_symbolic_data( this.cl_inst, "", "val.", this.sym_corr );
+        let d = this.make_symbolic_data( this.cl_inst, "", "val", this.sym_corr );
         let o = this.make_symbolic_data( op.inst );
         op.undo( d, o );
         wl( this.br_read_var( lang, op, "br", "", false ) );
@@ -454,7 +447,7 @@ class GenOperation<UT> {
     }
 
     _write_right_to( lang: string, op: OpInfo<UT> ): string {
-        let d = this.make_symbolic_data( this.cl_inst, "", "val.", this.sym_corr );
+        let d = this.make_symbolic_data( this.cl_inst, "", "val", this.sym_corr );
         let o = this.make_symbolic_data( op.inst );
         let f = LvNumber.symbol( "_f" );
         let r = LvNumber.symbol( "_r" );
@@ -464,14 +457,14 @@ class GenOperation<UT> {
 
     _write_apply( lang: string, op: OpInfo<UT> ): string {
         // apply operation
-        let d = this.make_symbolic_data( this.cl_inst, "", "val.", this.sym_corr );
+        let d = this.make_symbolic_data( this.cl_inst, "", "val", this.sym_corr );
         let o = this.make_symbolic_data( op.inst );
         op.apply( d, o );
         return Codegen.make_code( Object.keys( d ).map( n => d[ n ] ), lang );
     }
 
     _write_reg( lang: string, op: OpInfo<UT> ): string {
-        let d = this.make_symbolic_data( this.cl_inst, "", "val.", this.sym_corr );
+        let d = this.make_symbolic_data( this.cl_inst, "", "val", this.sym_corr );
         let o = this.make_symbolic_data( op.inst );
         let b = new BwRepr( this );
         if ( op.store )

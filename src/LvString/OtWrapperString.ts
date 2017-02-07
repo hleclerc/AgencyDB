@@ -1,5 +1,3 @@
-// import DeclTypesForRW from "../Core/DeclTypesForRW"
-// import PatchTypes     from "../Ot/PatchTypes"
 //// nsmake global alias ./OtWrapperStringOperations.ts ./(GenOtWrapperStringOperations.ts).ts
 import BinaryWriter              from "../System/BinaryWriter"
 import BinaryReader              from "../System/BinaryReader"

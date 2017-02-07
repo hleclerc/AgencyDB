@@ -44,4 +44,11 @@ class LvDirectory extends Variable<LvDirectory> {
             methods["set__so"].call_2s( sup, LvInode.makeRp( inode ) );
         return this;
     }
+
+    delete( name: string | LvString ) {
+        this.rp = typeof name == "string" ?
+            methods["sub__so"].call_2s( this, LvString.makeRp( name ) ) :
+            methods["sub__sb"].call_2s( this, name.rp                 );
+        return this;
+    }
 }

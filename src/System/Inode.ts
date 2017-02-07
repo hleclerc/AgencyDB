@@ -7,6 +7,7 @@ export default
 class Inode {
     /** for known Inodes (val = 1) */
     static base_dev = new DevId( "----------3~" );
+    static need_dev_for_read = true;
 
     constructor( dev: DevId = new DevId, num: number = 0 ) {
         this.dev = dev;
@@ -40,7 +41,7 @@ class Inode {
             this.dev.write_to( bw, cur_dev );
     }
 
-    static read_from( br: BinaryReader, src_dev: DevId, cur_dev: DevId ): Inode {
+    static read_from( br: BinaryReader, src_dev?: DevId, cur_dev?: DevId ): Inode {
         let num = br.read_PT();
         let dev = num ? DevId.read_from( br, src_dev, cur_dev ) : new DevId;
         return new Inode( dev, num );

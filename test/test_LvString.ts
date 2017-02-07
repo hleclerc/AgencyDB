@@ -1,12 +1,12 @@
 /// <reference path="../node_modules/@types/mocha/index.d.ts"/>
-import DevId      from "../src/System/DevId";
-import UsrId      from "../src/System/UsrId";
-import { VarAnc } from "../src/Core/Variable";
-import Method     from "../src/Core/Method";
-import test_ot    from "../src/Test/test_ot";
-import LvString   from "../src/LvString";
-import Db         from "../src/Db";
-import { assert } from "chai";
+import DevId      from "../src/System/DevId"
+import UsrId      from "../src/System/UsrId"
+import { VarAnc } from "../src/Core/Variable"
+import Method     from "../src/Core/Method"
+import test_ot    from "../src/Test/test_ot"
+import LvString   from "../src/LvString"
+import Db         from "../src/Db"
+import { assert } from "chai"
 
 function sequ( a, b, msg?: string ) {
     assert.equal( a.toString(), b.toString(), msg );

@@ -53,7 +53,7 @@ class DevId {
         return new DevId( str );
     }
 
-    static read_from( br: BinaryReader, src_dev: DevId, cur_dev: DevId ): DevId {
+    static read_from( br: BinaryReader, src_dev?: DevId, cur_dev?: DevId ): DevId {
         let arr = br.read_some( 8 );
         let str = Base64o.encode( arr.slice( 0 ).reverse() );
         if ( src_dev && str == DevId.null_DevId_str ) str = src_dev.val;
