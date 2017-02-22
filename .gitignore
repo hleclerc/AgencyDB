@@ -2,3 +2,9 @@ node_modules/
 *.js
 .*.dot
 .*.pdf
+AgencyDB.config
+AgencyDB.files
+AgencyDB.includes
+AgencyDB.creator*
+agencydb_tracker
+ext

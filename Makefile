@@ -1,5 +1,5 @@
 all: 
-	nsmake mocha test/test_LvDirectory.ts
+	nsmake run -o agencydb_tracker Tracker/main_tracker.cpp
 
 tests:
 	nsmake mocha test/test_*.ts
