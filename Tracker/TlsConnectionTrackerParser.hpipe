@@ -1,1 +1,1 @@
-main = 'GET' { I( "GETOUILLE" ); }
+main = 'GET ' word[ 'url' ] ' ' { I( "GETOUILLE", sipe_data->url ); } 
