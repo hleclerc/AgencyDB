@@ -1,1 +1,11 @@
-main = 'GET ' word[ 'url' ] ' ' { I( "GETOUILLE", sipe_data->url ); } 
+# read until end
+# read_string[ name, end = 10 | 13 ] = beg_str_next[ name ] ( any - end )** end_str_next[ name ]
+# read_ssized[ name, size ] = beg_str_next[ name ] skip[ size ] end_str_next[ name ]
+# read_number[ name ] = digit { name = *data - '0'; } ( digit { name = 10 * name + *data - '0'; } )**
+
+index_html = '/ '  { index_html(); }
+websocket  = '/ws ' { websocket(); }
+
+get = 'GET ' index_html | websocket
+
+main = get

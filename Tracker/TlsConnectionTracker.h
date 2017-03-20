@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Evel/SharedBufferParseAdapter.h>
+#include <Evel/HpipeBufferParseAdapter.h>
 #include <Evel/TlsConnection.h>
 #include <functional>
 
@@ -9,13 +9,16 @@ class Tracker;
 
 /**
 */
-class TlsConnectionTracker : public Evel::SharedBufferParseAdapter<Evel::TlsConnection> {
+class TlsConnectionTracker : public Evel::HpipeBufferParseAdapter<Evel::TlsConnection> {
 public:
     TlsConnectionTracker( Tracker *tracker, const Evel::InetAddress &addr, SSL_CTX *ssl_ctx, int accepting_fd );
     ~TlsConnectionTracker();
 
 protected:
-    //// nsmake alias TlsConnectionTrackerParser.h (#hpipe.cpp '--style' 'BUFFER_IN_CLASS' TlsConnectionTrackerParser.hpipe).h
+    void              index_html();
+    void              websocket ();
+
+    //// nsmake alias TlsConnectionTrackerParser.h (#hpipe.cpp '--style' 'HPIPE_BUFFER' TlsConnectionTrackerParser.hpipe).h
     #define HPIPE_DECLARATIONS
     #include "TlsConnectionTrackerParser.h"
     #undef  HPIPE_DECLARATIONS
