@@ -1,11 +1,63 @@
-# read until end
-# read_string[ name, end = 10 | 13 ] = beg_str_next[ name ] ( any - end )** end_str_next[ name ]
-# read_ssized[ name, size ] = beg_str_next[ name ] skip[ size ] end_str_next[ name ]
-# read_number[ name ] = digit { name = *data - '0'; } ( digit { name = 10 * name + *data - '0'; } )**
+# import TrackerCmds.hpipe
 
-index_html = '/ '  { index_html(); }
-websocket  = '/ws ' { websocket(); }
+read_number[ name ] = add_variable[ "unsigned", name ] digit { name = *data - '0'; } ( digit { name = 10 * name + *data - '0'; } )**
+read_string[ name, end = 10 | 13 ] = beg_str_next[ name ] ( any - end )** end_str_next[ name ]
+read_ssized[ name, size ] = beg_str_next[ name ] skip[ size ] end_str_next[ name ]
+read_PI8[ name ] = add_variable[ "unsigned char", name ] any { name = *data; }
 
-get = 'GET ' index_html | websocket
+read_8i[ name ] =
+    { name  = *data; }
 
-main = get
+read_8d[ name ] =
+    { name  = *data - 128; }
+
+read_16[ name ] =
+    any { name  = __uint16_t( *data ) << 8; }
+    any { name += __uint16_t( *data ) << 0; }
+
+read_64[ name ] =
+    any { name  = __uint64_t( *data ) << 56; }
+    any { name += __uint64_t( *data ) << 48; }
+    any { name += __uint64_t( *data ) << 40; }
+    any { name += __uint64_t( *data ) << 32; }
+    any { name += __uint64_t( *data ) << 24; }
+    any { name += __uint64_t( *data ) << 16; }
+    any { name += __uint64_t( *data ) <<  8; }
+    any { name += __uint64_t( *data ) <<  0; }
+
+read_mask =
+    add_variable[ "__int32_t", "websocket_mask" ]
+    any { reinterpret_cast<unsigned char *>( &websocket_mask )[ 0 ] = *data; }
+    any { reinterpret_cast<unsigned char *>( &websocket_mask )[ 1 ] = *data; }
+    any { reinterpret_cast<unsigned char *>( &websocket_mask )[ 2 ] = *data; }
+    any { reinterpret_cast<unsigned char *>( &websocket_mask )[ 3 ] = *data; }
+
+ws_payload =
+    read_ssized[ "websocket_content", "websocket_msg_length" ]
+
+ws_unmask =
+    { ws_unmask(); }
+
+ws_msg = read_PI8[ "websocket_byte_0" ] ( add_variable[ "size_t", "websocket_msg_length" ]
+    (   0 .. 125 read_8i[ "websocket_msg_length" ]           ws_payload           { ws_content(); } ) | # 8  bits without mask
+    ( 126        read_16[ "websocket_msg_length" ]           ws_payload           { ws_content(); } ) | # 16 bits without mask
+    ( 127        read_64[ "websocket_msg_length" ]           ws_payload           { ws_content(); } ) | # 64 bits without mask
+    ( 128 .. 253 read_8d[ "websocket_msg_length" ] read_mask ws_payload ws_unmask { ws_content(); } ) | # 8  bits with mask
+    ( 254        read_16[ "websocket_msg_length" ] read_mask ws_payload ws_unmask { ws_content(); } ) | # 16 bits with mask
+    ( 255        read_64[ "websocket_msg_length" ] read_mask ws_payload ws_unmask { ws_content(); } )   # 64 bits with mask
+)
+
+index_html = '/ '            { index_html(); }
+favicon    = '/favicon.ico ' { favicon(); }
+
+ws         = '/ws ' (
+    ( 10 'Sec-WebSocket-Version: ' read_number[ 'websocket_version' ] ) |
+    ( 10 'Sec-WebSocket-Key: ' read_string[ 'websocket_key' ] ) |
+    ( 10 eol { ws_handshake(); } ws_msg** ) |
+    any
+)** 
+
+get = 'GET ' index_html | favicon | ws
+
+main = get | cmds**
+

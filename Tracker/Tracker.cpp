@@ -21,7 +21,8 @@ public:
 };
 
 void Tracker::listen_tls( SSL_CTX *ssl_ctx, int port ) {
-    TlsListener *listener = new TlsListener( ssl_ctx, port, this );
+    Evel::Event *listener = new TlsListener( ssl_ctx, port, this );
+    to_del.push_back( std::unique_ptr<Evel::Event>{ listener } );
     Evel::gev->add_event_obj( listener );
 }
 

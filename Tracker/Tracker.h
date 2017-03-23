@@ -2,6 +2,7 @@
 
 #include <Evel/SslCtx.h>
 #include <Evel/Gev.h>
+#include <memory>
 #include <vector>
 
 namespace AgencyDb {

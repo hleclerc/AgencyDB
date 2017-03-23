@@ -1,0 +1,24 @@
+# This file has been generated using /home/hugo/.nsmake/build/make_hpipe_from_cmds-1.js and /home/hugo/AgencyDB/Tracker/TrackerCmdsDecl.cmds
+beg_flags
+    --never-ending
+end_flags
+
+read_PI32[ value, shift ] = 
+    add_variable[ "unsigned", shift ]
+    add_variable[ "unsigned", value ]
+    { value = 0; shift = 0; }
+    ( 128 .. 255 { value += PI32( *data - 128 ) << shift; shift += 7; } )**
+    (   0 .. 127 { value += PI32( *data       ) << shift; } )
+
+read_String[ value, len, shift ] =
+    read_PI32[ len, shift ]
+    beg_str_next[ value ]
+    skip[ len ]
+    end_str_next[ value ]
+
+# login with a passworg
+pwd_login = 0 read_String[ "__String_0", "__PI32_0", "__PI32_1" ] read_String[ "__String_1", "__PI32_0", "__PI32_1" ] { pwd_login( __String_0, __String_1 ); }
+
+cmds = pwd_login
+
+main = cmds**
