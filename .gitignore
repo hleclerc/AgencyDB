@@ -8,3 +8,4 @@ AgencyDB.includes
 AgencyDB.creator*
 agencydb_tracker
 ext
+dist/

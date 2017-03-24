@@ -9,7 +9,7 @@ namespace AgencyDb {
 
 namespace {
 
-//// nsmake mission_key TlsConnectionTrackerIndexHtml html --no-dist --single-page ../html/index.jsx
+//// nsmake mission_key TlsConnectionTrackerIndexHtml html --no-dist --single-page ../html/index.tsx
 //// nsmake alias TlsConnectionTrackerIndexHtml.h  (#txt_to_cpp.cpp (#add_http_header.js mission:TlsConnectionTrackerIndexHtml[0] 'text%2Fhtml'   ) 'index_html_str').h
 //// nsmake alias TlsConnectionTrackerFaviconIco.h (#txt_to_cpp.cpp (#add_http_header.js ..%2Fhtml%2Ffavicon.ico                  'image%2Fx-icon') 'favicon_str'   ).h
 #include "TlsConnectionTrackerIndexHtml.h"
