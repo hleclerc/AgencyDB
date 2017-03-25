@@ -2,8 +2,10 @@
 
 #include <Evel/HpipeBufferParseAdapter.h>
 #include <Evel/TlsConnection.h>
-#include <Hpipe/CbStringPtr.h>
+#include <Hpipe/BinStream.h>
 #include <functional>
+
+#include "../src/cpp/System/UsrId.h"
 
 //// nsmake alias TrackerCmds.hpipe (..%2Fsrc%2Fgeneration%2Fmake_hpipe_from_cmds.ts TrackerCmdsDecl.cmds).hpipe
 //// nsmake alias TlsConnectionTrackerParser.h (#hpipe.cpp '--style' 'HPIPE_BUFFER' TrackerCmds.hpipe TlsConnectionTrackerParser.hpipe).h

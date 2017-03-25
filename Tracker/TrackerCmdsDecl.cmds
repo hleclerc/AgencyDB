@@ -1,2 +1,4 @@
-# login with a passworg
+# login with a password
 0 pwd_login login:String passwd:String
+# answer to a login request
+1 ans_login usr_id:UsrId

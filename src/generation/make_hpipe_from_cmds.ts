@@ -3,6 +3,8 @@ import read_cmds from './read_cmds'
 const add_args_by_type = {
     String: [ "PI32", "PI32" ],
     PI32  : [ "PI32" ],
+    DevId : [ "PI64" ],
+    UsrId : [ "PI64", "PI64" ],
 } as { [key:string]: Array<string> };
 
 let cmds = read_cmds( process.argv[ 2 ] );
@@ -33,18 +35,26 @@ beg_flags
     --never-ending
 end_flags
 
-read_PI32[ value, shift ] = 
+read_PI[ value, shift, type = "PI32" ] = 
     add_variable[ "unsigned", shift ]
-    add_variable[ "unsigned", value ]
+    add_variable[ type, value ]
     { value = 0; shift = 0; }
-    ( 128 .. 255 { value += PI32( *data - 128 ) << shift; shift += 7; } )**
-    (   0 .. 127 { value += PI32( *data       ) << shift; } )
+    ( 128 .. 255 { value += type( *data - 128 ) << shift; shift += 7; } )**
+    (   0 .. 127 { value += type( *data       ) << shift; } )
 
 read_String[ value, len, shift ] =
-    read_PI32[ len, shift ]
+    read_PI[ len, shift, "PI32" ]
     beg_str_next[ value ]
     skip[ len ]
     end_str_next[ value ]
+
+read_DevId[ value, shift ] = 
+    read_PI[ value, shift, "PI64" ]
+
+read_UsrId[ num, dev, shift ] = 
+    read_PI[ num, shift, "PI64" ]
+    read_PI[ dev, shift, "PI64" ]
+
 ${ cmd_data }
 
 cmds = ${ cmds.map( cmd => cmd.name ).join( ' | ' ) }

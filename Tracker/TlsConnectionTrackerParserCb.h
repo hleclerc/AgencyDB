@@ -53,10 +53,13 @@ enum {
 #endif
 
 struct HPIPE_DATA_STRUCT_NAME {
-  unsigned __PI32_0;
+  PI32 __PI32_0;
   unsigned __PI32_1;
+  PI64 __PI64_0;
+  unsigned __PI64_1;
   HPIPE_CB_STRING_PTR_T __String_0;
   HPIPE_CB_STRING_PTR_T __String_1;
+  PI64 __UsrId_0;
   const HPIPE_BUFF_T * __beg___String_0_buf;
   const HPIPE_CHAR_T * __beg___String_0_data;
   HPIPE_SIZE_T __beg___String_0_off;
@@ -126,13 +129,14 @@ unsigned HPIPE_DEFINITION_PREFIX HPIPE_PARSE_FUNC_NAME( HPIPE_ADDITIONAL_ARGS co
     const HPIPE_CHAR_T *end_m1 = buf ? buf->data - 1 + ( end > buf->used ? buf->used : end ) : 0;
     if ( data > end_m1 ) goto c_1;
   l_1:
-    if ( data[ 0 ] >= 1 ) goto l_5;
+    if ( data[ 0 ] >= 2 ) goto l_8;
+    if ( data[ 0 ] == 1 ) goto l_9;
     { HPIPE_DATA.__PI32_0 = 0; HPIPE_DATA.__PI32_1 = 0; }
   l_4:
     if ( data >= end_m1 ) goto c_2;
     ++data;
-  l_6:
-    if ( data[ 0 ] >= 128 ) goto l_7;
+  l_10:
+    if ( data[ 0 ] >= 128 ) goto l_11;
     { HPIPE_DATA.__PI32_0 += PI32( *data       ) << HPIPE_DATA.__PI32_1; }
     HPIPE_DATA.__beg___String_0_off = 1;
     HPIPE_DATA.__beg___String_0_buf = buf;
@@ -143,7 +147,7 @@ unsigned HPIPE_DEFINITION_PREFIX HPIPE_PARSE_FUNC_NAME( HPIPE_ADDITIONAL_ARGS co
         HPIPE_DATA.__bytes_to_skip = HPIPE_DATA.__PI32_0 - ( buf->data + buf->used - data );
       t_3:
         if ( ! buf->next ) {
-            goto l_8;
+            goto l_12;
         }
         end -= buf->used; buf = buf->next;
       c_3:
@@ -160,8 +164,8 @@ unsigned HPIPE_DEFINITION_PREFIX HPIPE_PARSE_FUNC_NAME( HPIPE_ADDITIONAL_ARGS co
   l_2:
     if ( data >= end_m1 ) goto c_4;
     ++data;
-  l_9:
-    if ( data[ 0 ] >= 128 ) goto l_10;
+  l_13:
+    if ( data[ 0 ] >= 128 ) goto l_14;
     { HPIPE_DATA.__PI32_0 += PI32( *data       ) << HPIPE_DATA.__PI32_1; }
     HPIPE_DATA.__beg___String_1_off = 1;
     HPIPE_DATA.__beg___String_1_buf = buf;
@@ -172,7 +176,7 @@ unsigned HPIPE_DEFINITION_PREFIX HPIPE_PARSE_FUNC_NAME( HPIPE_ADDITIONAL_ARGS co
         HPIPE_DATA.__bytes_to_skip = HPIPE_DATA.__PI32_0 - ( buf->data + buf->used - data );
       t_5:
         if ( ! buf->next ) {
-            goto l_11;
+            goto l_15;
         }
         end -= buf->used; buf = buf->next;
       c_5:
@@ -186,34 +190,64 @@ unsigned HPIPE_DEFINITION_PREFIX HPIPE_PARSE_FUNC_NAME( HPIPE_ADDITIONAL_ARGS co
     HPIPE_BUFF_T__SKIP_N( &HPIPE_DATA.__beg___String_1_buf, HPIPE_DATA.__beg___String_1_data, HPIPE_DATA.__beg___String_1_off, 1 );
     HPIPE_CB_STRING_PTR__ASSIGN_BEG_END( HPIPE_DATA.__String_1, HPIPE_DATA.__beg___String_1_buf, HPIPE_DATA.__beg___String_1_data, buf, data + 1 );
     { pwd_login( HPIPE_DATA.__String_0, HPIPE_DATA.__String_1 ); }
+  l_5:
     if ( data >= end_m1 ) goto c_6;
     ++data;
     goto l_1;
-  l_5:
+  l_8:
     return RET_OK;
-  l_11:
+  l_15:
   l_3:
     return RET_KO;
-  l_10:
+  l_14:
     { HPIPE_DATA.__PI32_0 += PI32( *data - 128 ) << HPIPE_DATA.__PI32_1; HPIPE_DATA.__PI32_1 += 7; }
     goto l_2;
-  l_8:
+  l_12:
     goto l_3;
-  l_7:
+  l_11:
     { HPIPE_DATA.__PI32_0 += PI32( *data - 128 ) << HPIPE_DATA.__PI32_1; HPIPE_DATA.__PI32_1 += 7; }
     goto l_4;
-  c_1:
-    if ( ! buf ) goto l_5;
-    while ( buf->next ) { end -= buf->used; buf = buf->next; if ( buf && buf->used ) { data = buf->data; end_m1 = buf->data + ( buf->used < end ? buf->used : end ) - 1; goto l_1; } }
+  l_9:
+    { HPIPE_DATA.__UsrId_0 = 0; HPIPE_DATA.__PI64_1 = 0; }
+  l_7:
+    if ( data >= end_m1 ) goto c_7;
+    ++data;
+  l_16:
+    if ( data[ 0 ] >= 128 ) goto l_17;
+    { HPIPE_DATA.__UsrId_0 += PI64( *data       ) << HPIPE_DATA.__PI64_1; }
+    { HPIPE_DATA.__PI64_0 = 0; HPIPE_DATA.__PI64_1 = 0; }
+  l_6:
+    if ( data >= end_m1 ) goto c_8;
+    ++data;
+  l_18:
+    if ( data[ 0 ] >= 128 ) goto l_19;
+    { HPIPE_DATA.__PI64_0 += PI64( *data       ) << HPIPE_DATA.__PI64_1; }
+    { ans_login( HPIPE_DATA.__UsrId_0 ); }
     goto l_5;
+  l_19:
+    { HPIPE_DATA.__PI64_0 += PI64( *data - 128 ) << HPIPE_DATA.__PI64_1; HPIPE_DATA.__PI64_1 += 7; }
+    goto l_6;
+  l_17:
+    { HPIPE_DATA.__UsrId_0 += PI64( *data - 128 ) << HPIPE_DATA.__PI64_1; HPIPE_DATA.__PI64_1 += 7; }
+    goto l_7;
+  c_1:
+    if ( ! buf ) goto l_8;
+    while ( buf->next ) { end -= buf->used; buf = buf->next; if ( buf && buf->used ) { data = buf->data; end_m1 = buf->data + ( buf->used < end ? buf->used : end ) - 1; goto l_1; } }
+    goto l_8;
   c_2:
-    while ( buf->next ) { end -= buf->used; buf = buf->next; if ( buf && buf->used ) { data = buf->data; end_m1 = buf->data + ( buf->used < end ? buf->used : end ) - 1; goto l_6; } }
+    while ( buf->next ) { end -= buf->used; buf = buf->next; if ( buf && buf->used ) { data = buf->data; end_m1 = buf->data + ( buf->used < end ? buf->used : end ) - 1; goto l_10; } }
     goto l_3;
   c_4:
-    while ( buf->next ) { end -= buf->used; buf = buf->next; if ( buf && buf->used ) { data = buf->data; end_m1 = buf->data + ( buf->used < end ? buf->used : end ) - 1; goto l_9; } }
+    while ( buf->next ) { end -= buf->used; buf = buf->next; if ( buf && buf->used ) { data = buf->data; end_m1 = buf->data + ( buf->used < end ? buf->used : end ) - 1; goto l_13; } }
     goto l_3;
   c_6:
     while ( buf->next ) { end -= buf->used; buf = buf->next; if ( buf && buf->used ) { data = buf->data; end_m1 = buf->data + ( buf->used < end ? buf->used : end ) - 1; goto l_1; } }
-    goto l_5;
+    goto l_8;
+  c_7:
+    while ( buf->next ) { end -= buf->used; buf = buf->next; if ( buf && buf->used ) { data = buf->data; end_m1 = buf->data + ( buf->used < end ? buf->used : end ) - 1; goto l_16; } }
+    goto l_3;
+  c_8:
+    while ( buf->next ) { end -= buf->used; buf = buf->next; if ( buf && buf->used ) { data = buf->data; end_m1 = buf->data + ( buf->used < end ? buf->used : end ) - 1; goto l_18; } }
+    goto l_3;
 }
 #endif // HPIPE_DEFINITIONS
