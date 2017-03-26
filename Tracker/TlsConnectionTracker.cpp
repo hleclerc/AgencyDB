@@ -76,6 +76,10 @@ void TlsConnectionTracker::pwd_login( const Hpipe::CbStringPtr &login, const Hpi
     PRINT( "login", login, passwd );
 }
 
+void TlsConnectionTracker::ans_login( UsrId usr_id ) {
+    PRINT( "ans login", usr_id );
+}
+
 #define HPIPE_DEFINITIONS
 #define HPIPE_DEFINITION_PREFIX TlsConnectionTracker::
 

@@ -58,13 +58,12 @@ struct HPIPE_DATA_STRUCT_NAME {
     hpipe_data->inp_cont = 0;
   }
   #endif // __cplusplus
-  PI32 __PI32_0;
+  unsigned __PI32_0;
   unsigned __PI32_1;
   PI64 __PI64_0;
-  unsigned __PI64_1;
+  PI64 __PI64_1;
   HPIPE_CB_STRING_T __String_0;
   HPIPE_CB_STRING_T __String_1;
-  PI64 __UsrId_0;
   const HPIPE_BUFF_T * __beg___String_0_buf;
   const HPIPE_CHAR_T * __beg___String_0_data;
   HPIPE_SIZE_T __beg___String_0_off;
@@ -652,21 +651,21 @@ unsigned HPIPE_DEFINITION_PREFIX HPIPE_PARSE_FUNC_NAME( HPIPE_ADDITIONAL_ARGS HP
     { HPIPE_DATA.websocket_version = 10 * HPIPE_DATA.websocket_version + *data - '0'; }
     goto l_77;
   l_90:
-    { HPIPE_DATA.__UsrId_0 = 0; HPIPE_DATA.__PI64_1 = 0; }
+    { HPIPE_DATA.__PI64_0 = 0; HPIPE_DATA.__PI32_0 = 0; }
   l_78:
     if ( data >= end_m1 ) goto c_82;
     ++data;
   l_169:
     if ( data[ 0 ] >= 128 ) goto l_170;
-    { HPIPE_DATA.__UsrId_0 += PI64( *data       ) << HPIPE_DATA.__PI64_1; }
-    { HPIPE_DATA.__PI64_0 = 0; HPIPE_DATA.__PI64_1 = 0; }
+    { HPIPE_DATA.__PI64_0 += PI64( *data       ) << HPIPE_DATA.__PI32_0; }
+    { HPIPE_DATA.__PI64_1 = 0; HPIPE_DATA.__PI32_0 = 0; }
   l_79:
     if ( data >= end_m1 ) goto c_83;
     ++data;
   l_171:
     if ( data[ 0 ] >= 128 ) goto l_172;
-    { HPIPE_DATA.__PI64_0 += PI64( *data       ) << HPIPE_DATA.__PI64_1; }
-    { ans_login( HPIPE_DATA.__UsrId_0 ); }
+    { HPIPE_DATA.__PI64_1 += PI64( *data       ) << HPIPE_DATA.__PI32_0; }
+    { ans_login( { HPIPE_DATA.__PI64_0, HPIPE_DATA.__PI64_1 } ); }
   l_80:
     if ( data >= end_m1 ) goto c_84;
     ++data;
@@ -767,10 +766,10 @@ unsigned HPIPE_DEFINITION_PREFIX HPIPE_PARSE_FUNC_NAME( HPIPE_ADDITIONAL_ARGS HP
     { HPIPE_DATA.__PI32_0 += PI32( *data - 128 ) << HPIPE_DATA.__PI32_1; HPIPE_DATA.__PI32_1 += 7; }
     goto l_81;
   l_172:
-    { HPIPE_DATA.__PI64_0 += PI64( *data - 128 ) << HPIPE_DATA.__PI64_1; HPIPE_DATA.__PI64_1 += 7; }
+    { HPIPE_DATA.__PI64_1 += PI64( *data - 128 ) << HPIPE_DATA.__PI32_0; HPIPE_DATA.__PI32_0 += 7; }
     goto l_79;
   l_170:
-    { HPIPE_DATA.__UsrId_0 += PI64( *data - 128 ) << HPIPE_DATA.__PI64_1; HPIPE_DATA.__PI64_1 += 7; }
+    { HPIPE_DATA.__PI64_0 += PI64( *data - 128 ) << HPIPE_DATA.__PI32_0; HPIPE_DATA.__PI32_0 += 7; }
     goto l_78;
   c_1:
     if ( ! buf ) goto l_83;

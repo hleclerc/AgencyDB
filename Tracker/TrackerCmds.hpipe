@@ -27,7 +27,7 @@ read_UsrId[ num, dev, shift ] =
 # login with a password
 pwd_login = 0 read_String[ "__String_0", "__PI32_0", "__PI32_1" ] read_String[ "__String_1", "__PI32_0", "__PI32_1" ] { pwd_login( __String_0, __String_1 ); }
 # answer to a login request
-ans_login = 1 read_UsrId[ "__UsrId_0", "__PI64_0", "__PI64_1" ] { ans_login( __UsrId_0 ); }
+ans_login = 1 read_UsrId[ "__PI64_0", "__PI64_1", "__PI32_0" ] { ans_login( { __PI64_0, __PI64_1 } ); }
 
 cmds = pwd_login | ans_login
 

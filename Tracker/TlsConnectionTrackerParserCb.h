@@ -53,13 +53,12 @@ enum {
 #endif
 
 struct HPIPE_DATA_STRUCT_NAME {
-  PI32 __PI32_0;
+  unsigned __PI32_0;
   unsigned __PI32_1;
   PI64 __PI64_0;
-  unsigned __PI64_1;
+  PI64 __PI64_1;
   HPIPE_CB_STRING_PTR_T __String_0;
   HPIPE_CB_STRING_PTR_T __String_1;
-  PI64 __UsrId_0;
   const HPIPE_BUFF_T * __beg___String_0_buf;
   const HPIPE_CHAR_T * __beg___String_0_data;
   HPIPE_SIZE_T __beg___String_0_off;
@@ -208,27 +207,27 @@ unsigned HPIPE_DEFINITION_PREFIX HPIPE_PARSE_FUNC_NAME( HPIPE_ADDITIONAL_ARGS co
     { HPIPE_DATA.__PI32_0 += PI32( *data - 128 ) << HPIPE_DATA.__PI32_1; HPIPE_DATA.__PI32_1 += 7; }
     goto l_4;
   l_9:
-    { HPIPE_DATA.__UsrId_0 = 0; HPIPE_DATA.__PI64_1 = 0; }
+    { HPIPE_DATA.__PI64_0 = 0; HPIPE_DATA.__PI32_0 = 0; }
   l_7:
     if ( data >= end_m1 ) goto c_7;
     ++data;
   l_16:
     if ( data[ 0 ] >= 128 ) goto l_17;
-    { HPIPE_DATA.__UsrId_0 += PI64( *data       ) << HPIPE_DATA.__PI64_1; }
-    { HPIPE_DATA.__PI64_0 = 0; HPIPE_DATA.__PI64_1 = 0; }
+    { HPIPE_DATA.__PI64_0 += PI64( *data       ) << HPIPE_DATA.__PI32_0; }
+    { HPIPE_DATA.__PI64_1 = 0; HPIPE_DATA.__PI32_0 = 0; }
   l_6:
     if ( data >= end_m1 ) goto c_8;
     ++data;
   l_18:
     if ( data[ 0 ] >= 128 ) goto l_19;
-    { HPIPE_DATA.__PI64_0 += PI64( *data       ) << HPIPE_DATA.__PI64_1; }
-    { ans_login( HPIPE_DATA.__UsrId_0 ); }
+    { HPIPE_DATA.__PI64_1 += PI64( *data       ) << HPIPE_DATA.__PI32_0; }
+    { ans_login( { HPIPE_DATA.__PI64_0, HPIPE_DATA.__PI64_1 } ); }
     goto l_5;
   l_19:
-    { HPIPE_DATA.__PI64_0 += PI64( *data - 128 ) << HPIPE_DATA.__PI64_1; HPIPE_DATA.__PI64_1 += 7; }
+    { HPIPE_DATA.__PI64_1 += PI64( *data - 128 ) << HPIPE_DATA.__PI32_0; HPIPE_DATA.__PI32_0 += 7; }
     goto l_6;
   l_17:
-    { HPIPE_DATA.__UsrId_0 += PI64( *data - 128 ) << HPIPE_DATA.__PI64_1; HPIPE_DATA.__PI64_1 += 7; }
+    { HPIPE_DATA.__PI64_0 += PI64( *data - 128 ) << HPIPE_DATA.__PI32_0; HPIPE_DATA.__PI32_0 += 7; }
     goto l_7;
   c_1:
     if ( ! buf ) goto l_8;

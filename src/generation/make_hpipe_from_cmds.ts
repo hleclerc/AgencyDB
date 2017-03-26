@@ -1,11 +1,11 @@
 import read_cmds from './read_cmds'
 
 const add_args_by_type = {
-    String: [ "PI32", "PI32" ],
-    PI32  : [ "PI32" ],
-    DevId : [ "PI64" ],
-    UsrId : [ "PI64", "PI64" ],
-} as { [key:string]: Array<string> };
+    String: { cns: [ "String"       ], tmp: [ "PI32", "PI32" ] },
+    PI32  : { cns: [ "PI32"         ], tmp: [ "PI32"         ] },
+    DevId : { cns: [ "PI64"         ], tmp: [ "PI32"         ] },
+    UsrId : { cns: [ "PI64", "PI64" ], tmp: [ "PI32"         ] },
+} as { [key:string]: { cns: Array<string>, tmp: Array<string> } };
 
 let cmds = read_cmds( process.argv[ 2 ] );
 
@@ -21,10 +21,16 @@ for( const cmd of cmds ) {
     }
     let nargs = new Array<string>();
     for( const arg of cmd.args ) {
-        let nbt_loc = new Map<string,number>(); // type -> nb used
-        const lst_names = [ arg.type, ...add_args_by_type[ arg.type ] ].map( ( t, i ) => `__${ t }_${ nft( t, i ? nbt_loc : nbt ) }` );
+        let lst_names = [];
+        let nbl = new Map<string,number>(); // type -> nb used
+        const add_args = add_args_by_type[ arg.type ];
+        lst_names.push( ...add_args.cns.map( ( t, i ) => `__${ t }_${ nft( t, nbt ) }` ) );
+        lst_names.push( ...add_args.tmp.map( ( t, i ) => `__${ t }_${ nft( t, nbl ) }` ) );
         cmd_data += ` read_${ arg.type }[ ${ lst_names.map( name => `"${ name }"` ).join( ', ' ) } ]`;
-        nargs.push( lst_names[ 0 ] );
+        if ( add_args.cns.length == 1 )
+            nargs.push( lst_names[ 0 ] );
+        else
+            nargs.push( `{ ${ lst_names.slice( 0, add_args.cns.length ).join( ', ' ) } }` );
     }
     cmd_data += ` { ${ cmd.name }( ${ nargs.join( ', ' ) } ); }`;
 }

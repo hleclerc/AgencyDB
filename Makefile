@@ -15,3 +15,8 @@ clean:
 	truncate -s 0 ~/.nsmake/server.log
 	cd ~/nsmake; npm run build
 
+pull:
+	cd ext/Evel; git pull
+	cd ext/Hpipe; git pull
+	cd ext/PrepArg; git pull
+	
