@@ -1,0 +1,38 @@
+import BinaryWriter from '../../System/BinaryWriter';
+import BinaryReader from '../../System/BinaryReader';
+import DevId        from '../../System/DevId';
+import UsrId        from '../../System/UsrId';
+
+function check_cmd( br : BinaryReader, beg_cmd : number ) : boolean {
+    let ccrc = br.make_crc32c( beg_cmd );
+    let wcrc = br.read_PI32_le();
+    return ccrc == wcrc;
+}
+
+///
+export default {
+    % for cmd in tracker_client_cmds:
+    ${ cmd.name }: { // ${ cmd.comment }
+        num: ${ cmd.num },
+        args: ${ cmd.args_ts() },
+        write( bw : BinaryWriter, args, cur_dev : DevId, cur_usr : UsrId ) {${ cmd.write_ts() }
+        }
+    },
+    % endfor
+
+    _read_cmd( br: BinaryReader, tr : TrackerClient, cur_dev : DevId, cur_usr : UsrId ) {
+        let beg_cmd = br.cursor;
+        let cmd = br.read_PI8();
+        switch ( cmd ) {
+        % for cmd in tracker_client_cmds:
+            case ${ cmd.num }: { // ${ cmd.name }${ cmd.read_ts() }
+                if ( ! check_cmd( br, beg_cmd ) ) throw( `Invalid checksum for func=${ cmd.name }` );
+                tr.recv_${ cmd.name }( ${ cmd.arg_names_ts() } );
+                break;
+            }
+        % endfor
+        }
+    }
+};
+
+import TrackerClient from './TrackerClient';

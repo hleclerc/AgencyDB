@@ -1,0 +1,8 @@
+import Inode from "./Inode";
+
+///
+export default {
+    % for n in known_inodes:
+    ${ n }: new Inode( Inode.base_dev, ${ known_inodes[ n ] } ),
+    % endfor
+};

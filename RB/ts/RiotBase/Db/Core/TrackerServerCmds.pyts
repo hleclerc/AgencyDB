@@ -1,0 +1,16 @@
+import BinaryWriter from '../../System/BinaryWriter';
+import BinaryReader from '../../System/BinaryReader';
+import DevId        from '../../System/DevId';
+import UsrId        from '../../System/UsrId';
+
+///
+export default {
+    % for cmd in tracker_server_cmds:
+    ${ cmd.name }: { // ${ cmd.comment }
+        num: ${ cmd.num },
+        args: ${ cmd.args_ts() },
+        write( bw : BinaryWriter, args, cur_dev : DevId, cur_usr : UsrId ) {${ cmd.write_ts() }
+        }
+    },
+    % endfor
+};

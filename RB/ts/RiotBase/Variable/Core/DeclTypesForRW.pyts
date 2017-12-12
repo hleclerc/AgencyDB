@@ -1,0 +1,25 @@
+
+///
+export default {
+    num: {
+        % for m in decl_types_for_rw:
+        ${ m.name }: ${ m.num },
+        % endfor
+    },
+    skip_functions: [
+        % for m in decl_types_for_rw:
+        function( br: BinaryReader ) { ${ m.ts_skip } },
+        % endfor
+    ],
+    files: [
+        % for m in decl_types_for_rw:
+        "${ m.ts_path }",
+        % endfor
+    ],
+    readers: [
+    ]
+};
+
+import OtWrapperString from "../String/OtWrapperString";
+import BinaryReader    from "../../System/BinaryReader";
+import Variable        from "../Core/Variable";

@@ -1,0 +1,29 @@
+import Variable from "../Core/Variable";
+import Rp       from "../Core/Rp";
+
+//
+export default {
+    num: {
+        % for m in decl_patch_types_for_rw:
+        ${ m.name }: ${ m.num },
+        % endfor
+    },
+
+    list: [
+        % for m in decl_patch_types_for_rw:
+        "${ m.name }",
+        % endfor
+    ],
+
+    files: [
+        % for m in decl_patch_types_for_rw:
+        "${ m.ts_path }",
+        % endfor
+    ],
+
+    readers: [
+    ]
+};
+
+import BinaryReader from "../../System/BinaryReader";
+ 
