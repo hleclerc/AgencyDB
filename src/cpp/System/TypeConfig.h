@@ -3,8 +3,6 @@
 #include "EnableIf.h"
 #include <stdint.h>
 
-//// nsmake global cpp_flag -std=c++14
-
 namespace AgencyDb {
   
 using Bool = bool;
